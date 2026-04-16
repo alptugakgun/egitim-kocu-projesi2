@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koç Girişi - Eğitim Koçu Pro</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #0f172a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-image: radial-gradient(circle at top right, #1e293b, #0f172a); }
+        .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); width: 320px; text-align: center; animation: slideUp 0.6s ease-out; border-top: 5px solid #3b82f6; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .badge { background-color: #dbeafe; color: #1d4ed8; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+        h2 { color: #1e293b; margin-top: 0; margin-bottom: 5px;}
+        p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
+        
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        
+        button { width: 100%; padding: 12px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: background 0.3s; }
+        button:hover { background-color: #2563eb; }
+        
+        .error { color: #ef4444; font-size: 13px; font-weight: bold; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <div class="badge">PRO ABONELİK</div>
+        <h2>Eğitim Koçu Paneli</h2>
+        <p>Yönetim sistemine giriş yapın.</p>
+        
+        <input type="text" id="kocIsimInput" placeholder="Adınız Soyadınız" required>
+        <input type="password" id="kocSifreInput" placeholder="Yönetici Şifresi (pro123)" required>
+        
+        <button onclick="kocGirisYap()">Panele Eriş</button>
+        <div id="kocHataMesaji" class="error">Şifre hatalı veya boş bıraktınız!</div>
+    </div>
+
+    <script>
+        function kocGirisYap() {
+            const isim = document.getElementById('kocIsimInput').value;
+            const sifre = document.getElementById('kocSifreInput').value;
+            
+            // Koç için özel şifremiz 'pro123'
+            if(sifre === 'pro123' && isim.trim() !== '') {
+                // İsmi 'ogretmenKimligi' adıyla tarayıcıya kazıyoruz
+                localStorage.setItem('ogretmenKimligi', isim); 
+                window.location.href = 'ogretmen.html'; 
+            } else {
+                document.getElementById('kocHataMesaji').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

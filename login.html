@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş Yap - Eğitim Koçu</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+        body { font-family: 'Nunito', sans-serif; background: linear-gradient(135deg, #f6ea8c 0%, #f7a9a8 100%); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); width: 350px; text-align: center; }
+        h1 { color: #334155; margin-top: 0; font-weight: 900; font-size: 28px;}
+        p { color: #64748b; margin-bottom: 25px; font-weight: bold;}
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
+        .tab { flex: 1; padding: 10px; cursor: pointer; font-weight: bold; color: #94a3b8; transition: 0.3s; }
+        .tab.active { color: #4f46e5; border-bottom: 3px solid #4f46e5; }
+        input { width: 90%; padding: 14px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: inherit; font-weight: bold; outline: none; }
+        input:focus { border-color: #4f46e5; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 900; font-size: 16px; cursor: pointer; color: white; background-color: #4f46e5; transition: 0.2s; font-family: inherit;}
+        button:hover { background-color: #4338ca; transform: translateY(-2px); }
+        .form-section { display: none; }
+        .form-section.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h1>Eğitim Koçu</h1>
+        <p>Dijital Sınıfına Hoş Geldin</p>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('giris')">Giriş Yap</div>
+            <div class="tab" onclick="switchTab('kayit')">Kayıt Ol</div>
+        </div>
+
+        <div id="giris-formu" class="form-section active">
+            <input type="text" id="g-isim" placeholder="Adın Soyadın">
+            <input type="password" id="g-sifre" placeholder="Şifren">
+            <button onclick="girisYap()">Giriş Yap</button>
+        </div>
+
+        <div id="kayit-formu" class="form-section">
+            <input type="text" id="k-isim" placeholder="Adın Soyadın">
+            <input type="password" id="k-sifre" placeholder="Bir Şifre Belirle">
+            <button onclick="kayitOl()" style="background-color: #10b981;">Kayıt Ol</button>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.form-section').forEach(f => f.classList.remove('active'));
+            if(tabId === 'giris') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('giris-formu').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('kayit-formu').classList.add('active');
+            }
+        }
+
+        async function kayitOl() {
+            const isim = document.getElementById('k-isim').value.trim();
+            const sifre = document.getElementById('k-sifre').value.trim();
+            if(!isim || !sifre) return alert("Lütfen tüm alanları doldur!");
+
+            const response = await fetch('/api/kayit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ogrenciAd: isim, sifre: sifre })
+            });
+            const data = await response.json();
+            alert(data.mesaj);
+            if(data.basari) switchTab('giris');
+        }
+
+        async function girisYap() {
+            const isim = document.getElementById('g-isim').value.trim();
+            const sifre = document.getElementById('g-sifre').value.trim();
+            if(!isim || !sifre) return alert("Lütfen tüm alanları doldur!");
+
+            const response = await fetch('/api/giris', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ogrenciAd: isim, sifre: sifre })
+            });
+            const data = await response.json();
+            if(data.basari) {
+                localStorage.setItem('ogrenciKimligi', isim); // Sınırsız süreyle kalır!
+                window.location.href = 'index.html';
+            } else {
+                alert(data.mesaj);
+            }
+        }
+    </script>
+</body>
+</html>
