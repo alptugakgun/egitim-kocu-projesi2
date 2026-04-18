@@ -22,29 +22,24 @@
     </style>
 </head>
 <body>
-
     <div class="login-card">
         <h1>Eğitim Koçu</h1>
         <p>Dijital Sınıfına Hoş Geldin</p>
-
         <div class="tabs">
             <div class="tab active" onclick="switchTab('giris')">Giriş Yap</div>
             <div class="tab" onclick="switchTab('kayit')">Kayıt Ol</div>
         </div>
-
         <div id="giris-formu" class="form-section active">
             <input type="text" id="g-isim" placeholder="Adın Soyadın">
             <input type="password" id="g-sifre" placeholder="Şifren">
             <button onclick="girisYap()">Giriş Yap</button>
         </div>
-
         <div id="kayit-formu" class="form-section">
             <input type="text" id="k-isim" placeholder="Adın Soyadın">
             <input type="password" id="k-sifre" placeholder="Bir Şifre Belirle">
             <button onclick="kayitOl()" style="background-color: #10b981;">Kayıt Ol</button>
         </div>
     </div>
-
     <script>
         function switchTab(tabId) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -57,39 +52,23 @@
                 document.getElementById('kayit-formu').classList.add('active');
             }
         }
-
         async function kayitOl() {
             const isim = document.getElementById('k-isim').value.trim();
             const sifre = document.getElementById('k-sifre').value.trim();
             if(!isim || !sifre) return alert("Lütfen tüm alanları doldur!");
-
-            const response = await fetch('/api/kayit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ogrenciAd: isim, sifre: sifre })
-            });
+            const response = await fetch('/api/kayit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ogrenciAd: isim, sifre: sifre }) });
             const data = await response.json();
             alert(data.mesaj);
             if(data.basari) switchTab('giris');
         }
-
         async function girisYap() {
             const isim = document.getElementById('g-isim').value.trim();
             const sifre = document.getElementById('g-sifre').value.trim();
             if(!isim || !sifre) return alert("Lütfen tüm alanları doldur!");
-
-            const response = await fetch('/api/giris', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ogrenciAd: isim, sifre: sifre })
-            });
+            const response = await fetch('/api/giris', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ogrenciAd: isim, sifre: sifre }) });
             const data = await response.json();
-            if(data.basari) {
-                localStorage.setItem('ogrenciKimligi', isim); // Sınırsız süreyle kalır!
-                window.location.href = 'index.html';
-            } else {
-                alert(data.mesaj);
-            }
+            if(data.basari) { localStorage.setItem('ogrenciKimligi', isim); window.location.href = 'index.html'; } 
+            else { alert(data.mesaj); }
         }
     </script>
 </body>

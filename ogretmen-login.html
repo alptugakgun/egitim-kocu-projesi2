@@ -17,31 +17,21 @@
     </style>
 </head>
 <body>
-
     <div class="login-card">
         <div style="font-size: 50px; margin-bottom: 10px;">👨‍🏫</div>
         <h1>Öğretmen Paneli</h1>
         <p>Kontrol Merkezine Giriş</p>
-
         <input type="text" id="kocAd" placeholder="İsminiz">
         <input type="password" id="anahtarSifre" placeholder="Yönetici Anahtarı">
         <button onclick="kocGiris()">Sistemi Aç</button>
     </div>
-
     <script>
         function kocGiris() {
             const ad = document.getElementById('kocAd').value.trim();
             const sifre = document.getElementById('anahtarSifre').value.trim();
-
-            // 🔐 BURASI SENİN ÖZEL ANAHTARIN: İstediğin şifreyle değiştirebilirsin!
             const MASTER_KEY = "alptug-hoca-2026";
-
-            if (ad && sifre === MASTER_KEY) {
-                localStorage.setItem('ogretmenKimligi', ad);
-                window.location.href = 'ogretmen.html';
-            } else {
-                alert("Hatalı yönetici anahtarı veya isim eksik!");
-            }
+            if (ad && sifre === MASTER_KEY) { localStorage.setItem('ogretmenKimligi', ad); window.location.href = 'ogretmen.html'; } 
+            else { alert("Hatalı yönetici anahtarı veya isim eksik!"); }
         }
     </script>
 </body>

@@ -4,7 +4,7 @@ const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 
 const app = express();
-app.use(express.json()); // YENİ: Form verilerini okumak için
+app.use(express.json());
 app.use(express.static(__dirname));
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
@@ -13,14 +13,12 @@ const mongoURI = 'mongodb+srv://alptug:alptug123@cluster0.djt56xg.mongodb.net/Eg
 
 mongoose.connect(mongoURI).then(() => console.log('🫀 MongoDB Bağlantısı Başarılı!')).catch(err => console.log('❌ Veritabanı Hatası:', err));
 
-// 🧬 YENİ: Öğrenci şemasına 'sifre' alanı eklendi!
 const ogrenciSchema = new mongoose.Schema({ ogrenciAd: String, sifre: String, ders: String, mesaj: String, xp: { type: Number, default: 0 }, gorevler: Array });
 const Ogrenci = mongoose.model('Ogrenci', ogrenciSchema);
 
 const chatSchema = new mongoose.Schema({ id: Number, gonderen: String, mesaj: String, rol: String, saat: String });
 const Chat = mongoose.model('Chat', chatSchema);
 
-// 🔐 YENİ: ÖĞRENCİ KAYIT OLMA (Şifreler düz metin olarak kaydedilir)
 app.post('/api/kayit', async (req, res) => {
     try {
         const { ogrenciAd, sifre } = req.body;
@@ -33,20 +31,15 @@ app.post('/api/kayit', async (req, res) => {
     } catch (e) { res.json({ basari: false, mesaj: "Sunucu hatası!" }); }
 });
 
-// 🔐 YENİ: ÖĞRENCİ GİRİŞ YAPMA (Süre sınırı yok, token yok)
 app.post('/api/giris', async (req, res) => {
     try {
         const { ogrenciAd, sifre } = req.body;
         let ogrenci = await Ogrenci.findOne({ ogrenciAd, sifre });
-        if (ogrenci) {
-            res.json({ basari: true, mesaj: "Giriş başarılı!" });
-        } else {
-            res.json({ basari: false, mesaj: "İsim veya şifre hatalı!" });
-        }
+        if (ogrenci) { res.json({ basari: true, mesaj: "Giriş başarılı!" }); } 
+        else { res.json({ basari: false, mesaj: "İsim veya şifre hatalı!" }); }
     } catch (e) { res.json({ basari: false, mesaj: "Sunucu hatası!" }); }
 });
 
-// 🔐 YENİ: ÖĞRETMEN İÇİN ŞİFRE LİSTESİ (Sadece tüm öğrencileri ve şifrelerini döndürür)
 app.get('/api/sifreler', async (req, res) => {
     try {
         let ogrenciler = await Ogrenci.find({}, 'ogrenciAd sifre -_id');
@@ -117,7 +110,6 @@ io.on('connection', async (socket) => {
         } catch(e) {}
     });
 
-    // 🤖 YENİ: ÖĞRENCİ İÇİN GELİŞMİŞ YAPAY ZEKA VE SİSTEM REHBERİ
     socket.on('ogrenci_chatbot_mesaji', async (veri) => {
         try {
             let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd });
@@ -125,20 +117,17 @@ io.on('connection', async (socket) => {
             let msg = veri.mesaj.toLowerCase();
             let cevap = "";
 
-            // 1. SİSTEM VE KULLANIM REHBERİ (Yeni Eklenenler)
             if (msg.includes('xp') || msg.includes('puan')) {
                 cevap = `Sistemde XP (Deneyim Puanı) kazanmak çok kolay! Öğretmeninin gönderdiği hedefleri "Bitir" butonuna basarak tamamladığında görev başına +10 XP kazanırsın. Şu anki puanın: ${xp} XP. 🌟`;
             } else if (msg.includes('görev') || msg.includes('nasıl bitir') || msg.includes('nasıl yap')) {
                 cevap = `Öğretmeninin sana atadığı hedefler, ekranın alt kısmındaki 'Hedef Görevler' panosuna düşer. Görevi bitirdiğinde yanındaki "Bitir" butonuna basarsan hem öğretmeninin ekranında yeşil tik yanar hem de XP kazanırsın! 🎯`;
             } else if (msg.includes('pomodoro') || msg.includes('süre') || msg.includes('kronometre')) {
-                cevap = `Çalışma modları ikiye ayrılır: 'Kronometre' sen durdurana kadar artar. 'Pomodoro' ise 25 dakikalık geri sayım başlatır ve süre bitince otomatik mola verir. Tamamen senin odaklanma tarzına kalmış! ⏱️`;
+                cevap = `Çalışma modları ikiye ayrılır: 'Kronometre' sen durdurana kadar artar. 'Pomodoro' ise seçtiğin dakikalık geri sayım başlatır ve süre bitince otomatik mola verir. Tamamen senin odaklanma tarzına kalmış! ⏱️`;
             } else if (msg.includes('sıralama') || msg.includes('liderlik') || msg.includes('şampiyon')) {
                 cevap = `Haftanın Şampiyonları tablosu öğretmeninin dev ekranında (Kaptan Köşkünde) yer alıyor! En çok görev bitirip en yüksek XP'yi toplayanlar o panoya adını altın harflerle yazdırır. Asılmaya devam! 🏆`;
             } else if (msg.includes('sistem nasıl') || msg.includes('ne yapmalıyım')) {
                 cevap = `Dijital sınıfına hoş geldin! Önce çalışacağın dersi seç, sonra 'Başla' butonuna basarak odanı aktif et. Öğretmeninin verdiği görevleri tamamla ve XP'leri topla. Takıldığında sohbetten sınıf arkadaşlarına veya bana yazabilirsin! 🚀`;
-            }
-            // 2. MOTİVASYON VE PSİKOLOJİK DESTEK (Eski yetenekler)
-            else if (msg.includes('yorul') || msg.includes('sıkıl') || msg.includes('bıkt')) {
+            } else if (msg.includes('yorul') || msg.includes('sıkıl') || msg.includes('bıkt')) {
                 cevap = `Şu an "${veri.ders}" çalışıyorsun ve yorulman çok normal! Unutma, kazandığın o ${xp} XP senin ne kadar çabaladığının kanıtı. Gözlerini kapatıp 5 dakika derin nefes almaya ne dersin? 💧`;
             } else if (msg.includes('tavsiye') || msg.includes('taktik') || msg.includes('nasıl çalış')) {
                 cevap = `"${veri.ders}" için sana altın bir taktik: Yapamadığın sorular aslında senin asıl öğretmenlerindir. Şu an ${xp} XP'desin, harika bir temel kuruyorsun, asla pes etme! 🎯`;
@@ -151,6 +140,7 @@ io.on('connection', async (socket) => {
             socket.emit('chatbot_cevabi', cevap);
         } catch(e) {}
     });
+});
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => { console.log(`🚀 Sistem Çalışıyor! Port: ${PORT}`); });
