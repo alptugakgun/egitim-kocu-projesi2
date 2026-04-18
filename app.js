@@ -1,4 +1,4 @@
-const socket = io('http://localhost:3000');
+const socket = io();
 const aktifOgrenci = localStorage.getItem('ogrenciKimligi');
 
 let startTime, updatedTime, difference, tInterval;
