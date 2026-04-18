@@ -1,12 +1,7 @@
 const socket = io();
 const aktifOgrenci = localStorage.getItem('ogrenciKimligi');
 
-let startTime, updatedTime, difference, tInterval;
-let savedTime = parseInt(localStorage.getItem('savedTime')) || 0;
-let running = localStorage.getItem('running') === 'true';
-let mode = localStorage.getItem('mode') || 'normal'; 
-let POMO_TIME = (parseInt(localStorage.getItem('pomoDuration')) || 25) * 60 * 1000; 
-
+// DOM Elementleri
 const display = document.getElementById('display');
 const startBtn = document.getElementById('startBtn');
 const pauseBtn = document.getElementById('pauseBtn');
@@ -17,58 +12,101 @@ const dersSecimi = document.getElementById('dersSecimi');
 const pomoInput = document.getElementById('pomoInput');
 
 if(mainTitle) mainTitle.innerHTML = `Hoş Geldin, ${aktifOgrenci}! 🎯`;
-
 function sesCal() { if(sesEfekti) { sesEfekti.currentTime = 0; sesEfekti.play().catch(e=>{}); } }
 
-dersSecimi.addEventListener('change', () => {
-    if(running) pauseTimer();
-    savedTime = 0; localStorage.setItem('savedTime', 0);
-    let val = parseInt(pomoInput.value) || 25;
-    display.innerHTML = mode === 'pomodoro' ? (val < 10 ? "0"+val : val) + ":00" : "00:00:00";
+// --- KRONOMETRE & HAFIZA SİSTEMİ ---
+let tInterval;
+let running = localStorage.getItem(`${aktifOgrenci}_running`) === 'true';
+let mode = localStorage.getItem(`${aktifOgrenci}_mode`) || 'normal';
+
+function getDers() { return dersSecimi.value; }
+
+function gostergeyiGuncelle(sureMs) {
+    if(mode === 'normal') {
+        let hours = Math.floor((sureMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        let minutes = Math.floor((sureMs % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((sureMs % (1000 * 60)) / 1000);
+        display.innerHTML = (hours < 10 ? "0"+hours : hours) + ":" + (minutes < 10 ? "0"+minutes : minutes) + ":" + (seconds < 10 ? "0"+seconds : seconds);
+        return false;
+    } else {
+        let val = parseInt(pomoInput.value) || 25;
+        let kalan = (val * 60 * 1000) - sureMs;
+        if(kalan <= 0) { display.innerHTML = "00:00"; return true; /* Pomodoro Bitti */ }
+        let minutes = Math.floor((kalan % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((kalan % (1000 * 60)) / 1000);
+        display.innerHTML = (minutes < 10 ? "0"+minutes : minutes) + ":" + (seconds < 10 ? "0"+seconds : seconds);
+        return false;
+    }
+}
+
+// 🔄 DERS DEĞİŞTİĞİNDE: Eski dersi kaydet, yeni dersi yükle
+dersSecimi.addEventListener('change', (e) => {
+    let eskiDers = e.target.getAttribute('data-eski') || dersSecimi.options[0].value;
+    let yeniDers = getDers();
+    
+    if (running) {
+        let st = parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`));
+        let oldSaved = parseInt(localStorage.getItem(`${aktifOgrenci}_${eskiDers}_savedTime`)) || 0;
+        let diff = new Date().getTime() - st + oldSaved;
+        localStorage.setItem(`${aktifOgrenci}_${eskiDers}_savedTime`, diff);
+        
+        clearInterval(tInterval);
+        running = false;
+        localStorage.setItem(`${aktifOgrenci}_running`, 'false');
+        
+        pauseBtn.style.display = 'none'; startBtn.style.display = 'block'; startBtn.innerHTML = "▶ Başla";
+        statusText.innerHTML = "Ders değişti, sayaç durduruldu."; 
+        statusText.style.backgroundColor = "#f1f5f9"; statusText.style.color = "#64748b";
+        pomoInput.disabled = false;
+        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: eskiDers, mesaj: 'Ders değiştirdi, durdurdu.' });
+    }
+    
+    e.target.setAttribute('data-eski', yeniDers);
+    
+    let currentSaved = parseInt(localStorage.getItem(`${aktifOgrenci}_${yeniDers}_savedTime`)) || 0;
+    gostergeyiGuncelle(currentSaved);
     socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML });
+    
+    if(currentSaved > 0) { startBtn.innerHTML = "▶ Devam Et"; } else { startBtn.innerHTML = "▶ Başla"; }
 });
 
+// 🍅 POMODORO SÜRESİ DEĞİŞTİĞİNDE
 pomoInput.addEventListener('change', () => {
     if(mode === 'pomodoro' && !running) {
         let val = parseInt(pomoInput.value) || 25;
-        POMO_TIME = val * 60 * 1000;
-        localStorage.setItem('pomoDuration', val);
-        display.innerHTML = (val < 10 ? "0"+val : val) + ":00";
+        localStorage.setItem(`${aktifOgrenci}_pomoDuration`, val);
+        let sTime = parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0;
+        gostergeyiGuncelle(sTime);
     }
 });
 
+// ⏳ MOD DEĞİŞTİĞİNDE
 window.setMode = function(m) {
     if(running) return; 
-    mode = m; localStorage.setItem('mode', m);
+    mode = m; localStorage.setItem(`${aktifOgrenci}_mode`, m);
     document.getElementById('modeNormal').className = m === 'normal' ? 'mode-btn mode-active' : 'mode-btn mode-passive';
     document.getElementById('modePomo').className = m === 'pomodoro' ? 'mode-btn mode-active' : 'mode-btn mode-passive';
     
     if(m === 'pomodoro') { 
         pomoInput.style.display = 'block';
-        let val = parseInt(pomoInput.value) || 25;
-        display.innerHTML = (val < 10 ? "0"+val : val) + ":00"; 
         document.getElementById('modePomo').style.background = '#ef4444'; document.getElementById('modePomo').style.boxShadow = '0 4px 0 #b91c1c'; 
     } else { 
         pomoInput.style.display = 'none';
-        display.innerHTML = "00:00:00"; 
         document.getElementById('modePomo').style.background = ''; document.getElementById('modePomo').style.boxShadow = ''; 
     }
-    savedTime = 0; localStorage.setItem('savedTime', 0);
+    
+    let sTime = parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0;
+    gostergeyiGuncelle(sTime);
     socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML });
 };
 
 function startTimer() {
     if (!running) {
-        let secilenDers = dersSecimi.value;
-        startTime = new Date().getTime();
-        localStorage.setItem('startTime', startTime);
-        localStorage.setItem('running', 'true');
+        localStorage.setItem(`${aktifOgrenci}_startTime`, new Date().getTime());
+        localStorage.setItem(`${aktifOgrenci}_running`, 'true');
+        localStorage.setItem(`${aktifOgrenci}_activeDers`, getDers());
 
-        if(mode === 'pomodoro') {
-            let val = parseInt(pomoInput.value) || 25;
-            POMO_TIME = val * 60 * 1000;
-            localStorage.setItem('pomoDuration', val);
-        }
+        if(mode === 'pomodoro') { localStorage.setItem(`${aktifOgrenci}_pomoDuration`, parseInt(pomoInput.value) || 25); }
 
         tInterval = setInterval(getShowTime, 1000); 
         running = true;
@@ -77,57 +115,62 @@ function startTimer() {
         statusText.innerHTML = "🟢 Odak modu aktif!"; statusText.style.backgroundColor = "#d1fae5"; statusText.style.color = "#059669";
         dersSecimi.disabled = true; pomoInput.disabled = true;
 
-        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: secilenDers, mesaj: mode === 'pomodoro' ? `Pomodoro (${pomoInput.value}dk) Başlattı!` : 'Kronometre Başlattı!' });
+        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: mode === 'pomodoro' ? `Pomodoro (${pomoInput.value}dk) Başlattı!` : 'Kronometre Başlattı!' });
     }
 }
 
 function pauseTimer(otomatikMi = false) {
     if (running) {
         clearInterval(tInterval);
-        savedTime = difference; 
-        localStorage.setItem('savedTime', savedTime);
-        localStorage.setItem('running', 'false');
+        let st = parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`));
+        let oldSaved = parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0;
+        let diff = new Date().getTime() - st + oldSaved;
+        
+        if (otomatikMi && mode === 'pomodoro') {
+             localStorage.setItem(`${aktifOgrenci}_${getDers()}_savedTime`, 0); // Pomodoro bittiyse o dersi sıfırla
+        } else {
+             localStorage.setItem(`${aktifOgrenci}_${getDers()}_savedTime`, diff);
+        }
+        
+        localStorage.setItem(`${aktifOgrenci}_running`, 'false');
         running = false;
         
         pauseBtn.style.display = 'none'; startBtn.style.display = 'block'; startBtn.innerHTML = "▶ Devam Et";
+        if(otomatikMi) startBtn.innerHTML = "▶ Başla";
+
         statusText.innerHTML = otomatikMi ? "🎉 Pomodoro Bitti!" : "⏸️ Mola Verildi."; 
         statusText.style.backgroundColor = "#fef3c7"; statusText.style.color = "#d97706";
         dersSecimi.disabled = false; pomoInput.disabled = false;
 
-        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: dersSecimi.value, mesaj: otomatikMi ? 'Pomodoro Bitti, Molada.' : 'Mola verdi, durdurdu.' });
+        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: otomatikMi ? 'Pomodoro Bitti, Molada.' : 'Mola verdi, durdurdu.' });
     }
 }
 
 function getShowTime() {
-    updatedTime = new Date().getTime();
+    let st = parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`));
+    let oldSaved = parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0;
+    let diff = new Date().getTime() - st + oldSaved;
     
-    if (mode === 'normal') {
-        difference = updatedTime - startTime + savedTime;
-        let hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        let minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-        let seconds = Math.floor((difference % (1000 * 60)) / 1000);
-        if(display) display.innerHTML = (hours < 10 ? "0"+hours : hours) + ":" + (minutes < 10 ? "0"+minutes : minutes) + ":" + (seconds < 10 ? "0"+seconds : seconds);
-    } else {
-        let gecenSure = updatedTime - startTime + savedTime;
-        difference = gecenSure; 
-        let kalan = POMO_TIME - gecenSure;
-        
-        if (kalan <= 0) {
-            display.innerHTML = "00:00";
-            sesCal(); pauseTimer(true);
-            savedTime = 0; localStorage.setItem('savedTime', 0); 
-            socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML }); return;
-        }
-        let minutes = Math.floor((kalan % (1000 * 60 * 60)) / (1000 * 60));
-        let seconds = Math.floor((kalan % (1000 * 60)) / 1000);
-        if(display) display.innerHTML = (minutes < 10 ? "0"+minutes : minutes) + ":" + (seconds < 10 ? "0"+seconds : seconds);
-    }
+    let bittiMi = gostergeyiGuncelle(diff);
+    if (bittiMi && mode === 'pomodoro') { sesCal(); pauseTimer(true); }
     socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML });
 }
 
+// 🧠 SAYFA YÜKLENDİĞİNDE (Veya Giriş Yapıldığında) TÜM HAFIZAYI ÇAĞIR
 window.onload = () => {
+    let isRunning = localStorage.getItem(`${aktifOgrenci}_running`) === 'true';
+    let activeDers = localStorage.getItem(`${aktifOgrenci}_activeDers`);
+    
+    if (activeDers) {
+        dersSecimi.value = activeDers;
+        dersSecimi.setAttribute('data-eski', activeDers);
+    } else {
+        dersSecimi.setAttribute('data-eski', dersSecimi.value);
+    }
+
+    mode = localStorage.getItem(`${aktifOgrenci}_mode`) || 'normal';
     if(mode === 'pomodoro') {
-        pomoInput.value = localStorage.getItem('pomoDuration') || 25;
+        pomoInput.value = localStorage.getItem(`${aktifOgrenci}_pomoDuration`) || 25;
         pomoInput.style.display = 'block';
         document.getElementById('modeNormal').className = 'mode-btn mode-passive';
         document.getElementById('modePomo').className = 'mode-btn mode-active';
@@ -135,38 +178,22 @@ window.onload = () => {
     } else {
         pomoInput.style.display = 'none';
     }
+    
+    let sTime = parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0;
 
-    if(running) {
-        startTime = parseInt(localStorage.getItem('startTime'));
+    if(isRunning) {
         startBtn.style.display = 'none'; pauseBtn.style.display = 'block';
         statusText.innerHTML = "🟢 Odak modu aktif!"; statusText.style.backgroundColor = "#d1fae5"; statusText.style.color = "#059669";
         dersSecimi.disabled = true; pomoInput.disabled = true;
         tInterval = setInterval(getShowTime, 1000);
-    } else if (savedTime > 0) {
-        startBtn.innerHTML = "▶ Devam Et";
-        let diff = savedTime;
-        if (mode === 'normal') {
-            let hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            let minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            let seconds = Math.floor((diff % (1000 * 60)) / 1000);
-            display.innerHTML = (hours < 10 ? "0"+hours : hours) + ":" + (minutes < 10 ? "0"+minutes : minutes) + ":" + (seconds < 10 ? "0"+seconds : seconds);
-        } else {
-            let val = parseInt(pomoInput.value) || 25;
-            let kalan = (val * 60 * 1000) - diff;
-            if(kalan > 0) {
-                let minutes = Math.floor((kalan % (1000 * 60 * 60)) / (1000 * 60));
-                let seconds = Math.floor((kalan % (1000 * 60)) / 1000);
-                display.innerHTML = (minutes < 10 ? "0"+minutes : minutes) + ":" + (seconds < 10 ? "0"+seconds : seconds);
-            } else { display.innerHTML = "00:00"; }
-        }
+        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: 'Derse geri döndü (Devam ediyor)' });
     } else {
-        if(mode === 'pomodoro') {
-            let val = parseInt(pomoInput.value) || 25;
-            display.innerHTML = (val < 10 ? "0"+val : val) + ":00";
-        }
+        if (sTime > 0) { startBtn.innerHTML = "▶ Devam Et"; }
+        gostergeyiGuncelle(sTime);
     }
 };
 
+// --- GÖREVLER, CHAT VE YAPAY ZEKA ---
 socket.on('gorev_guncellendi', (tumVeriler) => {
     let benimVerim = tumVeriler.find(v => v.ogrenciAd === aktifOgrenci);
     if (benimVerim) {
