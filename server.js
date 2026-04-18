@@ -117,6 +117,7 @@ io.on('connection', async (socket) => {
         } catch(e) {}
     });
 
+    // 🤖 YENİ: ÖĞRENCİ İÇİN GELİŞMİŞ YAPAY ZEKA VE SİSTEM REHBERİ
     socket.on('ogrenci_chatbot_mesaji', async (veri) => {
         try {
             let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd });
@@ -124,19 +125,32 @@ io.on('connection', async (socket) => {
             let msg = veri.mesaj.toLowerCase();
             let cevap = "";
 
-            if (msg.includes('yorul') || msg.includes('sıkıl') || msg.includes('bıkt')) {
+            // 1. SİSTEM VE KULLANIM REHBERİ (Yeni Eklenenler)
+            if (msg.includes('xp') || msg.includes('puan')) {
+                cevap = `Sistemde XP (Deneyim Puanı) kazanmak çok kolay! Öğretmeninin gönderdiği hedefleri "Bitir" butonuna basarak tamamladığında görev başına +10 XP kazanırsın. Şu anki puanın: ${xp} XP. 🌟`;
+            } else if (msg.includes('görev') || msg.includes('nasıl bitir') || msg.includes('nasıl yap')) {
+                cevap = `Öğretmeninin sana atadığı hedefler, ekranın alt kısmındaki 'Hedef Görevler' panosuna düşer. Görevi bitirdiğinde yanındaki "Bitir" butonuna basarsan hem öğretmeninin ekranında yeşil tik yanar hem de XP kazanırsın! 🎯`;
+            } else if (msg.includes('pomodoro') || msg.includes('süre') || msg.includes('kronometre')) {
+                cevap = `Çalışma modları ikiye ayrılır: 'Kronometre' sen durdurana kadar artar. 'Pomodoro' ise 25 dakikalık geri sayım başlatır ve süre bitince otomatik mola verir. Tamamen senin odaklanma tarzına kalmış! ⏱️`;
+            } else if (msg.includes('sıralama') || msg.includes('liderlik') || msg.includes('şampiyon')) {
+                cevap = `Haftanın Şampiyonları tablosu öğretmeninin dev ekranında (Kaptan Köşkünde) yer alıyor! En çok görev bitirip en yüksek XP'yi toplayanlar o panoya adını altın harflerle yazdırır. Asılmaya devam! 🏆`;
+            } else if (msg.includes('sistem nasıl') || msg.includes('ne yapmalıyım')) {
+                cevap = `Dijital sınıfına hoş geldin! Önce çalışacağın dersi seç, sonra 'Başla' butonuna basarak odanı aktif et. Öğretmeninin verdiği görevleri tamamla ve XP'leri topla. Takıldığında sohbetten sınıf arkadaşlarına veya bana yazabilirsin! 🚀`;
+            }
+            // 2. MOTİVASYON VE PSİKOLOJİK DESTEK (Eski yetenekler)
+            else if (msg.includes('yorul') || msg.includes('sıkıl') || msg.includes('bıkt')) {
                 cevap = `Şu an "${veri.ders}" çalışıyorsun ve yorulman çok normal! Unutma, kazandığın o ${xp} XP senin ne kadar çabaladığının kanıtı. Gözlerini kapatıp 5 dakika derin nefes almaya ne dersin? 💧`;
-            } else if (msg.includes('tavsiye') || msg.includes('taktik') || msg.includes('nasıl')) {
+            } else if (msg.includes('tavsiye') || msg.includes('taktik') || msg.includes('nasıl çalış')) {
                 cevap = `"${veri.ders}" için sana altın bir taktik: Yapamadığın sorular aslında senin asıl öğretmenlerindir. Şu an ${xp} XP'desin, harika bir temel kuruyorsun, asla pes etme! 🎯`;
             } else if (msg.includes('kork') || msg.includes('yapam')) {
                 cevap = `Sınav stresi bazen her şeyi unutmuşsun gibi hissettirir. Ama sistemimizde ${xp} XP topladın, bu tesadüf değil senin başarın! Derin bir nefes al ve sadece bir sonraki soruya odaklan. 💪`;
             } else {
-                cevap = `Merhaba! Ben senin dijital koçunum. Şu ana kadar tam ${xp} XP kazandın. Yorulduğunda moral, takıldığında taktik istemek için hep buradayım! 🚀`;
+                cevap = `Merhaba! Ben senin dijital rehberinim. Şu ana kadar ${xp} XP kazandın. Bana sistemi nasıl kullanacağını sorabilir, yorulduğunda moral veya takıldığında taktik isteyebilirsin! 😊`;
             }
+            
             socket.emit('chatbot_cevabi', cevap);
         } catch(e) {}
     });
-});
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => { console.log(`🚀 Sistem Çalışıyor! Port: ${PORT}`); });
