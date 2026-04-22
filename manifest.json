@@ -1,6 +1,6 @@
 {
-  "name": "Eğitim Koçu Paneli",
-  "short_name": "Eğitim Koçu",
+  "name": "SincApp Paneli",
+  "short_name": "SincApp",
   "start_url": "/login.html",
   "display": "standalone",
   "background_color": "#f8fafc",

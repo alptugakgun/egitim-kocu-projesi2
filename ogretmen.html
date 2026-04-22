@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eğitim Koçu - Öğretmen Paneli</title>
+    <title>SincApp - Öğretmen Paneli</title>
     <link rel="manifest" href="manifest.json">
     <script>if (!localStorage.getItem('ogretmenKimligi')) window.location.href = 'ogretmen-login.html';</script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -52,7 +52,7 @@
 <body>
     <audio id="bildirimSesi" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
     <div class="header">
-        <h1 id="kocKarsilama">👨‍🏫 Canlı Eğitim Koçu Paneli</h1>
+        <h1 id="kocKarsilama">👨‍🏫 Canlı SincApp Paneli</h1>
         <div style="display: flex; gap: 10px;">
             <button onclick="sifreleriGor()" style="background-color: #f59e0b; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s;">🔐 Öğrenci Şifreleri</button>
             <button class="logout-btn" onclick="cikisYap()">🚪 Çıkış Yap</button>
@@ -99,7 +99,6 @@
         const liveGrid = document.getElementById('liveGrid'), emptyState = document.getElementById('emptyState'), leaderboardList = document.getElementById('leaderboardList');
         let sinifListesi = [], odakGrafikObjesi = null, barGrafikObjesi = null; 
 
-        // Rozet Hesaplama (Öğretmen İçin)
         function unvanHesapla(xp) { return xp >= 300 ? '🏆 Efsane' : xp >= 150 ? '🔥 Odak Ustası' : xp >= 50 ? '⚡ Çalışkan' : '🌱 Çaylak'; }
 
         function liderlikVeGrafikGuncelle() {
@@ -132,9 +131,9 @@
             let statsHtml = '', totalMs = 0;
             if(ogrenci.istatistik) { for(let ders in ogrenci.istatistik) { let dk = Math.floor(ogrenci.istatistik[ders] / 60000); if(dk > 0) { statsHtml += `<li style="margin-bottom: 10px; font-size: 16px;"><b>${ders}:</b> ${dk} Dakika</li>`; totalMs += ogrenci.istatistik[ders]; } } }
             if(statsHtml === '') statsHtml = '<li>Henüz yeterli çalışma verisi yok.</li>';
-            let htmlMetin = `<div style="padding: 40px; font-family: 'Segoe UI', sans-serif; color: #1e293b;"><h1 style="color: #4f46e5; border-bottom: 3px solid #e2e8f0; padding-bottom: 15px; text-align: center;">Eğitim Koçu - Gelişim Raporu</h1><h2 style="margin-top: 30px;">🎓 ${ogrenci.avatar || '👤'} ${ogrenci.ogrenciAd} <span style="font-size:16px; color:#64748b;">(${unvanHesapla(ogrenci.xp || 0)})</span></h2><div style="background: #f1f5f9; padding: 20px; border-radius: 10px; margin-top: 20px;"><p style="font-size: 18px; margin: 0 0 10px 0;"><b>⭐ Toplam Kazanılan XP:</b> ${ogrenci.xp || 0}</p><p style="font-size: 18px; margin: 0;"><b>⏱️ Toplam Net Çalışma:</b> ${Math.floor(totalMs / 60000)} Dakika</p></div><h3 style="margin-top: 40px; color: #3b82f6;">📚 Ders Bazlı Çalışma Süreleri</h3><ul style="background: #fff; border: 1px solid #e2e8f0; padding: 20px 40px; border-radius: 10px;">${statsHtml}</ul><div style="margin-top: 60px; text-align: center; color: #64748b; font-size: 13px; border-top: 1px dashed #cbd5e1; padding-top: 20px;">Tarih: ${new Date().toLocaleDateString('tr-TR')}</div></div>`;
+            let htmlMetin = `<div style="padding: 40px; font-family: 'Segoe UI', sans-serif; color: #1e293b;"><h1 style="color: #4f46e5; border-bottom: 3px solid #e2e8f0; padding-bottom: 15px; text-align: center;">SincApp - Gelişim Raporu</h1><h2 style="margin-top: 30px;">🎓 ${ogrenci.avatar || '👤'} ${ogrenci.ogrenciAd} <span style="font-size:16px; color:#64748b;">(${unvanHesapla(ogrenci.xp || 0)})</span></h2><div style="background: #f1f5f9; padding: 20px; border-radius: 10px; margin-top: 20px;"><p style="font-size: 18px; margin: 0 0 10px 0;"><b>⭐ Toplam Kazanılan XP:</b> ${ogrenci.xp || 0}</p><p style="font-size: 18px; margin: 0;"><b>⏱️ Toplam Net Çalışma:</b> ${Math.floor(totalMs / 60000)} Dakika</p></div><h3 style="margin-top: 40px; color: #3b82f6;">📚 Ders Bazlı Çalışma Süreleri</h3><ul style="background: #fff; border: 1px solid #e2e8f0; padding: 20px 40px; border-radius: 10px;">${statsHtml}</ul><div style="margin-top: 60px; text-align: center; color: #64748b; font-size: 13px; border-top: 1px dashed #cbd5e1; padding-top: 20px;">Tarih: ${new Date().toLocaleDateString('tr-TR')}</div></div>`;
             let element = document.createElement('div'); element.innerHTML = htmlMetin;
-            html2pdf().from(element).set({ margin: 1, filename: `${ogrenciAd.replace(/\s+/g, '_')}_Karne.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).save();
+            html2pdf().from(element).set({ margin: 1, filename: `${ogrenciAd.replace(/\s+/g, '_')}_SincApp_Karne.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).save();
         };
 
         async function sifreleriGor() {
