@@ -1,5 +1,9 @@
 const socket = io();
 const aktifOgrenci = localStorage.getItem('ogrenciKimligi');
+const kocKodu = localStorage.getItem('kocKodu');
+
+// 🔑 Öğrenci sisteme girince kendi öğretmeninin odasına kilitlenir
+socket.emit('join_room', kocKodu);
 
 const display = document.getElementById('display');
 const startBtn = document.getElementById('startBtn');
@@ -21,7 +25,6 @@ function sesCal() { if(sesEfekti) { sesEfekti.currentTime = 0; sesEfekti.play().
 
 function getDers() { return dersSecimi.value; }
 
-// Rozet (Unvan) Hesaplama
 function unvanHesapla(xp) {
     if(xp >= 300) return '🏆 Efsane';
     if(xp >= 150) return '🔥 Odak Ustası';
@@ -33,7 +36,7 @@ window.toggleAvatarModal = function() { avatarModal.style.display = avatarModal.
 window.avatarSec = function(ikon) {
     aktifAvatar.innerHTML = ikon;
     avatarModal.style.display = 'none';
-    socket.emit('avatar_guncelle', { ogrenciAd: aktifOgrenci, avatar: ikon });
+    socket.emit('avatar_guncelle', { ogrenciAd: aktifOgrenci, avatar: ikon, kocKodu: kocKodu });
 };
 
 function gostergeyiGuncelle(sureMs) {
@@ -62,17 +65,17 @@ dersSecimi.addEventListener('change', (e) => {
         let oldSaved = parseInt(localStorage.getItem(`${aktifOgrenci}_${eskiDers}_savedTime`)) || 0;
         let diff = new Date().getTime() - st + oldSaved;
         localStorage.setItem(`${aktifOgrenci}_${eskiDers}_savedTime`, diff);
-        socket.emit('istatistik_guncelle', { ogrenciAd: aktifOgrenci, ders: eskiDers, ms: diff });
+        socket.emit('istatistik_guncelle', { ogrenciAd: aktifOgrenci, ders: eskiDers, ms: diff, kocKodu: kocKodu });
         clearInterval(tInterval); running = false; localStorage.setItem(`${aktifOgrenci}_running`, 'false');
         pauseBtn.style.display = 'none'; startBtn.style.display = 'block'; startBtn.innerHTML = "▶ Başla";
         statusText.innerHTML = "Ders değişti, sayaç durduruldu."; statusText.style.backgroundColor = "#f1f5f9"; statusText.style.color = "#64748b";
         pomoInput.disabled = false;
-        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: eskiDers, mesaj: 'Ders değiştirdi, durdurdu.' });
+        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: eskiDers, mesaj: 'Ders değiştirdi, durdurdu.', kocKodu: kocKodu });
     }
     e.target.setAttribute('data-eski', yeniDers);
     let currentSaved = parseInt(localStorage.getItem(`${aktifOgrenci}_${yeniDers}_savedTime`)) || 0;
     gostergeyiGuncelle(currentSaved);
-    socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML });
+    socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML, kocKodu: kocKodu });
     if(currentSaved > 0) { startBtn.innerHTML = "▶ Devam Et"; } else { startBtn.innerHTML = "▶ Başla"; }
 });
 
@@ -91,7 +94,7 @@ window.setMode = function(m) {
     if(m === 'pomodoro') { pomoInput.style.display = 'block'; document.getElementById('modePomo').style.background = '#ef4444'; document.getElementById('modePomo').style.boxShadow = '0 4px 0 #b91c1c'; } 
     else { pomoInput.style.display = 'none'; document.getElementById('modePomo').style.background = ''; document.getElementById('modePomo').style.boxShadow = ''; }
     gostergeyiGuncelle(parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0);
-    socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML });
+    socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML, kocKodu: kocKodu });
 };
 
 function startTimer() {
@@ -104,7 +107,7 @@ function startTimer() {
         startBtn.style.display = 'none'; pauseBtn.style.display = 'block';
         statusText.innerHTML = "🟢 Odak modu aktif!"; statusText.style.backgroundColor = "#d1fae5"; statusText.style.color = "#059669";
         dersSecimi.disabled = true; pomoInput.disabled = true;
-        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: mode === 'pomodoro' ? `Pomodoro (${pomoInput.value}dk) Başlattı!` : 'Kronometre Başlattı!' });
+        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: mode === 'pomodoro' ? `Pomodoro (${pomoInput.value}dk) Başlattı!` : 'Kronometre Başlattı!', kocKodu: kocKodu });
     }
 }
 
@@ -113,19 +116,19 @@ function pauseTimer(otomatikMi = false) {
         clearInterval(tInterval);
         let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0);
         localStorage.setItem(`${aktifOgrenci}_${getDers()}_savedTime`, otomatikMi && mode === 'pomodoro' ? 0 : diff);
-        socket.emit('istatistik_guncelle', { ogrenciAd: aktifOgrenci, ders: getDers(), ms: diff });
+        socket.emit('istatistik_guncelle', { ogrenciAd: aktifOgrenci, ders: getDers(), ms: diff, kocKodu: kocKodu });
         localStorage.setItem(`${aktifOgrenci}_running`, 'false'); running = false;
         pauseBtn.style.display = 'none'; startBtn.style.display = 'block'; startBtn.innerHTML = otomatikMi ? "▶ Başla" : "▶ Devam Et";
         statusText.innerHTML = otomatikMi ? "🎉 Pomodoro Bitti!" : "⏸️ Mola Verildi."; statusText.style.backgroundColor = "#fef3c7"; statusText.style.color = "#d97706";
         dersSecimi.disabled = false; pomoInput.disabled = false;
-        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: otomatikMi ? 'Pomodoro Bitti, Molada.' : 'Mola verdi, durdurdu.' });
+        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: otomatikMi ? 'Pomodoro Bitti, Molada.' : 'Mola verdi, durdurdu.', kocKodu: kocKodu });
     }
 }
 
 function getShowTime() {
     let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0);
     if (gostergeyiGuncelle(diff) && mode === 'pomodoro') { sesCal(); pauseTimer(true); }
-    socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML });
+    socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML, kocKodu: kocKodu });
 }
 
 window.onload = () => {
@@ -141,7 +144,7 @@ window.onload = () => {
         statusText.innerHTML = "🟢 Odak modu aktif!"; statusText.style.backgroundColor = "#d1fae5"; statusText.style.color = "#059669";
         dersSecimi.disabled = true; pomoInput.disabled = true;
         tInterval = setInterval(getShowTime, 1000);
-        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: 'Derse geri döndü (Devam ediyor)' });
+        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: 'Derse geri döndü (Devam ediyor)', kocKodu: kocKodu });
     } else {
         if (sTime > 0) startBtn.innerHTML = "▶ Devam Et";
         gostergeyiGuncelle(sTime);
@@ -151,14 +154,13 @@ window.onload = () => {
 socket.on('gorev_guncellendi', (tumVeriler) => {
     let benimVerim = tumVeriler.find(v => v.ogrenciAd === aktifOgrenci);
     if (benimVerim) {
-        if(benimVerim.avatar) aktifAvatar.innerHTML = benimVerim.avatar; // Avatarı eşitle
+        if(benimVerim.avatar) aktifAvatar.innerHTML = benimVerim.avatar;
         let xpBadge = document.getElementById('xpBadge');
         if (!xpBadge) {
             xpBadge = document.createElement('div'); xpBadge.id = 'xpBadge';
             xpBadge.style.cssText = "position:absolute; top:20px; left:20px; background: linear-gradient(135deg, #10b981, #059669); color:white; padding:8px 15px; border-radius:20px; font-weight:800; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.2);";
             document.body.appendChild(xpBadge);
         }
-        // 🏆 Rozet ve Puan Gösterimi
         xpBadge.innerHTML = `${unvanHesapla(benimVerim.xp || 0)} | ${benimVerim.xp || 0} XP`;
 
         if (benimVerim.gorevler && benimVerim.gorevler.length > 0) {
@@ -181,14 +183,14 @@ socket.on('gorev_guncellendi', (tumVeriler) => {
     }
 });
 
-window.goreviBitir = function(id) { sesCal(); socket.emit('gorev_tamamlandi', { ogrenciAd: aktifOgrenci, gorevId: id, durum: true }); };
+window.goreviBitir = function(id) { sesCal(); socket.emit('gorev_tamamlandi', { ogrenciAd: aktifOgrenci, gorevId: id, durum: true, kocKodu: kocKodu }); };
 
 window.toggleChat = function() { const body = document.getElementById('chatBody'), footer = document.getElementById('chatFooter'), uyari = document.getElementById('chatUyari'); if(body.style.display === 'flex') { body.style.display = 'none'; footer.style.display = 'none'; } else { body.style.display = 'flex'; footer.style.display = 'flex'; uyari.style.display = 'none'; body.scrollTop = body.scrollHeight; } };
-window.mesajGonder = function() { const input = document.getElementById('chatInput'); if(input.value.trim() !== '') { socket.emit('chat_mesaji_gonder', { gonderen: aktifOgrenci, mesaj: input.value, rol: 'ogrenci' }); input.value = ''; } };
+window.mesajGonder = function() { const input = document.getElementById('chatInput'); if(input.value.trim() !== '') { socket.emit('chat_mesaji_gonder', { gonderen: aktifOgrenci, mesaj: input.value, rol: 'ogrenci', kocKodu: kocKodu }); input.value = ''; } };
 window.resimGonder = function(input) {
     if(input.files && input.files[0]) {
         const file = input.files[0]; if(file.size > 2.5 * 1024 * 1024) return alert("Hocam/Öğrencim resim çok büyük! Lütfen 2.5MB'den küçük bir fotoğraf seçin."); 
-        const reader = new FileReader(); reader.onload = function(e) { socket.emit('chat_mesaji_gonder', { gonderen: aktifOgrenci, mesaj: e.target.result, rol: 'ogrenci', tip: 'resim' }); input.value = ''; }; reader.readAsDataURL(file);
+        const reader = new FileReader(); reader.onload = function(e) { socket.emit('chat_mesaji_gonder', { gonderen: aktifOgrenci, mesaj: e.target.result, rol: 'ogrenci', tip: 'resim', kocKodu: kocKodu }); input.value = ''; }; reader.readAsDataURL(file);
     }
 };
 
@@ -207,11 +209,11 @@ window.botMesajGonder = function() {
     const input = document.getElementById('botInput'); let mesajMetni = input.value.trim();
     if(mesajMetni !== '') { 
         const body = document.getElementById('botBody'); body.innerHTML += `<div style="align-self: flex-end; background: #8b5cf6; color: white; padding: 10px 14px; border-radius: 14px; font-size: 13px; max-width: 80%; line-height: 1.4; margin-bottom: 10px; font-weight: 700;">${mesajMetni}</div>`; body.scrollTop = body.scrollHeight;
-        socket.emit('ogrenci_chatbot_mesaji', { ogrenciAd: aktifOgrenci, mesaj: mesajMetni, ders: document.getElementById('dersSecimi').value }); input.value = ''; 
+        socket.emit('ogrenci_chatbot_mesaji', { ogrenciAd: aktifOgrenci, mesaj: mesajMetni, ders: document.getElementById('dersSecimi').value, kocKodu: kocKodu }); input.value = ''; 
     }
 };
 socket.on('chatbot_cevabi', (cevapMetni) => {
     sesCal(); const body = document.getElementById('botBody');
-    body.innerHTML += `<div style="align-self: flex-start; background: #e2e8f0; color: #1e293b; padding: 10px 14px; border-radius: 14px; font-size: 13px; max-width: 80%; line-height: 1.4; margin-bottom: 10px; font-weight: 700;"><div style="font-size: 10px; font-weight: 900; margin-bottom: 4px; opacity: 0.8;">🤖 Dijital Koç</div>${cevapMetni}</div>`;
+    body.innerHTML += `<div style="align-self: flex-start; background: #e2e8f0; color: #1e293b; padding: 10px 14px; border-radius: 14px; font-size: 13px; max-width: 80%; line-height: 1.4; margin-bottom: 10px; font-weight: 700;"><div style="font-size: 10px; font-weight: 900; margin-bottom: 4px; opacity: 0.8;">🤖 SincApp AI</div>${cevapMetni}</div>`;
     body.scrollTop = body.scrollHeight;
 });

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Öğretmen Girişi - SincApp</title>
+    <title>Eğitmen Girişi - SincApp</title>
     <link rel="manifest" href="manifest.json">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
@@ -11,28 +11,58 @@
         .login-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); width: 350px; text-align: center; }
         h1 { color: #1e293b; margin-top: 0; font-weight: 900; font-size: 26px;}
         p { color: #64748b; margin-bottom: 25px; font-weight: bold;}
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
+        .tab { flex: 1; padding: 10px; cursor: pointer; font-weight: bold; color: #94a3b8; transition: 0.3s; }
+        .tab.active { color: #3b82f6; border-bottom: 3px solid #3b82f6; }
         input { width: 90%; padding: 14px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: inherit; font-weight: bold; outline: none; }
         input:focus { border-color: #3b82f6; }
         button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 900; font-size: 16px; cursor: pointer; color: white; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: 0.2s; font-family: inherit;}
         button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4); }
+        .form-section { display: none; }
+        .form-section.active { display: block; }
     </style>
 </head>
 <body>
     <div class="login-card">
         <div style="font-size: 60px; margin-bottom: 10px;">🐿️👨‍🏫</div>
         <h1>SincApp Yönetim</h1>
-        <p>Kontrol Merkezine Giriş</p>
-        <input type="text" id="kocAd" placeholder="İsminiz">
-        <input type="password" id="anahtarSifre" placeholder="Yönetici Anahtarı">
-        <button onclick="kocGiris()">Sistemi Aç</button>
+        <p>Eğitmen Kontrol Merkezi</p>
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('giris')">Giriş Yap</div>
+            <div class="tab" onclick="switchTab('kayit')">Kayıt Ol</div>
+        </div>
+        <div id="giris-formu" class="form-section active">
+            <input type="text" id="g-isim" placeholder="Eğitmen İsmi">
+            <input type="password" id="g-sifre" placeholder="Şifre">
+            <button onclick="girisYap()">Sistemi Aç</button>
+        </div>
+        <div id="kayit-formu" class="form-section">
+            <input type="text" id="k-isim" placeholder="Eğitmen İsmi">
+            <input type="password" id="k-sifre" placeholder="Yeni Şifre Belirle">
+            <button onclick="kayitOl()" style="background: #10b981;">Hesap Oluştur</button>
+        </div>
     </div>
     <script>
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
-        function kocGiris() {
-            const ad = document.getElementById('kocAd').value.trim(); const sifre = document.getElementById('anahtarSifre').value.trim();
-            const MASTER_KEY = "alptug-hoca-2026";
-            if (ad && sifre === MASTER_KEY) { localStorage.setItem('ogretmenKimligi', ad); window.location.href = 'ogretmen.html'; } 
-            else { alert("Hatalı yönetici anahtarı veya isim eksik!"); }
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.form-section').forEach(f => f.classList.remove('active'));
+            if(tabId === 'giris') { document.querySelectorAll('.tab')[0].classList.add('active'); document.getElementById('giris-formu').classList.add('active'); } 
+            else { document.querySelectorAll('.tab')[1].classList.add('active'); document.getElementById('kayit-formu').classList.add('active'); }
+        }
+        async function kayitOl() {
+            const isim = document.getElementById('k-isim').value.trim(); const sifre = document.getElementById('k-sifre').value.trim();
+            if(!isim || !sifre) return alert("Eksik alan bıraktınız!");
+            const res = await fetch('/api/koc/kayit', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({kocAd: isim, sifre: sifre}) });
+            const data = await res.json(); alert(data.mesaj); 
+            if(data.basari) { localStorage.setItem('ogretmenKimligi', isim); localStorage.setItem('kocKodu', data.kocKodu); window.location.href = 'ogretmen.html'; }
+        }
+        async function girisYap() {
+            const isim = document.getElementById('g-isim').value.trim(); const sifre = document.getElementById('g-sifre').value.trim();
+            if(!isim || !sifre) return alert("Eksik alan bıraktınız!");
+            const res = await fetch('/api/koc/giris', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({kocAd: isim, sifre: sifre}) });
+            const data = await res.json(); 
+            if(data.basari) { localStorage.setItem('ogretmenKimligi', isim); localStorage.setItem('kocKodu', data.kocKodu); window.location.href = 'ogretmen.html'; } else { alert(data.mesaj); }
         }
     </script>
 </body>
