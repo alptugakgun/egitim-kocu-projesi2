@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Öğretmen Girişi - Eğitim Koçu</title>
+    <link rel="manifest" href="manifest.json">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
         body { font-family: 'Nunito', sans-serif; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
@@ -26,9 +27,9 @@
         <button onclick="kocGiris()">Sistemi Aç</button>
     </div>
     <script>
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
         function kocGiris() {
-            const ad = document.getElementById('kocAd').value.trim();
-            const sifre = document.getElementById('anahtarSifre').value.trim();
+            const ad = document.getElementById('kocAd').value.trim(); const sifre = document.getElementById('anahtarSifre').value.trim();
             const MASTER_KEY = "alptug-hoca-2026";
             if (ad && sifre === MASTER_KEY) { localStorage.setItem('ogretmenKimligi', ad); window.location.href = 'ogretmen.html'; } 
             else { alert("Hatalı yönetici anahtarı veya isim eksik!"); }
