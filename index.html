@@ -15,7 +15,6 @@
         .top-btn:hover { transform: scale(1.05); }
         .btn-lib { background: #8b5cf6; } .btn-net { background: #3b82f6; } .btn-market { background: linear-gradient(135deg, #f59e0b, #d97706); } .btn-duel { background: #ef4444; }
         
-        /* 🎧 Lofi Radyo Tasarımı */
         .radyo-widget { background: #1e293b; padding: 10px; border-radius: 15px; margin-bottom: 15px; display: flex; justify-content: space-around; align-items: center;}
         .radyo-btn { background: #334155; color: white; border: none; padding: 8px; border-radius: 50%; font-size: 16px; cursor: pointer; transition: 0.2s;}
         .radyo-btn:hover { background: #4f46e5; }
@@ -23,8 +22,13 @@
 
         .avatar-btn { font-size: 40px; cursor: pointer; background: #f1f5f9; border-radius: 50%; width: 60px; height: 60px; display: inline-flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: -20px auto 10px auto;}
         h1 { color: #334155; margin-top: 10px; font-size: 22px; font-weight: 900;}
-        .select-box { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #e2e8f0; font-family: inherit; font-weight: bold; color: #334155; font-size: 15px; margin-bottom: 15px; outline: none; }
-        .mode-container { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+        
+        /* Yeni Müfredat Seçiciler */
+        .select-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .select-box { flex: 1; padding: 12px; border-radius: 12px; border: 2px solid #e2e8f0; font-family: inherit; font-weight: bold; color: #334155; font-size: 14px; outline: none; transition: 0.3s;}
+        .select-box:focus { border-color: #4f46e5; }
+        
+        .mode-container { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; margin-top: 15px;}
         .mode-btn { flex: 1; padding: 10px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; }
         .mode-active { background: #4f46e5; color: white; box-shadow: 0 4px 0 #3730a3; }
         .mode-passive { background: #e2e8f0; color: #64748b; }
@@ -72,7 +76,13 @@
         </div>
 
         <h1 id="mainTitle">🐿️ SincApp!</h1>
-        <select id="dersSecimi" class="select-box"><option value="TYT Türkçe">📚 TYT Türkçe</option><option value="TYT Matematik">📐 TYT Matematik</option><option value="AYT Matematik">📈 AYT Matematik</option><option value="AYT Fizik">⚛️ AYT Fizik</option><option value="Paragraf">📝 Paragraf</option><option value="Genel Deneme">⏱️ Genel Deneme</option></select>
+        
+        <div class="select-row">
+            <select id="sinavSecimi" class="select-box" style="flex: 0.4;"></select>
+            <select id="dersSecimiUI" class="select-box"></select>
+        </div>
+        <select id="konuSecimi" class="select-box" style="width: 100%;"></select>
+
         <div class="mode-container"><button id="modeNormal" class="mode-btn mode-active" onclick="setMode('normal')">⏳ Kronometre</button><button id="modePomo" class="mode-btn mode-passive" onclick="setMode('pomodoro')">🍅 Pomodoro</button><input type="number" id="pomoInput" value="25" min="1" max="120" title="Dakika" style="width: 65px; padding: 10px; border-radius: 12px; border: 2px solid #e2e8f0; font-weight: 900; font-size: 16px; outline: none; text-align: center; display: none; color: #ef4444;"></div>
         <div id="display">00:00:00</div>
         <div class="buttons"><button id="startBtn" class="action-btn" onclick="startTimer()">▶ Başla</button><button id="pauseBtn" class="action-btn" onclick="pauseTimer()">⏸ Mola Ver</button></div>
@@ -84,8 +94,7 @@
         <div class="modal-content">
             <h2 style="color:#ef4444; margin-top:0;">⚔️ SincApp Düello Arenası</h2>
             <p style="font-size:13px; color:#64748b; font-weight:bold;">Sınıftaki arkadaşlarına meydan oku! İlk görevi bitiren 50 XP kazanır.</p>
-            <div id="duelloSinifListesi" style="margin-bottom: 15px; text-align: left; background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; max-height: 200px; overflow-y:auto;">
-                </div>
+            <div id="duelloSinifListesi" style="margin-bottom: 15px; text-align: left; background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; max-height: 200px; overflow-y:auto;"></div>
             <button onclick="document.getElementById('duelloModal').style.display='none'" style="padding:10px; background:#e2e8f0; border:none; border-radius:10px; font-weight:bold; width:100%; cursor:pointer;">Kapat</button>
         </div>
     </div>
@@ -121,6 +130,12 @@
     <div class="modal" id="marketModal"><div class="modal-content"><h2 style="color:#d97706; margin-top:0;">🛒 SincApp Market</h2><p style="font-size:14px; font-weight:bold; color:#64748b;">Mevcut XP: <span id="marketXpDisplay" style="color:#4f46e5; font-size:18px;">0</span></p><div class="market-item"><span>15 Dk Ekstra Mola</span><button class="buy-btn" onclick="odulAl('15 Dk Ekstra Mola', 1000)">1000 XP</button></div><div class="market-item"><span>Özel Soru Çözüm Saati</span><button class="buy-btn" onclick="odulAl('Özel Soru Çözüm Saati', 3000)">3000 XP</button></div><div class="market-item"><span>☕ Koçtan Kahve</span><button class="buy-btn" onclick="odulAl('Koçtan Kahve Ismarlama', 5000)">5000 XP</button></div><button onclick="document.getElementById('marketModal').style.display='none'" style="margin-top:15px; padding:10px; background:#e2e8f0; border:none; border-radius:10px; font-weight:bold; width:100%; cursor:pointer;">Kapat</button></div></div>
     <div class="modal" id="netModal"><div class="modal-content"><h2 style="color:#3b82f6; margin-top:0;">📈 Deneme Neti Gir</h2><select id="sinavTuru" class="select-box" style="margin-bottom:10px;"><option value="TYT Denemesi">TYT Genel</option><option value="AYT Denemesi">AYT Genel</option><option value="LGS Denemesi">LGS Genel</option></select><input type="number" id="netSkoru" placeholder="Örn: 75.5" step="0.25" class="select-box" style="text-align:center; font-size:24px;"><button onclick="netKaydet()" class="action-btn" style="background:#10b981; width:100%; margin-top:10px;">Neti Sisteme Gönder</button><button onclick="document.getElementById('netModal').style.display='none'" style="margin-top:10px; padding:10px; background:#e2e8f0; border:none; border-radius:10px; font-weight:bold; width:100%; cursor:pointer;">Kapat</button></div></div>
 
+    <div style="position: fixed; bottom: 20px; left: 20px; width: 320px; background: white; border-radius: 16px; box-shadow: 0 10px 35px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; z-index: 1000; font-family: 'Nunito', sans-serif;">
+        <div style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; padding: 15px; font-weight: 900; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleBot()"><span>🐿️ SincApp AI Koçum</span></div>
+        <div id="botBody" style="height: 300px; background: #f8fafc; padding: 15px; overflow-y: auto; display: none; flex-direction: column;"><div style="align-self: flex-start; background: #e2e8f0; color: #1e293b; padding: 10px 14px; border-radius: 14px; font-size: 13px; max-width: 80%; line-height: 1.4; margin-bottom: 10px; font-weight: 700;"><div style="font-size: 10px; font-weight: 900; margin-bottom: 4px; opacity: 0.8;">🐿️ SincApp AI</div>Merhaba! Ben senin özel AI Asistanınım.</div></div>
+        <div id="botFooter" style="padding: 10px; background: white; border-top: 1px solid #e2e8f0; display: none; gap: 8px;"><input type="text" id="botInput" placeholder="Sistem nasıl, taktik ver..." style="flex: 1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; font-family: inherit;" onkeypress="if(event.key === 'Enter') botMesajGonder()"><button onclick="botMesajGonder()" style="background: #8b5cf6; color: white; border: none; padding: 12px 18px; border-radius: 10px; cursor: pointer; font-weight: 800; font-family: inherit;">Sor</button></div>
+    </div>
+
     <div style="position: fixed; bottom: 20px; right: 20px; width: 320px; background: white; border-radius: 16px; box-shadow: 0 10px 35px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; z-index: 1000; font-family: 'Nunito', sans-serif;">
         <div style="background: #4f46e5; color: white; padding: 15px; font-weight: 900; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleChat()"><span>💬 Sınıf Sohbeti</span><span id="chatUyari" style="background: #ef4444; color: white; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; font-size: 12px;">!</span></div>
         <div id="chatBody" style="height: 300px; background: #f8fafc; padding: 15px; overflow-y: auto; display: none; flex-direction: column;"></div>
@@ -128,103 +143,6 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io(); const aktifOgrenci = localStorage.getItem('ogrenciKimligi'); const kocKodu = localStorage.getItem('kocKodu'); const veliKodu = localStorage.getItem('veliKodu');
-        socket.emit('join_room', kocKodu);
-        
-        document.getElementById('veliKoduGosterge').innerText = veliKodu || 'V-XXXX';
-
-        // 🎧 Lofi Radyo Mantığı
-        function radyoKapat() { document.getElementById('radyoLofi').pause(); document.getElementById('radyoYagmur').pause(); document.getElementById('radyoKafe').pause(); document.querySelectorAll('.radyo-btn').forEach(b => b.classList.remove('aktif')); }
-        window.radyoCal = function(tur) {
-            radyoKapat(); document.getElementById('btn' + tur).classList.add('aktif');
-            let audio = document.getElementById('radyo' + tur); audio.volume = 0.5; audio.play().catch(e=>alert("Tarayıcınız otomatik müziği engelledi."));
-        };
-
-        // ⚔️ Düello Mantığı
-        let bekleyenDuelloRakip = '';
-        window.duelloAt = function(hedefIsim) {
-            if(hedefIsim === aktifOgrenci) return alert("Kendine meydan okuyamazsın!");
-            if(confirm(`${hedefIsim} isimli arkadaşına 50 XP'sine meydan okumak istiyor musun?`)) {
-                socket.emit('duello_teklif_et', { gonderen: aktifOgrenci, hedef: hedefIsim, miktar: 50, kocKodu: kocKodu });
-                alert("Meydan okuma gönderildi! Bekleniyor..."); document.getElementById('duelloModal').style.display = 'none';
-            }
-        };
-
-        socket.on('duello_istegi_geldi', (veri) => {
-            if(veri.hedef === aktifOgrenci) {
-                bekleyenDuelloRakip = veri.gonderen; document.getElementById('duelloIstekMetni').innerText = `${veri.gonderen} sana 50 XP'sine meydan okuyor!`;
-                document.getElementById('duelloIstekModal').style.display = 'flex'; sesCal();
-            }
-        });
-
-        window.duelloKabulEt = function() {
-            socket.emit('duello_kabul_edildi', { gonderen: bekleyenDuelloRakip, hedef: aktifOgrenci, miktar: 50, kocKodu: kocKodu });
-            document.getElementById('duelloIstekModal').style.display = 'none';
-        };
-
-        socket.on('duello_basladi', (veri) => {
-            if(veri.o1 === aktifOgrenci || veri.o2 === aktifOgrenci) { alert("⚔️ DÜELLO BAŞLADI! İlk görevi bitiren kazanır!"); sesCal(); }
-        });
-
-        socket.on('duello_sonucu', (veri) => {
-            if(veri.kazanan === aktifOgrenci) { alert(`🏆 TEBRİKLER! Düelloyu sen kazandın. +${veri.miktar} XP`); sesCal(); }
-            else if(veri.kaybeden === aktifOgrenci) { alert(`💀 MAALESEF! Düelloyu ${veri.kazanan} kazandı. -${veri.miktar} XP kaybettin.`); }
-        });
-
-        // Diğer Fonksiyonlar
-        let anlikXp = 0; const display = document.getElementById('display'), startBtn = document.getElementById('startBtn'), pauseBtn = document.getElementById('pauseBtn');
-        let tInterval, running = localStorage.getItem(`${aktifOgrenci}_running`) === 'true', mode = localStorage.getItem(`${aktifOgrenci}_mode`) || 'normal';
-        document.getElementById('mainTitle').innerHTML = `Hoş Geldin, ${aktifOgrenci}! 🎯`;
-        
-        function sesCal() { const s = document.getElementById('bildirimSesi'); s.currentTime = 0; s.play().catch(e=>{}); }
-        function getDers() { return document.getElementById('dersSecimi').value; }
-        function unvanHesapla(xp) { return xp >= 300 ? '🏆 Efsane' : xp >= 150 ? '🔥 Odak Ustası' : xp >= 50 ? '⚡ Çalışkan' : '🌱 Çaylak'; }
-
-        socket.on('kaynaklari_yukle', (liste) => { let kutu = document.getElementById('kaynakListesi'); kutu.innerHTML = ''; if(liste.length === 0) { kutu.innerHTML = '<div style="color: #94a3b8; font-style: italic;">Henüz kaynak yok.</div>'; return; } liste.forEach(k => { kutu.innerHTML += `<div class="kaynak-item">${k.baslik} <a href="${k.url}" target="_blank">🔗 Kaynağa Git</a></div>`; }); });
-        socket.on('yeni_kaynak_eklendi', (kaynak) => { sesCal(); socket.emit('join_room', kocKodu); });
-
-        window.avatarSec = function(ikon) { document.getElementById('aktifAvatar').innerHTML = ikon; document.getElementById('avatarModal').style.display = 'none'; socket.emit('avatar_guncelle', { ogrenciAd: aktifOgrenci, avatar: ikon, kocKodu: kocKodu }); };
-        window.netKaydet = function() { let tur = document.getElementById('sinavTuru').value; let net = document.getElementById('netSkoru').value; if(!net) return; socket.emit('net_ekle', { ogrenciAd: aktifOgrenci, sinavTuru: tur, netSkoru: Number(net), kocKodu: kocKodu }); document.getElementById('netSkoru').value = ''; document.getElementById('netModal').style.display = 'none'; alert("Netiniz iletildi! 🚀"); };
-        window.odulAl = function(odulIsmi, bedel) { if(anlikXp < bedel) return alert("Yetersiz XP!"); if(confirm(`${odulIsmi} almak istiyor musun?`)) { socket.emit('odul_satin_al', { ogrenciAd: aktifOgrenci, odul: odulIsmi, bedel: bedel, kocKodu: kocKodu }); document.getElementById('marketModal').style.display = 'none'; } };
-
-        function gostergeyiGuncelle(sureMs) { if(mode === 'normal') { let hours = Math.floor((sureMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)), minutes = Math.floor((sureMs % (1000 * 60 * 60)) / (1000 * 60)), seconds = Math.floor((sureMs % (1000 * 60)) / 1000); display.innerHTML = (hours < 10 ? "0"+hours : hours) + ":" + (minutes < 10 ? "0"+minutes : minutes) + ":" + (seconds < 10 ? "0"+seconds : seconds); return false; } else { let val = parseInt(document.getElementById('pomoInput').value) || 25, kalan = (val * 60 * 1000) - sureMs; if(kalan <= 0) { display.innerHTML = "00:00"; return true; } let minutes = Math.floor((kalan % (1000 * 60 * 60)) / (1000 * 60)), seconds = Math.floor((kalan % (1000 * 60)) / 1000); display.innerHTML = (minutes < 10 ? "0"+minutes : minutes) + ":" + (seconds < 10 ? "0"+seconds : seconds); return false; } }
-
-        window.setMode = function(m) { if(running) return; mode = m; localStorage.setItem(`${aktifOgrenci}_mode`, m); document.getElementById('modeNormal').className = m === 'normal' ? 'mode-btn mode-active' : 'mode-btn mode-passive'; document.getElementById('modePomo').className = m === 'pomodoro' ? 'mode-btn mode-active' : 'mode-btn mode-passive'; if(m === 'pomodoro') { document.getElementById('pomoInput').style.display = 'block'; } else { document.getElementById('pomoInput').style.display = 'none'; } };
-        function startTimer() { if (!running) { localStorage.setItem(`${aktifOgrenci}_startTime`, new Date().getTime()); localStorage.setItem(`${aktifOgrenci}_running`, 'true'); localStorage.setItem(`${aktifOgrenci}_activeDers`, getDers()); tInterval = setInterval(() => { let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0); if (gostergeyiGuncelle(diff) && mode === 'pomodoro') { sesCal(); pauseTimer(true); } socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML, kocKodu: kocKodu }); }, 1000); running = true; startBtn.style.display = 'none'; pauseBtn.style.display = 'block'; document.getElementById('statusText').innerHTML = "🟢 Odak modu aktif!"; socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: mode === 'pomodoro' ? 'Pomodoro Başlattı!' : 'Kronometre Başlattı!', kocKodu: kocKodu }); } }
-        function pauseTimer(otomatikMi = false) { if (running) { clearInterval(tInterval); let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0); localStorage.setItem(`${aktifOgrenci}_${getDers()}_savedTime`, otomatikMi && mode === 'pomodoro' ? 0 : diff); socket.emit('istatistik_guncelle', { ogrenciAd: aktifOgrenci, ders: getDers(), ms: diff, kocKodu: kocKodu }); localStorage.setItem(`${aktifOgrenci}_running`, 'false'); running = false; pauseBtn.style.display = 'none'; startBtn.style.display = 'block'; startBtn.innerHTML = otomatikMi ? "▶ Başla" : "▶ Devam Et"; document.getElementById('statusText').innerHTML = otomatikMi ? "🎉 Pomodoro Bitti!" : "⏸️ Mola Verildi."; socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: otomatikMi ? 'Pomodoro Bitti, Molada.' : 'Mola verdi, durdurdu.', kocKodu: kocKodu }); } }
-
-        socket.on('gorev_guncellendi', (tumVeriler) => {
-            // Düello listesi oluştur
-            let duelloDiv = document.getElementById('duelloSinifListesi'); duelloDiv.innerHTML = '';
-            tumVeriler.forEach(o => { if(o.ogrenciAd !== aktifOgrenci) { duelloDiv.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #cbd5e1;"><span>${o.avatar || '👤'} <b>${o.ogrenciAd}</b></span> <button class="duel-btn" onclick="duelloAt('${o.ogrenciAd}')">Meydan Oku</button></div>`; } });
-
-            let benimVerim = tumVeriler.find(v => v.ogrenciAd === aktifOgrenci);
-            if (benimVerim) {
-                anlikXp = benimVerim.xp || 0; document.getElementById('marketXpDisplay').innerText = anlikXp;
-                if(benimVerim.avatar) document.getElementById('aktifAvatar').innerHTML = benimVerim.avatar;
-                let xpBadge = document.getElementById('xpBadge'); if (!xpBadge) { xpBadge = document.createElement('div'); xpBadge.id = 'xpBadge'; xpBadge.style.cssText = "position:absolute; top:20px; left:20px; color:white; padding:8px 15px; border-radius:20px; font-weight:800; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.2);"; document.body.appendChild(xpBadge); }
-                let sirali = tumVeriler.sort((a,b) => (b.xp||0) - (a.xp||0)), benimSira = sirali.findIndex(v => v.ogrenciAd === aktifOgrenci);
-                let ligIsmi = 'Henüz Lige Giremedi', ligRengi = '#94a3b8', anaRenk = '#64748b';
-                if(benimSira !== -1 && benimVerim.xp > 0) { if(benimSira < 3) { ligIsmi = '🏆 Süper Lig'; ligRengi = '#fef3c7'; anaRenk = '#f59e0b'; } else if(benimSira < 8) { ligIsmi = '🥇 1. Lig'; ligRengi = '#f1f5f9'; anaRenk = '#64748b'; } else { ligIsmi = '🪵 Amatör Lig'; ligRengi = '#ffedd5'; anaRenk = '#d97706'; } }
-                xpBadge.style.background = anaRenk; xpBadge.innerHTML = `<span style="background:${ligRengi}; color:${anaRenk}; padding:4px 8px; border-radius:10px; margin-right:6px;">${ligIsmi}</span> ${unvanHesapla(anlikXp)} | ${anlikXp} XP`;
-                
-                // Eğer düellodaysa uyarı ver
-                if(benimVerim.aktifDuello && benimVerim.aktifDuello.rakip) {
-                    xpBadge.innerHTML += `<div style="background:#ef4444; color:white; padding:4px; border-radius:6px; margin-top:5px; font-size:11px; text-align:center; animation: zippla 1s infinite;">⚔️ ${benimVerim.aktifDuello.rakip} ile Düelloda!</div>`;
-                }
-
-                if (benimVerim.gorevler && benimVerim.gorevler.length > 0) { document.getElementById('taskBoard').style.display = 'block'; let taskList = document.getElementById('studentTaskList'); taskList.innerHTML = ''; benimVerim.gorevler.forEach(gorev => { let textStil = gorev.tamamlandi ? "text-decoration: line-through; color: #94a3b8;" : "color: #334155; font-weight: 800;"; let sagKisim = gorev.tamamlandi ? `<span style="color: #10b981; font-weight: 800;">✅ Bitti</span>` : `<button class="finish-btn" onclick="goreviBitir(${gorev.id})">Bitir (+10 XP)</button>`; taskList.innerHTML += `<div class="task-item"><span style="${textStil}">${gorev.metin}</span>${sagKisim}</div>`; }); }
-            }
-        });
-        window.goreviBitir = function(id) { sesCal(); socket.emit('gorev_tamamlandi', { ogrenciAd: aktifOgrenci, gorevId: id, durum: true, kocKodu: kocKodu }); };
-
-        window.toggleChat = function() { const body = document.getElementById('chatBody'), footer = document.getElementById('chatFooter'), uyari = document.getElementById('chatUyari'); if(body.style.display === 'flex') { body.style.display = 'none'; footer.style.display = 'none'; } else { body.style.display = 'flex'; footer.style.display = 'flex'; uyari.style.display = 'none'; body.scrollTop = body.scrollHeight; } };
-        window.mesajGonder = function() { const input = document.getElementById('chatInput'); if(input.value.trim() !== '') { socket.emit('chat_mesaji_gonder', { gonderen: aktifOgrenci, mesaj: input.value, rol: 'ogrenci', kocKodu: kocKodu }); input.value = ''; } };
-        window.resimGonder = function(input) { if(input.files && input.files[0]) { const file = input.files[0]; if(file.size > 2.5 * 1024 * 1024) return alert("Resim çok büyük!"); const reader = new FileReader(); reader.onload = function(e) { socket.emit('chat_mesaji_gonder', { gonderen: aktifOgrenci, mesaj: e.target.result, rol: 'ogrenci', tip: 'resim', kocKodu: kocKodu }); input.value = ''; }; reader.readAsDataURL(file); } };
-        function chatEkranaBas(veri) { const body = document.getElementById('chatBody'); let benMiyim = (veri.gonderen === aktifOgrenci), renk = benMiyim ? '#10b981' : '#e2e8f0', yaziRengi = benMiyim ? 'white' : '#1e293b', hizalama = benMiyim ? 'flex-end' : 'flex-start', ikon = veri.rol === 'koc' ? '👨‍🏫' : '💬'; let icerik = veri.tip === 'resim' ? `<img src="${veri.mesaj}" style="max-width: 100%; border-radius: 8px; margin-top: 5px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="window.open('${veri.mesaj}', '_blank')">` : veri.mesaj; body.innerHTML += `<div style="align-self: ${hizalama}; background: ${renk}; color: ${yaziRengi}; padding: 10px 14px; border-radius: 14px; font-size: 13px; max-width: 80%; line-height: 1.4; margin-bottom: 10px; font-weight: 700;"><div style="font-size: 10px; font-weight: 900; margin-bottom: 4px; opacity: 0.8;">${ikon} ${veri.gonderen} • ${veri.saat}</div>${icerik}</div>`; body.scrollTop = body.scrollHeight; }
-        socket.on('eski_chat_yukle', (gecmis) => { document.getElementById('chatBody').innerHTML = ''; gecmis.forEach(msg => chatEkranaBas(msg)); });
-        socket.on('yeni_chat_mesaji', (msg) => { chatEkranaBas(msg); const body = document.getElementById('chatBody'); if(msg.gonderen !== aktifOgrenci) { sesCal(); if(body.style.display !== 'flex') document.getElementById('chatUyari').style.display = 'flex'; } });
-    </script>
+    <script src="app.js?v=10"></script>
 </body>
 </html>
