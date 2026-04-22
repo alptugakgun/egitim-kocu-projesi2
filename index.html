@@ -10,11 +10,17 @@
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
         body { font-family: 'Nunito', sans-serif; background: linear-gradient(135deg, #f6ea8c 0%, #f7a9a8 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .container { background: rgba(255, 255, 255, 0.95); padding: 30px 40px; border-radius: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); width: 400px; text-align: center; border: 4px solid #fff; position: relative;}
-        .top-bar-btns { display: flex; justify-content: space-between; margin-bottom: 10px; gap: 5px; }
-        .market-btn { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; padding: 8px 12px; border-radius: 12px; cursor: pointer; font-weight: 900; font-size: 12px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); transition: 0.3s; flex: 1;}
-        .net-btn { background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: 12px; transition: 0.3s; flex: 1;}
-        .lib-btn { background: #8b5cf6; color: white; border: none; padding: 8px 12px; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: 12px; transition: 0.3s; flex: 1;}
-        .top-bar-btns button:hover { transform: scale(1.05); }
+        .top-bar-btns { display: flex; justify-content: space-between; margin-bottom: 10px; gap: 5px; flex-wrap: wrap; }
+        .top-btn { color: white; border: none; padding: 8px 10px; border-radius: 12px; cursor: pointer; font-weight: 900; font-size: 12px; transition: 0.3s; flex: 1; min-width: 80px;}
+        .top-btn:hover { transform: scale(1.05); }
+        .btn-lib { background: #8b5cf6; } .btn-net { background: #3b82f6; } .btn-market { background: linear-gradient(135deg, #f59e0b, #d97706); } .btn-duel { background: #ef4444; }
+        
+        /* 🎧 Lofi Radyo Tasarımı */
+        .radyo-widget { background: #1e293b; padding: 10px; border-radius: 15px; margin-bottom: 15px; display: flex; justify-content: space-around; align-items: center;}
+        .radyo-btn { background: #334155; color: white; border: none; padding: 8px; border-radius: 50%; font-size: 16px; cursor: pointer; transition: 0.2s;}
+        .radyo-btn:hover { background: #4f46e5; }
+        .radyo-btn.aktif { background: #10b981; box-shadow: 0 0 10px #10b981;}
+
         .avatar-btn { font-size: 40px; cursor: pointer; background: #f1f5f9; border-radius: 50%; width: 60px; height: 60px; display: inline-flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: -20px auto 10px auto;}
         h1 { color: #334155; margin-top: 10px; font-size: 22px; font-weight: 900;}
         .select-box { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #e2e8f0; font-family: inherit; font-weight: bold; color: #334155; font-size: 15px; margin-bottom: 15px; outline: none; }
@@ -25,90 +31,149 @@
         #display { font-size: 56px; font-weight: 900; color: #4f46e5; margin: 10px 0 25px 0; font-variant-numeric: tabular-nums; background: #e0e7ff; padding: 10px 30px; border-radius: 20px; display: inline-block; box-shadow: inset 0 4px 6px rgba(0,0,0,0.05); }
         .buttons { display: flex; gap: 15px; justify-content: center; }
         button.action-btn { flex: 1; padding: 16px; border: none; border-radius: 18px; font-weight: 800; font-size: 16px; cursor: pointer; color: white; transition: all 0.1s ease; }
-        #startBtn { background-color: #10b981; box-shadow: 0 6px 0 #059669; }
-        #pauseBtn { background-color: #f59e0b; display: none; box-shadow: 0 6px 0 #d97706; }
+        #startBtn { background-color: #10b981; box-shadow: 0 6px 0 #059669; } #pauseBtn { background-color: #f59e0b; display: none; box-shadow: 0 6px 0 #d97706; }
         #statusText { margin-top: 20px; padding: 12px; border-radius: 14px; font-size: 15px; font-weight: 800; transition: 0.3s; }
         .task-board { margin-top: 30px; padding-top: 20px; border-top: 3px dashed #cbd5e1; text-align: left; display: none; }
         .task-board h3 { margin-top: 0; font-size: 18px; color: #4f46e5; font-weight: 900; display: flex; align-items: center; gap: 8px;}
         .task-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 16px; border-radius: 16px; margin-bottom: 12px; border: 2px solid #e2e8f0; transition: all 0.3s; }
         .finish-btn { background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: 800; }
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;}
         .modal-content { background: white; padding: 25px; border-radius: 20px; text-align: center; width: 320px; max-height: 80vh; overflow-y: auto;}
         .market-item { background: #f8fafc; padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-weight: bold;}
         .buy-btn { background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 900; cursor: pointer;}
         .kaynak-item { background: #f1f5f9; padding: 12px; border-radius: 10px; margin-bottom: 8px; text-align: left; font-weight: bold; font-size: 14px; border-left: 4px solid #8b5cf6;}
         .kaynak-item a { color: #4f46e5; text-decoration: none; display: block; margin-top: 5px; font-size: 13px; font-weight: 900;}
+        .duel-btn { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px;}
     </style>
 </head>
 <body>
     <audio id="bildirimSesi" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="radyoLofi" src="https://assets.mixkit.co/music/preview/mixkit-lofi-study-112.mp3" loop preload="none"></audio>
+    <audio id="radyoYagmur" src="https://assets.mixkit.co/active_storage/sfx/1244/1244-preview.mp3" loop preload="none"></audio>
+    <audio id="radyoKafe" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3" loop preload="none"></audio>
+
     <div class="container">
         <div class="top-bar-btns">
-            <button class="lib-btn" onclick="document.getElementById('kutuphaneModal').style.display='flex'">📚 Kaynaklar</button>
-            <button class="net-btn" onclick="document.getElementById('netModal').style.display='flex'">📈 Net Gir</button>
-            <button class="market-btn" onclick="document.getElementById('marketModal').style.display='flex'">🛒 Market</button>
+            <button class="top-btn btn-lib" onclick="document.getElementById('kutuphaneModal').style.display='flex'">📚 Kaynak</button>
+            <button class="top-btn btn-net" onclick="document.getElementById('netModal').style.display='flex'">📈 Net Gir</button>
+            <button class="top-btn btn-market" onclick="document.getElementById('marketModal').style.display='flex'">🛒 Market</button>
+            <button class="top-btn btn-duel" onclick="document.getElementById('duelloModal').style.display='flex'">⚔️ Düello</button>
         </div>
+        
         <div class="avatar-btn" id="aktifAvatar" onclick="document.getElementById('avatarModal').style.display='flex'">👤</div>
-        <h1 id="mainTitle">🐿️ SincApp'e Hoş Geldin!</h1>
-        <select id="dersSecimi" class="select-box">
-            <option value="TYT Türkçe">📚 TYT Türkçe</option>
-            <option value="TYT Matematik">📐 TYT Matematik</option>
-            <option value="AYT Matematik">📈 AYT Matematik</option>
-            <option value="AYT Fizik">⚛️ AYT Fizik</option>
-            <option value="Paragraf">📝 Paragraf</option>
-            <option value="Genel Deneme">⏱️ Genel Deneme</option>
-        </select>
-        <div class="mode-container">
-            <button id="modeNormal" class="mode-btn mode-active" onclick="setMode('normal')">⏳ Kronometre</button>
-            <button id="modePomo" class="mode-btn mode-passive" onclick="setMode('pomodoro')">🍅 Pomodoro</button>
-            <input type="number" id="pomoInput" value="25" min="1" max="120" title="Dakika" style="width: 65px; padding: 10px; border-radius: 12px; border: 2px solid #e2e8f0; font-weight: 900; font-size: 16px; outline: none; text-align: center; display: none; color: #ef4444;">
+        
+        <div class="radyo-widget">
+            <span style="color:#94a3b8; font-weight:bold; font-size:12px;">🎧 Odak Müzik:</span>
+            <button class="radyo-btn" id="btnLofi" onclick="radyoCal('Lofi')" title="Lofi Beats">🎵</button>
+            <button class="radyo-btn" id="btnYagmur" onclick="radyoCal('Yagmur')" title="Yağmur Sesi">🌧️</button>
+            <button class="radyo-btn" id="btnKafe" onclick="radyoCal('Kafe')" title="Kafe Ortamı">☕</button>
+            <button class="radyo-btn" onclick="radyoKapat()" style="background:#ef4444;" title="Kapat">🔇</button>
         </div>
+
+        <h1 id="mainTitle">🐿️ SincApp!</h1>
+        <select id="dersSecimi" class="select-box"><option value="TYT Türkçe">📚 TYT Türkçe</option><option value="TYT Matematik">📐 TYT Matematik</option><option value="AYT Matematik">📈 AYT Matematik</option><option value="AYT Fizik">⚛️ AYT Fizik</option><option value="Paragraf">📝 Paragraf</option><option value="Genel Deneme">⏱️ Genel Deneme</option></select>
+        <div class="mode-container"><button id="modeNormal" class="mode-btn mode-active" onclick="setMode('normal')">⏳ Kronometre</button><button id="modePomo" class="mode-btn mode-passive" onclick="setMode('pomodoro')">🍅 Pomodoro</button><input type="number" id="pomoInput" value="25" min="1" max="120" title="Dakika" style="width: 65px; padding: 10px; border-radius: 12px; border: 2px solid #e2e8f0; font-weight: 900; font-size: 16px; outline: none; text-align: center; display: none; color: #ef4444;"></div>
         <div id="display">00:00:00</div>
-        <div class="buttons">
-            <button id="startBtn" class="action-btn" onclick="startTimer()">▶ Başla</button>
-            <button id="pauseBtn" class="action-btn" onclick="pauseTimer()">⏸ Mola Ver</button>
-        </div>
+        <div class="buttons"><button id="startBtn" class="action-btn" onclick="startTimer()">▶ Başla</button><button id="pauseBtn" class="action-btn" onclick="pauseTimer()">⏸ Mola Ver</button></div>
         <div id="statusText"></div>
-        <div class="task-board" id="taskBoard">
-            <h3>🎯 Hedef Görevler</h3>
-            <div id="studentTaskList"></div>
-        </div>
+        <div class="task-board" id="taskBoard"><h3>🎯 Hedef Görevler</h3><div id="studentTaskList"></div></div>
     </div>
 
-    <div class="modal" id="kutuphaneModal">
+    <div class="modal" id="duelloModal">
         <div class="modal-content">
-            <h2 style="color:#8b5cf6; margin-top:0;">📚 Kütüphanem</h2>
-            <p style="font-size:13px; color:#64748b;">Koçunun paylaştığı PDF ve linkler</p>
-            <div id="kaynakListesi" style="margin-bottom: 15px;">
-                <div style="color: #94a3b8; font-style: italic;">Henüz kaynak eklenmemiş.</div>
-            </div>
-            <button onclick="document.getElementById('kutuphaneModal').style.display='none'" style="padding:10px; background:#e2e8f0; border:none; border-radius:10px; font-weight:bold; width:100%; cursor:pointer;">Kapat</button>
+            <h2 style="color:#ef4444; margin-top:0;">⚔️ SincApp Düello Arenası</h2>
+            <p style="font-size:13px; color:#64748b; font-weight:bold;">Sınıftaki arkadaşlarına meydan oku! İlk görevi bitiren 50 XP kazanır.</p>
+            <div id="duelloSinifListesi" style="margin-bottom: 15px; text-align: left; background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; max-height: 200px; overflow-y:auto;">
+                </div>
+            <button onclick="document.getElementById('duelloModal').style.display='none'" style="padding:10px; background:#e2e8f0; border:none; border-radius:10px; font-weight:bold; width:100%; cursor:pointer;">Kapat</button>
         </div>
     </div>
 
+    <div class="modal" id="duelloIstekModal">
+        <div class="modal-content" style="border: 4px solid #ef4444;">
+            <h1 style="font-size: 50px; margin: 0;">⚔️</h1>
+            <h2 style="color:#ef4444; margin-top:0;">MEYDAN OKUMA!</h2>
+            <p id="duelloIstekMetni" style="font-weight:bold; font-size:16px;">[İsim] sana meydan okuyor!</p>
+            <p style="color:#64748b; font-size:13px;">Kabul edersen ilk görevi bitiren 50 XP'yi kapar.</p>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button onclick="duelloKabulEt()" style="flex:1; background:#10b981; color:white; border:none; padding:12px; border-radius:10px; font-weight:bold; cursor:pointer;">Kabul Et</button>
+                <button onclick="document.getElementById('duelloIstekModal').style.display='none'" style="flex:1; background:#ef4444; color:white; border:none; padding:12px; border-radius:10px; font-weight:bold; cursor:pointer;">Reddet</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="avatarModal">
+        <div class="modal-content">
+            <h3 style="margin:0 0 10px 0;">Avatar Seç</h3>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom: 20px;">
+                <div style="font-size:35px; cursor:pointer;" onclick="avatarSec('👤')">👤</div><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('👨‍🎓')">👨‍🎓</div><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('👩‍🎓')">👩‍🎓</div><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('🥷')">🥷</div><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('🦸‍♂️')">🦸‍♂️</div><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('🦸‍♀️')">🦸‍♀️</div><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('🧙‍♂️')">🧙‍♂️</div><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('👩‍🚀')">👩‍🚀</div>
+            </div>
+            <div style="background: #fef3c7; padding: 15px; border-radius: 12px; border: 2px dashed #f59e0b;">
+                <p style="margin:0; font-size:12px; font-weight:bold; color:#d97706;">👨‍👩‍👧‍👦 Ailen için Veli Takip Kodun:</p>
+                <h2 id="veliKoduGosterge" style="margin:5px 0 0 0; color:#b45309; letter-spacing: 2px;">V-XXXX</h2>
+            </div>
+            <button onclick="document.getElementById('avatarModal').style.display='none'" style="margin-top:15px; padding:10px; background:#e2e8f0; border:none; border-radius:10px; font-weight:bold; width:100%; cursor:pointer;">Kapat</button>
+        </div>
+    </div>
+
+    <div class="modal" id="kutuphaneModal"><div class="modal-content"><h2 style="color:#8b5cf6; margin-top:0;">📚 Kütüphanem</h2><div id="kaynakListesi" style="margin-bottom: 15px;"><div style="color: #94a3b8; font-style: italic;">Henüz kaynak eklenmemiş.</div></div><button onclick="document.getElementById('kutuphaneModal').style.display='none'" style="padding:10px; background:#e2e8f0; border:none; border-radius:10px; font-weight:bold; width:100%; cursor:pointer;">Kapat</button></div></div>
     <div class="modal" id="marketModal"><div class="modal-content"><h2 style="color:#d97706; margin-top:0;">🛒 SincApp Market</h2><p style="font-size:14px; font-weight:bold; color:#64748b;">Mevcut XP: <span id="marketXpDisplay" style="color:#4f46e5; font-size:18px;">0</span></p><div class="market-item"><span>15 Dk Ekstra Mola</span><button class="buy-btn" onclick="odulAl('15 Dk Ekstra Mola', 1000)">1000 XP</button></div><div class="market-item"><span>Özel Soru Çözüm Saati</span><button class="buy-btn" onclick="odulAl('Özel Soru Çözüm Saati', 3000)">3000 XP</button></div><div class="market-item"><span>☕ Koçtan Kahve</span><button class="buy-btn" onclick="odulAl('Koçtan Kahve Ismarlama', 5000)">5000 XP</button></div><button onclick="document.getElementById('marketModal').style.display='none'" style="margin-top:15px; padding:10px; background:#e2e8f0; border:none; border-radius:10px; font-weight:bold; width:100%; cursor:pointer;">Kapat</button></div></div>
     <div class="modal" id="netModal"><div class="modal-content"><h2 style="color:#3b82f6; margin-top:0;">📈 Deneme Neti Gir</h2><select id="sinavTuru" class="select-box" style="margin-bottom:10px;"><option value="TYT Denemesi">TYT Genel</option><option value="AYT Denemesi">AYT Genel</option><option value="LGS Denemesi">LGS Genel</option></select><input type="number" id="netSkoru" placeholder="Örn: 75.5" step="0.25" class="select-box" style="text-align:center; font-size:24px;"><button onclick="netKaydet()" class="action-btn" style="background:#10b981; width:100%; margin-top:10px;">Neti Sisteme Gönder</button><button onclick="document.getElementById('netModal').style.display='none'" style="margin-top:10px; padding:10px; background:#e2e8f0; border:none; border-radius:10px; font-weight:bold; width:100%; cursor:pointer;">Kapat</button></div></div>
-    <div class="modal" id="avatarModal"><div class="modal-content" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"><h3 style="width:100%; margin:0 0 10px 0;">Avatar Seç</h3><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('👤')">👤</div><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('👨‍🎓')">👨‍🎓</div><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('👩‍🎓')">👩‍🎓</div><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('🥷')">🥷</div><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('🦸‍♂️')">🦸‍♂️</div><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('🦸‍♀️')">🦸‍♀️</div><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('🧙‍♂️')">🧙‍♂️</div><div style="font-size:35px; cursor:pointer;" onclick="avatarSec('👩‍🚀')">👩‍🚀</div></div></div>
-    
-    <div style="position: fixed; bottom: 20px; left: 20px; width: 320px; background: white; border-radius: 16px; box-shadow: 0 10px 35px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; z-index: 1000; font-family: 'Nunito', sans-serif;">
-        <div style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; padding: 15px; font-weight: 900; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleBot()"><span>🐿️ SincApp AI Koçum</span></div>
-        <div id="botBody" style="height: 300px; background: #f8fafc; padding: 15px; overflow-y: auto; display: none; flex-direction: column;"><div style="align-self: flex-start; background: #e2e8f0; color: #1e293b; padding: 10px 14px; border-radius: 14px; font-size: 13px; max-width: 80%; line-height: 1.4; margin-bottom: 10px; font-weight: 700;"><div style="font-size: 10px; font-weight: 900; margin-bottom: 4px; opacity: 0.8;">🐿️ SincApp AI</div>Merhaba! Ben senin özel AI Asistanınım.</div></div>
-        <div id="botFooter" style="padding: 10px; background: white; border-top: 1px solid #e2e8f0; display: none; gap: 8px;"><input type="text" id="botInput" placeholder="Sistem nasıl, taktik ver..." style="flex: 1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; font-family: inherit;" onkeypress="if(event.key === 'Enter') botMesajGonder()"><button onclick="botMesajGonder()" style="background: #8b5cf6; color: white; border: none; padding: 12px 18px; border-radius: 10px; cursor: pointer; font-weight: 800; font-family: inherit;">Sor</button></div>
-    </div>
 
     <div style="position: fixed; bottom: 20px; right: 20px; width: 320px; background: white; border-radius: 16px; box-shadow: 0 10px 35px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; z-index: 1000; font-family: 'Nunito', sans-serif;">
         <div style="background: #4f46e5; color: white; padding: 15px; font-weight: 900; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleChat()"><span>💬 Sınıf Sohbeti</span><span id="chatUyari" style="background: #ef4444; color: white; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; font-size: 12px;">!</span></div>
         <div id="chatBody" style="height: 300px; background: #f8fafc; padding: 15px; overflow-y: auto; display: none; flex-direction: column;"></div>
         <div id="chatFooter" style="padding: 10px; background: white; border-top: 1px solid #e2e8f0; display: none; gap: 8px; align-items: center;"><input type="file" id="resimInput" accept="image/*" style="display: none;" onchange="resimGonder(this)"><button onclick="document.getElementById('resimInput').click()" style="background: none; border: none; font-size: 22px; cursor: pointer; padding: 0;" title="Fotoğraf Gönder">📎</button><input type="text" id="chatInput" placeholder="Sınıfa yaz..." style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-family: inherit;" onkeypress="if(event.key === 'Enter') mesajGonder()"><button onclick="mesajGonder()" style="background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: inherit;">Gönder</button></div>
     </div>
-    
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io(); const aktifOgrenci = localStorage.getItem('ogrenciKimligi'); const kocKodu = localStorage.getItem('kocKodu');
+        const socket = io(); const aktifOgrenci = localStorage.getItem('ogrenciKimligi'); const kocKodu = localStorage.getItem('kocKodu'); const veliKodu = localStorage.getItem('veliKodu');
         socket.emit('join_room', kocKodu);
         
-        let anlikXp = 0;
-        const display = document.getElementById('display'), startBtn = document.getElementById('startBtn'), pauseBtn = document.getElementById('pauseBtn');
+        document.getElementById('veliKoduGosterge').innerText = veliKodu || 'V-XXXX';
+
+        // 🎧 Lofi Radyo Mantığı
+        function radyoKapat() { document.getElementById('radyoLofi').pause(); document.getElementById('radyoYagmur').pause(); document.getElementById('radyoKafe').pause(); document.querySelectorAll('.radyo-btn').forEach(b => b.classList.remove('aktif')); }
+        window.radyoCal = function(tur) {
+            radyoKapat(); document.getElementById('btn' + tur).classList.add('aktif');
+            let audio = document.getElementById('radyo' + tur); audio.volume = 0.5; audio.play().catch(e=>alert("Tarayıcınız otomatik müziği engelledi."));
+        };
+
+        // ⚔️ Düello Mantığı
+        let bekleyenDuelloRakip = '';
+        window.duelloAt = function(hedefIsim) {
+            if(hedefIsim === aktifOgrenci) return alert("Kendine meydan okuyamazsın!");
+            if(confirm(`${hedefIsim} isimli arkadaşına 50 XP'sine meydan okumak istiyor musun?`)) {
+                socket.emit('duello_teklif_et', { gonderen: aktifOgrenci, hedef: hedefIsim, miktar: 50, kocKodu: kocKodu });
+                alert("Meydan okuma gönderildi! Bekleniyor..."); document.getElementById('duelloModal').style.display = 'none';
+            }
+        };
+
+        socket.on('duello_istegi_geldi', (veri) => {
+            if(veri.hedef === aktifOgrenci) {
+                bekleyenDuelloRakip = veri.gonderen; document.getElementById('duelloIstekMetni').innerText = `${veri.gonderen} sana 50 XP'sine meydan okuyor!`;
+                document.getElementById('duelloIstekModal').style.display = 'flex'; sesCal();
+            }
+        });
+
+        window.duelloKabulEt = function() {
+            socket.emit('duello_kabul_edildi', { gonderen: bekleyenDuelloRakip, hedef: aktifOgrenci, miktar: 50, kocKodu: kocKodu });
+            document.getElementById('duelloIstekModal').style.display = 'none';
+        };
+
+        socket.on('duello_basladi', (veri) => {
+            if(veri.o1 === aktifOgrenci || veri.o2 === aktifOgrenci) { alert("⚔️ DÜELLO BAŞLADI! İlk görevi bitiren kazanır!"); sesCal(); }
+        });
+
+        socket.on('duello_sonucu', (veri) => {
+            if(veri.kazanan === aktifOgrenci) { alert(`🏆 TEBRİKLER! Düelloyu sen kazandın. +${veri.miktar} XP`); sesCal(); }
+            else if(veri.kaybeden === aktifOgrenci) { alert(`💀 MAALESEF! Düelloyu ${veri.kazanan} kazandı. -${veri.miktar} XP kaybettin.`); }
+        });
+
+        // Diğer Fonksiyonlar
+        let anlikXp = 0; const display = document.getElementById('display'), startBtn = document.getElementById('startBtn'), pauseBtn = document.getElementById('pauseBtn');
         let tInterval, running = localStorage.getItem(`${aktifOgrenci}_running`) === 'true', mode = localStorage.getItem(`${aktifOgrenci}_mode`) || 'normal';
         document.getElementById('mainTitle').innerHTML = `Hoş Geldin, ${aktifOgrenci}! 🎯`;
         
@@ -116,47 +181,39 @@
         function getDers() { return document.getElementById('dersSecimi').value; }
         function unvanHesapla(xp) { return xp >= 300 ? '🏆 Efsane' : xp >= 150 ? '🔥 Odak Ustası' : xp >= 50 ? '⚡ Çalışkan' : '🌱 Çaylak'; }
 
-        // 📚 Kütüphane Yükleme
-        function kaynaklariCiz(liste) {
-            let kutu = document.getElementById('kaynakListesi'); kutu.innerHTML = '';
-            if(liste.length === 0) { kutu.innerHTML = '<div style="color: #94a3b8; font-style: italic;">Henüz kaynak eklenmemiş.</div>'; return; }
-            liste.forEach(k => {
-                kutu.innerHTML += `<div class="kaynak-item">${k.baslik} <span style="font-size:10px; color:#94a3b8; font-weight:normal;">(${k.tarih})</span><a href="${k.url}" target="_blank">🔗 Kaynağa Git</a></div>`;
-            });
-        }
-        socket.on('kaynaklari_yukle', (liste) => { kaynaklariCiz(liste); });
+        socket.on('kaynaklari_yukle', (liste) => { let kutu = document.getElementById('kaynakListesi'); kutu.innerHTML = ''; if(liste.length === 0) { kutu.innerHTML = '<div style="color: #94a3b8; font-style: italic;">Henüz kaynak yok.</div>'; return; } liste.forEach(k => { kutu.innerHTML += `<div class="kaynak-item">${k.baslik} <a href="${k.url}" target="_blank">🔗 Kaynağa Git</a></div>`; }); });
         socket.on('yeni_kaynak_eklendi', (kaynak) => { sesCal(); socket.emit('join_room', kocKodu); });
 
         window.avatarSec = function(ikon) { document.getElementById('aktifAvatar').innerHTML = ikon; document.getElementById('avatarModal').style.display = 'none'; socket.emit('avatar_guncelle', { ogrenciAd: aktifOgrenci, avatar: ikon, kocKodu: kocKodu }); };
-        window.netKaydet = function() { let tur = document.getElementById('sinavTuru').value; let net = document.getElementById('netSkoru').value; if(!net) return alert("Lütfen netinizi girin!"); socket.emit('net_ekle', { ogrenciAd: aktifOgrenci, sinavTuru: tur, netSkoru: Number(net), kocKodu: kocKodu }); document.getElementById('netSkoru').value = ''; document.getElementById('netModal').style.display = 'none'; alert("Netiniz Koçunuza iletildi! 🚀"); };
-        window.odulAl = function(odulIsmi, bedel) { if(anlikXp < bedel) return alert(`Yetersiz XP! ${bedel} XP gerekiyor.`); if(confirm(`${odulIsmi} ödülünü ${bedel} XP karşılığında almak istiyor musun?`)) { socket.emit('odul_satin_al', { ogrenciAd: aktifOgrenci, odul: odulIsmi, bedel: bedel, kocKodu: kocKodu }); alert("Siparişin iletildi! 🎉"); document.getElementById('marketModal').style.display = 'none'; } };
+        window.netKaydet = function() { let tur = document.getElementById('sinavTuru').value; let net = document.getElementById('netSkoru').value; if(!net) return; socket.emit('net_ekle', { ogrenciAd: aktifOgrenci, sinavTuru: tur, netSkoru: Number(net), kocKodu: kocKodu }); document.getElementById('netSkoru').value = ''; document.getElementById('netModal').style.display = 'none'; alert("Netiniz iletildi! 🚀"); };
+        window.odulAl = function(odulIsmi, bedel) { if(anlikXp < bedel) return alert("Yetersiz XP!"); if(confirm(`${odulIsmi} almak istiyor musun?`)) { socket.emit('odul_satin_al', { ogrenciAd: aktifOgrenci, odul: odulIsmi, bedel: bedel, kocKodu: kocKodu }); document.getElementById('marketModal').style.display = 'none'; } };
 
-        function gostergeyiGuncelle(sureMs) {
-            if(mode === 'normal') { let hours = Math.floor((sureMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)), minutes = Math.floor((sureMs % (1000 * 60 * 60)) / (1000 * 60)), seconds = Math.floor((sureMs % (1000 * 60)) / 1000); display.innerHTML = (hours < 10 ? "0"+hours : hours) + ":" + (minutes < 10 ? "0"+minutes : minutes) + ":" + (seconds < 10 ? "0"+seconds : seconds); return false; } 
-            else { let val = parseInt(document.getElementById('pomoInput').value) || 25, kalan = (val * 60 * 1000) - sureMs; if(kalan <= 0) { display.innerHTML = "00:00"; return true; } let minutes = Math.floor((kalan % (1000 * 60 * 60)) / (1000 * 60)), seconds = Math.floor((kalan % (1000 * 60)) / 1000); display.innerHTML = (minutes < 10 ? "0"+minutes : minutes) + ":" + (seconds < 10 ? "0"+seconds : seconds); return false; }
-        }
+        function gostergeyiGuncelle(sureMs) { if(mode === 'normal') { let hours = Math.floor((sureMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)), minutes = Math.floor((sureMs % (1000 * 60 * 60)) / (1000 * 60)), seconds = Math.floor((sureMs % (1000 * 60)) / 1000); display.innerHTML = (hours < 10 ? "0"+hours : hours) + ":" + (minutes < 10 ? "0"+minutes : minutes) + ":" + (seconds < 10 ? "0"+seconds : seconds); return false; } else { let val = parseInt(document.getElementById('pomoInput').value) || 25, kalan = (val * 60 * 1000) - sureMs; if(kalan <= 0) { display.innerHTML = "00:00"; return true; } let minutes = Math.floor((kalan % (1000 * 60 * 60)) / (1000 * 60)), seconds = Math.floor((kalan % (1000 * 60)) / 1000); display.innerHTML = (minutes < 10 ? "0"+minutes : minutes) + ":" + (seconds < 10 ? "0"+seconds : seconds); return false; } }
 
         window.setMode = function(m) { if(running) return; mode = m; localStorage.setItem(`${aktifOgrenci}_mode`, m); document.getElementById('modeNormal').className = m === 'normal' ? 'mode-btn mode-active' : 'mode-btn mode-passive'; document.getElementById('modePomo').className = m === 'pomodoro' ? 'mode-btn mode-active' : 'mode-btn mode-passive'; if(m === 'pomodoro') { document.getElementById('pomoInput').style.display = 'block'; } else { document.getElementById('pomoInput').style.display = 'none'; } };
-
-        function startTimer() {
-            if (!running) { localStorage.setItem(`${aktifOgrenci}_startTime`, new Date().getTime()); localStorage.setItem(`${aktifOgrenci}_running`, 'true'); localStorage.setItem(`${aktifOgrenci}_activeDers`, getDers()); tInterval = setInterval(() => { let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0); if (gostergeyiGuncelle(diff) && mode === 'pomodoro') { sesCal(); pauseTimer(true); } socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML, kocKodu: kocKodu }); }, 1000); running = true; startBtn.style.display = 'none'; pauseBtn.style.display = 'block'; document.getElementById('statusText').innerHTML = "🟢 Odak modu aktif!"; socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: mode === 'pomodoro' ? 'Pomodoro Başlattı!' : 'Kronometre Başlattı!', kocKodu: kocKodu }); }
-        }
-
-        function pauseTimer(otomatikMi = false) {
-            if (running) { clearInterval(tInterval); let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0); localStorage.setItem(`${aktifOgrenci}_${getDers()}_savedTime`, otomatikMi && mode === 'pomodoro' ? 0 : diff); socket.emit('istatistik_guncelle', { ogrenciAd: aktifOgrenci, ders: getDers(), ms: diff, kocKodu: kocKodu }); localStorage.setItem(`${aktifOgrenci}_running`, 'false'); running = false; pauseBtn.style.display = 'none'; startBtn.style.display = 'block'; startBtn.innerHTML = otomatikMi ? "▶ Başla" : "▶ Devam Et"; document.getElementById('statusText').innerHTML = otomatikMi ? "🎉 Pomodoro Bitti!" : "⏸️ Mola Verildi."; socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: otomatikMi ? 'Pomodoro Bitti, Molada.' : 'Mola verdi, durdurdu.', kocKodu: kocKodu }); }
-        }
+        function startTimer() { if (!running) { localStorage.setItem(`${aktifOgrenci}_startTime`, new Date().getTime()); localStorage.setItem(`${aktifOgrenci}_running`, 'true'); localStorage.setItem(`${aktifOgrenci}_activeDers`, getDers()); tInterval = setInterval(() => { let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0); if (gostergeyiGuncelle(diff) && mode === 'pomodoro') { sesCal(); pauseTimer(true); } socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML, kocKodu: kocKodu }); }, 1000); running = true; startBtn.style.display = 'none'; pauseBtn.style.display = 'block'; document.getElementById('statusText').innerHTML = "🟢 Odak modu aktif!"; socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: mode === 'pomodoro' ? 'Pomodoro Başlattı!' : 'Kronometre Başlattı!', kocKodu: kocKodu }); } }
+        function pauseTimer(otomatikMi = false) { if (running) { clearInterval(tInterval); let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0); localStorage.setItem(`${aktifOgrenci}_${getDers()}_savedTime`, otomatikMi && mode === 'pomodoro' ? 0 : diff); socket.emit('istatistik_guncelle', { ogrenciAd: aktifOgrenci, ders: getDers(), ms: diff, kocKodu: kocKodu }); localStorage.setItem(`${aktifOgrenci}_running`, 'false'); running = false; pauseBtn.style.display = 'none'; startBtn.style.display = 'block'; startBtn.innerHTML = otomatikMi ? "▶ Başla" : "▶ Devam Et"; document.getElementById('statusText').innerHTML = otomatikMi ? "🎉 Pomodoro Bitti!" : "⏸️ Mola Verildi."; socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: otomatikMi ? 'Pomodoro Bitti, Molada.' : 'Mola verdi, durdurdu.', kocKodu: kocKodu }); } }
 
         socket.on('gorev_guncellendi', (tumVeriler) => {
+            // Düello listesi oluştur
+            let duelloDiv = document.getElementById('duelloSinifListesi'); duelloDiv.innerHTML = '';
+            tumVeriler.forEach(o => { if(o.ogrenciAd !== aktifOgrenci) { duelloDiv.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #cbd5e1;"><span>${o.avatar || '👤'} <b>${o.ogrenciAd}</b></span> <button class="duel-btn" onclick="duelloAt('${o.ogrenciAd}')">Meydan Oku</button></div>`; } });
+
             let benimVerim = tumVeriler.find(v => v.ogrenciAd === aktifOgrenci);
             if (benimVerim) {
                 anlikXp = benimVerim.xp || 0; document.getElementById('marketXpDisplay').innerText = anlikXp;
                 if(benimVerim.avatar) document.getElementById('aktifAvatar').innerHTML = benimVerim.avatar;
-                let xpBadge = document.getElementById('xpBadge');
-                if (!xpBadge) { xpBadge = document.createElement('div'); xpBadge.id = 'xpBadge'; xpBadge.style.cssText = "position:absolute; top:20px; left:20px; color:white; padding:8px 15px; border-radius:20px; font-weight:800; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.2);"; document.body.appendChild(xpBadge); }
+                let xpBadge = document.getElementById('xpBadge'); if (!xpBadge) { xpBadge = document.createElement('div'); xpBadge.id = 'xpBadge'; xpBadge.style.cssText = "position:absolute; top:20px; left:20px; color:white; padding:8px 15px; border-radius:20px; font-weight:800; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.2);"; document.body.appendChild(xpBadge); }
                 let sirali = tumVeriler.sort((a,b) => (b.xp||0) - (a.xp||0)), benimSira = sirali.findIndex(v => v.ogrenciAd === aktifOgrenci);
                 let ligIsmi = 'Henüz Lige Giremedi', ligRengi = '#94a3b8', anaRenk = '#64748b';
                 if(benimSira !== -1 && benimVerim.xp > 0) { if(benimSira < 3) { ligIsmi = '🏆 Süper Lig'; ligRengi = '#fef3c7'; anaRenk = '#f59e0b'; } else if(benimSira < 8) { ligIsmi = '🥇 1. Lig'; ligRengi = '#f1f5f9'; anaRenk = '#64748b'; } else { ligIsmi = '🪵 Amatör Lig'; ligRengi = '#ffedd5'; anaRenk = '#d97706'; } }
                 xpBadge.style.background = anaRenk; xpBadge.innerHTML = `<span style="background:${ligRengi}; color:${anaRenk}; padding:4px 8px; border-radius:10px; margin-right:6px;">${ligIsmi}</span> ${unvanHesapla(anlikXp)} | ${anlikXp} XP`;
+                
+                // Eğer düellodaysa uyarı ver
+                if(benimVerim.aktifDuello && benimVerim.aktifDuello.rakip) {
+                    xpBadge.innerHTML += `<div style="background:#ef4444; color:white; padding:4px; border-radius:6px; margin-top:5px; font-size:11px; text-align:center; animation: zippla 1s infinite;">⚔️ ${benimVerim.aktifDuello.rakip} ile Düelloda!</div>`;
+                }
+
                 if (benimVerim.gorevler && benimVerim.gorevler.length > 0) { document.getElementById('taskBoard').style.display = 'block'; let taskList = document.getElementById('studentTaskList'); taskList.innerHTML = ''; benimVerim.gorevler.forEach(gorev => { let textStil = gorev.tamamlandi ? "text-decoration: line-through; color: #94a3b8;" : "color: #334155; font-weight: 800;"; let sagKisim = gorev.tamamlandi ? `<span style="color: #10b981; font-weight: 800;">✅ Bitti</span>` : `<button class="finish-btn" onclick="goreviBitir(${gorev.id})">Bitir (+10 XP)</button>`; taskList.innerHTML += `<div class="task-item"><span style="${textStil}">${gorev.metin}</span>${sagKisim}</div>`; }); }
             }
         });
@@ -164,13 +221,10 @@
 
         window.toggleChat = function() { const body = document.getElementById('chatBody'), footer = document.getElementById('chatFooter'), uyari = document.getElementById('chatUyari'); if(body.style.display === 'flex') { body.style.display = 'none'; footer.style.display = 'none'; } else { body.style.display = 'flex'; footer.style.display = 'flex'; uyari.style.display = 'none'; body.scrollTop = body.scrollHeight; } };
         window.mesajGonder = function() { const input = document.getElementById('chatInput'); if(input.value.trim() !== '') { socket.emit('chat_mesaji_gonder', { gonderen: aktifOgrenci, mesaj: input.value, rol: 'ogrenci', kocKodu: kocKodu }); input.value = ''; } };
-        window.resimGonder = function(input) { if(input.files && input.files[0]) { const file = input.files[0]; if(file.size > 2.5 * 1024 * 1024) return alert("Resim çok büyük! Lütfen 2.5MB'den küçük seçin."); const reader = new FileReader(); reader.onload = function(e) { socket.emit('chat_mesaji_gonder', { gonderen: aktifOgrenci, mesaj: e.target.result, rol: 'ogrenci', tip: 'resim', kocKodu: kocKodu }); input.value = ''; }; reader.readAsDataURL(file); } };
+        window.resimGonder = function(input) { if(input.files && input.files[0]) { const file = input.files[0]; if(file.size > 2.5 * 1024 * 1024) return alert("Resim çok büyük!"); const reader = new FileReader(); reader.onload = function(e) { socket.emit('chat_mesaji_gonder', { gonderen: aktifOgrenci, mesaj: e.target.result, rol: 'ogrenci', tip: 'resim', kocKodu: kocKodu }); input.value = ''; }; reader.readAsDataURL(file); } };
         function chatEkranaBas(veri) { const body = document.getElementById('chatBody'); let benMiyim = (veri.gonderen === aktifOgrenci), renk = benMiyim ? '#10b981' : '#e2e8f0', yaziRengi = benMiyim ? 'white' : '#1e293b', hizalama = benMiyim ? 'flex-end' : 'flex-start', ikon = veri.rol === 'koc' ? '👨‍🏫' : '💬'; let icerik = veri.tip === 'resim' ? `<img src="${veri.mesaj}" style="max-width: 100%; border-radius: 8px; margin-top: 5px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="window.open('${veri.mesaj}', '_blank')">` : veri.mesaj; body.innerHTML += `<div style="align-self: ${hizalama}; background: ${renk}; color: ${yaziRengi}; padding: 10px 14px; border-radius: 14px; font-size: 13px; max-width: 80%; line-height: 1.4; margin-bottom: 10px; font-weight: 700;"><div style="font-size: 10px; font-weight: 900; margin-bottom: 4px; opacity: 0.8;">${ikon} ${veri.gonderen} • ${veri.saat}</div>${icerik}</div>`; body.scrollTop = body.scrollHeight; }
         socket.on('eski_chat_yukle', (gecmis) => { document.getElementById('chatBody').innerHTML = ''; gecmis.forEach(msg => chatEkranaBas(msg)); });
         socket.on('yeni_chat_mesaji', (msg) => { chatEkranaBas(msg); const body = document.getElementById('chatBody'); if(msg.gonderen !== aktifOgrenci) { sesCal(); if(body.style.display !== 'flex') document.getElementById('chatUyari').style.display = 'flex'; } });
-        window.toggleBot = function() { const body = document.getElementById('botBody'), footer = document.getElementById('botFooter'); if(body.style.display === 'flex') { body.style.display = 'none'; footer.style.display = 'none'; } else { body.style.display = 'flex'; footer.style.display = 'flex'; body.scrollTop = body.scrollHeight; } };
-        window.botMesajGonder = function() { const input = document.getElementById('botInput'); let mesajMetni = input.value.trim(); if(mesajMetni !== '') { const body = document.getElementById('botBody'); body.innerHTML += `<div style="align-self: flex-end; background: #8b5cf6; color: white; padding: 10px 14px; border-radius: 14px; font-size: 13px; max-width: 80%; line-height: 1.4; margin-bottom: 10px; font-weight: 700;">${mesajMetni}</div>`; body.scrollTop = body.scrollHeight; socket.emit('ogrenci_chatbot_mesaji', { ogrenciAd: aktifOgrenci, mesaj: mesajMetni, ders: document.getElementById('dersSecimi').value, kocKodu: kocKodu }); input.value = ''; } };
-        socket.on('chatbot_cevabi', (cevapMetni) => { sesCal(); const body = document.getElementById('botBody'); body.innerHTML += `<div style="align-self: flex-start; background: #e2e8f0; color: #1e293b; padding: 10px 14px; border-radius: 14px; font-size: 13px; max-width: 80%; line-height: 1.4; margin-bottom: 10px; font-weight: 700;"><div style="font-size: 10px; font-weight: 900; margin-bottom: 4px; opacity: 0.8;">🤖 SincApp AI</div>${cevapMetni}</div>`; body.scrollTop = body.scrollHeight; });
     </script>
 </body>
 </html>

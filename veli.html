@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SincApp - Veli Portalı</title>
+    <script>if (!localStorage.getItem('veliKimligi')) window.location.href = 'veli-login.html';</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f8fafc; padding: 20px; color: #334155; margin: 0; }
+        .header { margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
+        .header h1 { margin: 0; color: #1e293b; font-size: 24px; }
+        .box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid #f59e0b;}
+        .live-status { font-size: 24px; font-weight: 900; color: #10b981; display: flex; align-items: center; gap: 10px;}
+        .pulse-dot { width: 15px; height: 15px; border-radius: 50%; background: #10b981; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        .chart-container { position: relative; height: 250px; width: 100%; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px;}
+        .stat-card { background: #f1f5f9; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold;}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 id="veliKarsilama">👨‍👩‍👧‍👦 Veli Portalı</h1>
+        <button onclick="localStorage.clear(); window.location.href='veli-login.html'" style="background:#ef4444; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">Çıkış</button>
+    </div>
+
+    <div class="box">
+        <h2 style="margin-top:0; color:#475569;">Canlı Durum: <span id="ogrIsim" style="color:#4f46e5;">Öğrenci</span></h2>
+        <div class="live-status" id="canliDurumKutusu"><div class="pulse-dot"></div> <span id="canliAktivite">Derse girmesi bekleniyor...</span></div>
+        <p id="canliMesaj" style="color:#64748b; font-weight:bold;"></p>
+        <div style="font-size: 40px; font-weight: 900; color: #4f46e5; margin-top: 10px;" id="sureGosterge">00:00:00</div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="box" style="margin:0;">
+            <h3 style="margin-top:0;">🌟 XP ve Lig</h3>
+            <div class="stat-card" style="background:#fef3c7; color:#d97706; font-size:20px;" id="veliXp">0 XP</div>
+            <div class="stat-card" style="margin-top:10px; background:#e0e7ff; color:#4f46e5;" id="veliLig">Hesaplanıyor...</div>
+        </div>
+        <div class="box" style="margin:0;">
+            <h3 style="margin-top:0;">📈 Net Gelişimi</h3>
+            <div class="chart-container"><canvas id="netGrafigi"></canvas></div>
+        </div>
+    </div>
+
+    <script>
+        const ogrAd = localStorage.getItem('veliKimligi'); const kocKodu = localStorage.getItem('kocKodu');
+        document.getElementById('ogrIsim').innerText = ogrAd;
+        const socket = io(); socket.emit('join_room', kocKodu);
+        let lineGrafikObjesi = null;
+
+        function unvanHesapla(xp) { return xp >= 300 ? '🏆 Efsane' : xp >= 150 ? '🔥 Odak Ustası' : xp >= 50 ? '⚡ Çalışkan' : '🌱 Çaylak'; }
+
+        socket.on('gorev_guncellendi', (tumVeriler) => {
+            let benimVerim = tumVeriler.find(v => v.ogrenciAd === ogrAd);
+            if(benimVerim) {
+                document.getElementById('veliXp').innerText = `${benimVerim.xp || 0} XP`;
+                
+                let sirali = tumVeriler.sort((a,b) => (b.xp||0) - (a.xp||0)); let sira = sirali.findIndex(v => v.ogrenciAd === ogrAd);
+                if(sira !== -1 && benimVerim.xp > 0) {
+                    if(sira < 3) document.getElementById('veliLig').innerText = `🏆 Süper Lig (${sira+1}. Sırada)`;
+                    else if(sira < 8) document.getElementById('veliLig').innerText = `🥇 1. Lig (${sira+1}. Sırada)`;
+                    else document.getElementById('veliLig').innerText = `🪵 Amatör Lig`;
+                } else { document.getElementById('veliLig').innerText = `Henüz Lige Giremedi`; }
+
+                if(benimVerim.netler && benimVerim.netler.length > 0) {
+                    let etiketler = benimVerim.netler.map(n => n.tarih); let veriler = benimVerim.netler.map(n => n.net);
+                    if(lineGrafikObjesi) { lineGrafikObjesi.data.labels = etiketler; lineGrafikObjesi.data.datasets[0].data = veriler; lineGrafikObjesi.update(); } 
+                    else { lineGrafikObjesi = new Chart(document.getElementById('netGrafigi').getContext('2d'), { type: 'line', data: { labels: etiketler, datasets: [{ label: 'Net', data: veriler, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
+                }
+            }
+        });
+
+        socket.on('ogretmene_sure_guncelle', (veri) => { if(veri.ogrenciAd === ogrAd) document.getElementById('sureGosterge').innerText = veri.sure; });
+        socket.on('ogretmene_canli_bildirim', (veri) => {
+            if(veri.ogrenciAd === ogrAd) {
+                let molaMi = veri.mesaj && veri.mesaj.includes('Mola');
+                let kutu = document.getElementById('canliDurumKutusu');
+                if(molaMi) { kutu.style.color = '#f59e0b'; kutu.querySelector('.pulse-dot').style.background = '#f59e0b'; document.getElementById('canliAktivite').innerText = 'MOLA VERDİ'; } 
+                else { kutu.style.color = '#10b981'; kutu.querySelector('.pulse-dot').style.background = '#10b981'; document.getElementById('canliAktivite').innerText = 'CANLI ÇALIŞIYOR'; }
+                document.getElementById('canliMesaj').innerText = `${veri.ders} ➔ ${veri.mesaj}`;
+            }
+        });
+    </script>
+</body>
+</html>
