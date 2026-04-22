@@ -10,28 +10,34 @@ const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" }, maxHttpBufferSize: 1e8 }); 
 
 const mongoURI = 'mongodb+srv://alptug:alptug123@cluster0.djt56xg.mongodb.net/EgitimKocuDB?retryWrites=true&w=majority';
-
 mongoose.connect(mongoURI).then(() => console.log('🫀 MongoDB Bağlantısı Başarılı!')).catch(err => console.log('❌ Veritabanı Hatası:', err));
 
-// 🏢 YENİ: Öğretmen Veritabanı
 const ogretmenSchema = new mongoose.Schema({ kocAd: String, sifre: String, kocKodu: String });
 const Ogretmen = mongoose.model('Ogretmen', ogretmenSchema);
 
-// 🎓 Öğrenci Şemasına 'kocKodu' Eklendi
-const ogrenciSchema = new mongoose.Schema({ ogrenciAd: String, sifre: String, kocKodu: String, ders: String, mesaj: String, xp: { type: Number, default: 0 }, avatar: { type: String, default: '👤' }, gorevler: Array, istatistik: { type: Object, default: {} } });
+// 📈 Öğrenci şemasına netler ve alinanOduller eklendi
+const ogrenciSchema = new mongoose.Schema({ ogrenciAd: String, sifre: String, kocKodu: String, ders: String, mesaj: String, xp: { type: Number, default: 0 }, avatar: { type: String, default: '👤' }, gorevler: Array, istatistik: { type: Object, default: {} }, netler: Array, alinanOduller: Array });
 const Ogrenci = mongoose.model('Ogrenci', ogrenciSchema);
 
-// 💬 Chat Şemasına 'kocKodu' Eklendi
 const chatSchema = new mongoose.Schema({ id: Number, gonderen: String, mesaj: String, rol: String, saat: String, tip: { type: String, default: 'metin' }, kocKodu: String });
 const Chat = mongoose.model('Chat', chatSchema);
 
-// --- ÖĞRETMEN API ---
+// --- SÜPER ADMIN API ---
+app.post('/api/admin', async (req, res) => {
+    const { sifre } = req.body;
+    if(sifre === 'sincap-boss-2026') {
+        let kocSayisi = await Ogretmen.countDocuments();
+        let ogrSayisi = await Ogrenci.countDocuments();
+        res.json({ basari: true, data: { koc: kocSayisi, ogr: ogrSayisi } });
+    } else { res.json({ basari: false }); }
+});
+
 app.post('/api/koc/kayit', async (req, res) => {
     try {
         const { kocAd, sifre } = req.body;
         let varMi = await Ogretmen.findOne({ kocAd });
         if (varMi) return res.json({ basari: false, mesaj: "Bu isimde bir öğretmen zaten var!" });
-        let yeniKod = Math.random().toString(36).substr(2, 6).toUpperCase(); // Rastgele 6 Haneli Davet Kodu
+        let yeniKod = Math.random().toString(36).substr(2, 6).toUpperCase();
         let yeniKoc = new Ogretmen({ kocAd, sifre, kocKodu: yeniKod });
         await yeniKoc.save();
         res.json({ basari: true, mesaj: `Kayıt Başarılı! Davet Kodunuz: ${yeniKod}`, kocKodu: yeniKod });
@@ -47,7 +53,6 @@ app.post('/api/koc/giris', async (req, res) => {
     } catch (e) { res.json({ basari: false, mesaj: "Sunucu hatası!" }); }
 });
 
-// --- ÖĞRENCİ API ---
 app.post('/api/kayit', async (req, res) => {
     try {
         const { ogrenciAd, sifre, kocKodu } = req.body;
@@ -55,7 +60,7 @@ app.post('/api/kayit', async (req, res) => {
         if(!kocVarMi) return res.json({ basari: false, mesaj: "Böyle bir Davet Kodu bulunamadı!" });
         let varMi = await Ogrenci.findOne({ ogrenciAd, kocKodu });
         if (varMi) return res.json({ basari: false, mesaj: "Bu isimde bir öğrenci sınıfınızda zaten var!" });
-        let yeniOgrenci = new Ogrenci({ ogrenciAd, sifre, kocKodu, xp: 0, avatar: '👤', gorevler: [], istatistik: {} });
+        let yeniOgrenci = new Ogrenci({ ogrenciAd, sifre, kocKodu, xp: 0, avatar: '👤', gorevler: [], istatistik: {}, netler: [], alinanOduller: [] });
         await yeniOgrenci.save();
         res.json({ basari: true, mesaj: "Kayıt başarılı! Giriş yapabilirsiniz." });
     } catch (e) { res.json({ basari: false, mesaj: "Sunucu hatası!" }); }
@@ -75,13 +80,9 @@ app.post('/api/sifreler', async (req, res) => {
     catch (e) { res.json([]); }
 });
 
-// --- SOCKET.IO ODA YÖNETİMİ ---
 io.on('connection', (socket) => {
-    
-    // 🚪 Sisteme girenler kendi Davet Kodlarına ait odaya kilitlenir
     socket.on('join_room', async (kocKodu) => {
         socket.join(kocKodu);
-        console.log(`🚪 ID: ${socket.id} -> ${kocKodu} odasına girdi.`);
         try {
             const ogrenciler = await Ogrenci.find({ kocKodu });
             socket.emit('eski_verileri_yukle', ogrenciler);
@@ -104,6 +105,32 @@ io.on('connection', (socket) => {
             let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu });
             if(ogrenci) { ogrenci.avatar = veri.avatar; await ogrenci.save(); io.to(veri.kocKodu).emit('gorev_guncellendi', await Ogrenci.find({kocKodu: veri.kocKodu})); }
         } catch(e) {}
+    });
+
+    // 📈 Net Ekleme Zekası
+    socket.on('net_ekle', async (veri) => {
+        try {
+            let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu });
+            if(ogrenci) {
+                ogrenci.netler.push({ id: Date.now(), tur: veri.sinavTuru, net: veri.netSkoru, tarih: new Date().toLocaleDateString('tr-TR') });
+                ogrenci.markModified('netler'); await ogrenci.save();
+                io.to(veri.kocKodu).emit('gorev_guncellendi', await Ogrenci.find({kocKodu: veri.kocKodu}));
+            }
+        } catch(e){}
+    });
+
+    // 🛒 XP Harcama (Market) Zekası
+    socket.on('odul_satin_al', async (veri) => {
+        try {
+            let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu });
+            if(ogrenci && ogrenci.xp >= veri.bedel) {
+                ogrenci.xp -= veri.bedel;
+                ogrenci.alinanOduller.push({ odul: veri.odul, tarih: new Date().toLocaleDateString('tr-TR') });
+                ogrenci.markModified('alinanOduller'); await ogrenci.save();
+                io.to(veri.kocKodu).emit('gorev_guncellendi', await Ogrenci.find({kocKodu: veri.kocKodu}));
+                io.to(veri.kocKodu).emit('ogretmene_market_bildirimi', { ogrenci: veri.ogrenciAd, odul: veri.odul }); // Hoca ekranına uyarı at
+            }
+        } catch(e){}
     });
 
     socket.on('istatistik_guncelle', async (veri) => {
@@ -168,13 +195,13 @@ io.on('connection', (socket) => {
             let rütbe = xp >= 300 ? 'Efsane' : xp >= 150 ? 'Odak Ustası' : xp >= 50 ? 'Çalışkan' : 'Çaylak';
             let msg = veri.mesaj.toLowerCase(); let cevap = "";
 
-            if (msg.includes('xp') || msg.includes('puan') || msg.includes('rütbe')) { cevap = `Görev bitirerek XP kazanırsın! Puanın: ${xp} XP, Rütben: ${rütbe}! 🌟`; } 
+            if (msg.includes('xp') || msg.includes('market')) { cevap = `XP'lerini Market'te harcayarak Koçundan sürpriz ödüller alabilirsin! Şuan ${xp} XP'n var! 🌟`; } 
             else if (msg.includes('görev') || msg.includes('bitir')) { cevap = `Görevleri bitirip +10 XP kazan! 🎯`; } 
             else { cevap = `Merhaba ${rütbe}! Yorulduğunda moral isteyebilirsin! 😊`; }
-            socket.emit('chatbot_cevabi', cevap); // Sadece soran kişiye döner
+            socket.emit('chatbot_cevabi', cevap); 
         } catch(e) {}
     });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => { console.log(`🚀 Çok Kiracılı Sistem Çalışıyor! Port: ${PORT}`); });
+server.listen(PORT, () => { console.log(`🚀 SincApp V2 SaaS Çalışıyor! Port: ${PORT}`); });

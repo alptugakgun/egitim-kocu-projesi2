@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SincApp - Öğrenci Paneli</title>
+    <title>Öğrenci Paneli - SincApp</title>
     <link rel="manifest" href="manifest.json">
     <script>if (!localStorage.getItem('ogrenciKimligi')) window.location.href = 'login.html';</script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
         body { font-family: 'Nunito', sans-serif; background: linear-gradient(135deg, #f6ea8c 0%, #f7a9a8 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .container { background: rgba(255, 255, 255, 0.95); padding: 30px 40px; border-radius: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); width: 400px; text-align: center; border: 4px solid #fff; position: relative;}
-        .logout-btn { background-color: #ffe4e6; color: #e11d48; border: none; padding: 8px 16px; border-radius: 14px; cursor: pointer; font-weight: 800; font-size: 13px; float: right; transition: all 0.3s ease;}
-        .logout-btn:hover { background-color: #fecdd3; transform: translateY(-2px); }
-        .avatar-btn { font-size: 40px; cursor: pointer; background: #f1f5f9; border-radius: 50%; width: 60px; height: 60px; display: inline-flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-top: -10px;}
+        .top-bar-btns { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .market-btn { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; padding: 8px 16px; border-radius: 14px; cursor: pointer; font-weight: 900; font-size: 13px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); transition: 0.3s;}
+        .market-btn:hover { transform: scale(1.05); }
+        .net-btn { background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 14px; cursor: pointer; font-weight: 800; font-size: 13px; transition: 0.3s;}
+        .avatar-btn { font-size: 40px; cursor: pointer; background: #f1f5f9; border-radius: 50%; width: 60px; height: 60px; display: inline-flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: -20px auto 10px auto;}
         h1 { color: #334155; margin-top: 10px; font-size: 22px; font-weight: 900;}
         .select-box { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #e2e8f0; font-family: inherit; font-weight: bold; color: #334155; font-size: 15px; margin-bottom: 15px; outline: none; }
         .mode-container { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
@@ -23,34 +25,26 @@
         .buttons { display: flex; gap: 15px; justify-content: center; }
         button.action-btn { flex: 1; padding: 16px; border: none; border-radius: 18px; font-weight: 800; font-size: 16px; cursor: pointer; color: white; transition: all 0.1s ease; }
         #startBtn { background-color: #10b981; box-shadow: 0 6px 0 #059669; }
-        #startBtn:active { transform: translateY(6px); box-shadow: 0 0px 0 #059669; }
         #pauseBtn { background-color: #f59e0b; display: none; box-shadow: 0 6px 0 #d97706; }
-        #pauseBtn:active { transform: translateY(6px); box-shadow: 0 0px 0 #d97706; }
         #statusText { margin-top: 20px; padding: 12px; border-radius: 14px; font-size: 15px; font-weight: 800; transition: 0.3s; }
         .task-board { margin-top: 30px; padding-top: 20px; border-top: 3px dashed #cbd5e1; text-align: left; display: none; }
         .task-board h3 { margin-top: 0; font-size: 18px; color: #4f46e5; font-weight: 900; display: flex; align-items: center; gap: 8px;}
         .task-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 16px; border-radius: 16px; margin-bottom: 12px; border: 2px solid #e2e8f0; transition: all 0.3s; }
-        .finish-btn { background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 800; box-shadow: 0 4px 0 #2563eb; transition: all 0.1s; }
-        .avatar-modal { display: none; position: absolute; top: 70px; left: 50%; transform: translateX(-50%); background: white; padding: 15px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 100; gap: 10px; flex-wrap: wrap; width: 250px; justify-content: center; border: 3px solid #4f46e5;}
-        .avatar-option { font-size: 35px; cursor: pointer; padding: 5px; border-radius: 10px; transition: 0.2s;}
-        .avatar-option:hover { background: #e0e7ff; transform: scale(1.1);}
+        .finish-btn { background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: 800; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;}
+        .modal-content { background: white; padding: 25px; border-radius: 20px; text-align: center; width: 320px;}
+        .market-item { background: #f8fafc; padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-weight: bold;}
+        .buy-btn { background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 900; cursor: pointer;}
     </style>
 </head>
 <body>
     <audio id="bildirimSesi" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
     <div class="container">
-        <button class="logout-btn" onclick="cikisYap()">🚪 Çıkış</button>
-        <div class="avatar-btn" id="aktifAvatar" onclick="toggleAvatarModal()">👤</div>
-        <div class="avatar-modal" id="avatarModal">
-            <div class="avatar-option" onclick="avatarSec('👤')">👤</div>
-            <div class="avatar-option" onclick="avatarSec('👨‍🎓')">👨‍🎓</div>
-            <div class="avatar-option" onclick="avatarSec('👩‍🎓')">👩‍🎓</div>
-            <div class="avatar-option" onclick="avatarSec('🥷')">🥷</div>
-            <div class="avatar-option" onclick="avatarSec('🦸‍♂️')">🦸‍♂️</div>
-            <div class="avatar-option" onclick="avatarSec('🦸‍♀️')">🦸‍♀️</div>
-            <div class="avatar-option" onclick="avatarSec('🧙‍♂️')">🧙‍♂️</div>
-            <div class="avatar-option" onclick="avatarSec('👩‍🚀')">👩‍🚀</div>
+        <div class="top-bar-btns">
+            <button class="net-btn" onclick="document.getElementById('netModal').style.display='flex'">📈 Net Gir</button>
+            <button class="market-btn" onclick="document.getElementById('marketModal').style.display='flex'">🛒 Market</button>
         </div>
+        <div class="avatar-btn" id="aktifAvatar" onclick="document.getElementById('avatarModal').style.display='flex'">👤</div>
         <h1 id="mainTitle">🐿️ SincApp'e Hoş Geldin!</h1>
         <select id="dersSecimi" class="select-box">
             <option value="TYT Türkçe">📚 TYT Türkçe</option>
@@ -76,38 +70,145 @@
             <div id="studentTaskList"></div>
         </div>
     </div>
-    
-    <div style="position: fixed; bottom: 20px; left: 20px; width: 320px; background: white; border-radius: 16px; box-shadow: 0 10px 35px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; z-index: 1000; font-family: 'Nunito', sans-serif;">
-        <div style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; padding: 15px; font-weight: 900; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleBot()"><span>🐿️ SincApp AI Koçum</span></div>
-        <div id="botBody" style="height: 300px; background: #f8fafc; padding: 15px; overflow-y: auto; display: none; flex-direction: column;">
-            <div style="align-self: flex-start; background: #e2e8f0; color: #1e293b; padding: 10px 14px; border-radius: 14px; font-size: 13px; max-width: 80%; line-height: 1.4; margin-bottom: 10px; font-weight: 700;">
-                <div style="font-size: 10px; font-weight: 900; margin-bottom: 4px; opacity: 0.8;">🐿️ SincApp AI</div>
-                Merhaba! Ben senin özel AI Asistanınım. Yorulduğunda bana yazabilir veya sistemi nasıl kullanacağını sorabilirsin!
-            </div>
-        </div>
-        <div id="botFooter" style="padding: 10px; background: white; border-top: 1px solid #e2e8f0; display: none; gap: 8px;">
-            <input type="text" id="botInput" placeholder="Sistem nasıl, taktik ver..." style="flex: 1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; font-family: inherit;" onkeypress="if(event.key === 'Enter') botMesajGonder()">
-            <button onclick="botMesajGonder()" style="background: #8b5cf6; color: white; border: none; padding: 12px 18px; border-radius: 10px; cursor: pointer; font-weight: 800; font-family: inherit;">Sor</button>
+
+    <div class="modal" id="marketModal">
+        <div class="modal-content">
+            <h2 style="color:#d97706; margin-top:0;">🛒 SincApp Market</h2>
+            <p style="font-size:14px; font-weight:bold; color:#64748b;">Mevcut XP: <span id="marketXpDisplay" style="color:#4f46e5; font-size:18px;">0</span></p>
+            <div class="market-item"><span>15 Dk Ekstra Mola</span><button class="buy-btn" onclick="odulAl('15 Dk Ekstra Mola', 1000)">1000 XP</button></div>
+            <div class="market-item"><span>Özel Soru Çözüm Saati</span><button class="buy-btn" onclick="odulAl('Özel Soru Çözüm Saati', 3000)">3000 XP</button></div>
+            <div class="market-item"><span>☕ Koçtan Kahve</span><button class="buy-btn" onclick="odulAl('Koçtan Kahve Ismarlama', 5000)">5000 XP</button></div>
+            <button onclick="document.getElementById('marketModal').style.display='none'" style="margin-top:15px; padding:10px; background:#e2e8f0; border:none; border-radius:10px; font-weight:bold; width:100%; cursor:pointer;">Kapat</button>
         </div>
     </div>
 
-    <div style="position: fixed; bottom: 20px; right: 20px; width: 320px; background: white; border-radius: 16px; box-shadow: 0 10px 35px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; z-index: 1000; font-family: 'Nunito', sans-serif;">
-        <div style="background: #4f46e5; color: white; padding: 15px; font-weight: 900; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleChat()">
-            <span>💬 Sınıf Sohbeti</span><span id="chatUyari" style="background: #ef4444; color: white; border-radius: 50%; width: 22px; height: 22px; display: none; align-items: center; justify-content: center; font-size: 12px;">!</span>
-        </div>
-        <div id="chatBody" style="height: 300px; background: #f8fafc; padding: 15px; overflow-y: auto; display: none; flex-direction: column;"></div>
-        <div id="chatFooter" style="padding: 10px; background: white; border-top: 1px solid #e2e8f0; display: none; gap: 8px; align-items: center;">
-            <input type="file" id="resimInput" accept="image/*" style="display: none;" onchange="resimGonder(this)">
-            <button onclick="document.getElementById('resimInput').click()" style="background: none; border: none; font-size: 22px; cursor: pointer; padding: 0;" title="Fotoğraf Gönder">📎</button>
-            <input type="text" id="chatInput" placeholder="Sınıfa yaz..." style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-family: inherit;" onkeypress="if(event.key === 'Enter') mesajGonder()">
-            <button onclick="mesajGonder()" style="background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: inherit;">Gönder</button>
+    <div class="modal" id="netModal">
+        <div class="modal-content">
+            <h2 style="color:#3b82f6; margin-top:0;">📈 Deneme Neti Gir</h2>
+            <select id="sinavTuru" class="select-box" style="margin-bottom:10px;">
+                <option value="TYT Denemesi">TYT Genel</option>
+                <option value="AYT Denemesi">AYT Genel</option>
+                <option value="LGS Denemesi">LGS Genel</option>
+            </select>
+            <input type="number" id="netSkoru" placeholder="Örn: 75.5" step="0.25" class="select-box" style="text-align:center; font-size:24px;">
+            <button onclick="netKaydet()" class="action-btn" style="background:#10b981; width:100%; margin-top:10px;">Neti Sisteme Gönder</button>
+            <button onclick="document.getElementById('netModal').style.display='none'" style="margin-top:10px; padding:10px; background:#e2e8f0; border:none; border-radius:10px; font-weight:bold; width:100%; cursor:pointer;">Kapat</button>
         </div>
     </div>
+
+    <div class="modal" id="avatarModal">
+        <div class="modal-content" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
+            <h3 style="width:100%; margin:0 0 10px 0;">Avatar Seç</h3>
+            <div style="font-size:35px; cursor:pointer;" onclick="avatarSec('👤')">👤</div>
+            <div style="font-size:35px; cursor:pointer;" onclick="avatarSec('👨‍🎓')">👨‍🎓</div>
+            <div style="font-size:35px; cursor:pointer;" onclick="avatarSec('👩‍🎓')">👩‍🎓</div>
+            <div style="font-size:35px; cursor:pointer;" onclick="avatarSec('🥷')">🥷</div>
+            <div style="font-size:35px; cursor:pointer;" onclick="avatarSec('🦸‍♂️')">🦸‍♂️</div>
+            <div style="font-size:35px; cursor:pointer;" onclick="avatarSec('🦸‍♀️')">🦸‍♀️</div>
+            <div style="font-size:35px; cursor:pointer;" onclick="avatarSec('🧙‍♂️')">🧙‍♂️</div>
+            <div style="font-size:35px; cursor:pointer;" onclick="avatarSec('👩‍🚀')">👩‍🚀</div>
+        </div>
+    </div>
+    
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=9"></script>
     <script>
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
-        function cikisYap() { localStorage.removeItem('ogrenciKimligi'); window.location.href = 'login.html'; }
+        const socket = io(); const aktifOgrenci = localStorage.getItem('ogrenciKimligi'); const kocKodu = localStorage.getItem('kocKodu');
+        socket.emit('join_room', kocKodu);
+        
+        let anlikXp = 0;
+        const display = document.getElementById('display'), startBtn = document.getElementById('startBtn'), pauseBtn = document.getElementById('pauseBtn');
+        let tInterval, running = localStorage.getItem(`${aktifOgrenci}_running`) === 'true', mode = localStorage.getItem(`${aktifOgrenci}_mode`) || 'normal';
+        document.getElementById('mainTitle').innerHTML = `Hoş Geldin, ${aktifOgrenci}! 🎯`;
+        
+        function sesCal() { const s = document.getElementById('bildirimSesi'); s.currentTime = 0; s.play().catch(e=>{}); }
+        function getDers() { return document.getElementById('dersSecimi').value; }
+        function unvanHesapla(xp) { return xp >= 300 ? '🏆 Efsane' : xp >= 150 ? '🔥 Odak Ustası' : xp >= 50 ? '⚡ Çalışkan' : '🌱 Çaylak'; }
+
+        window.avatarSec = function(ikon) { document.getElementById('aktifAvatar').innerHTML = ikon; document.getElementById('avatarModal').style.display = 'none'; socket.emit('avatar_guncelle', { ogrenciAd: aktifOgrenci, avatar: ikon, kocKodu: kocKodu }); };
+        
+        // 📈 Net Gönderme
+        window.netKaydet = function() {
+            let tur = document.getElementById('sinavTuru').value; let net = document.getElementById('netSkoru').value;
+            if(!net) return alert("Lütfen netinizi girin!");
+            socket.emit('net_ekle', { ogrenciAd: aktifOgrenci, sinavTuru: tur, netSkoru: Number(net), kocKodu: kocKodu });
+            document.getElementById('netSkoru').value = ''; document.getElementById('netModal').style.display = 'none';
+            alert("Netiniz başarıyla Koçunuza iletildi! 🚀");
+        };
+
+        // 🛒 Market Satın Alma
+        window.odulAl = function(odulIsmi, bedel) {
+            if(anlikXp < bedel) return alert(`Yetersiz XP! ${bedel} XP gerekiyor, sende ${anlikXp} XP var. Görev bitirerek XP kazanabilirsin.`);
+            if(confirm(`${odulIsmi} ödülünü ${bedel} XP karşılığında almak istiyor musun?`)) {
+                socket.emit('odul_satin_al', { ogrenciAd: aktifOgrenci, odul: odulIsmi, bedel: bedel, kocKodu: kocKodu });
+                alert("Siparişin Koçuna iletildi! 🎉"); document.getElementById('marketModal').style.display = 'none';
+            }
+        };
+
+        function gostergeyiGuncelle(sureMs) {
+            if(mode === 'normal') {
+                let hours = Math.floor((sureMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)), minutes = Math.floor((sureMs % (1000 * 60 * 60)) / (1000 * 60)), seconds = Math.floor((sureMs % (1000 * 60)) / 1000);
+                display.innerHTML = (hours < 10 ? "0"+hours : hours) + ":" + (minutes < 10 ? "0"+minutes : minutes) + ":" + (seconds < 10 ? "0"+seconds : seconds); return false;
+            } else {
+                let val = parseInt(document.getElementById('pomoInput').value) || 25, kalan = (val * 60 * 1000) - sureMs;
+                if(kalan <= 0) { display.innerHTML = "00:00"; return true; }
+                let minutes = Math.floor((kalan % (1000 * 60 * 60)) / (1000 * 60)), seconds = Math.floor((kalan % (1000 * 60)) / 1000);
+                display.innerHTML = (minutes < 10 ? "0"+minutes : minutes) + ":" + (seconds < 10 ? "0"+seconds : seconds); return false;
+            }
+        }
+
+        window.setMode = function(m) {
+            if(running) return; mode = m; localStorage.setItem(`${aktifOgrenci}_mode`, m);
+            document.getElementById('modeNormal').className = m === 'normal' ? 'mode-btn mode-active' : 'mode-btn mode-passive';
+            document.getElementById('modePomo').className = m === 'pomodoro' ? 'mode-btn mode-active' : 'mode-btn mode-passive';
+            if(m === 'pomodoro') { document.getElementById('pomoInput').style.display = 'block'; } else { document.getElementById('pomoInput').style.display = 'none'; }
+        };
+
+        function startTimer() {
+            if (!running) {
+                localStorage.setItem(`${aktifOgrenci}_startTime`, new Date().getTime()); localStorage.setItem(`${aktifOgrenci}_running`, 'true'); localStorage.setItem(`${aktifOgrenci}_activeDers`, getDers());
+                tInterval = setInterval(() => {
+                    let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0);
+                    if (gostergeyiGuncelle(diff) && mode === 'pomodoro') { sesCal(); pauseTimer(true); }
+                    socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML, kocKodu: kocKodu });
+                }, 1000); running = true;
+                startBtn.style.display = 'none'; pauseBtn.style.display = 'block'; document.getElementById('statusText').innerHTML = "🟢 Odak modu aktif!";
+                socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: mode === 'pomodoro' ? 'Pomodoro Başlattı!' : 'Kronometre Başlattı!', kocKodu: kocKodu });
+            }
+        }
+
+        function pauseTimer(otomatikMi = false) {
+            if (running) {
+                clearInterval(tInterval);
+                let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${getDers()}_savedTime`)) || 0);
+                localStorage.setItem(`${aktifOgrenci}_${getDers()}_savedTime`, otomatikMi && mode === 'pomodoro' ? 0 : diff);
+                socket.emit('istatistik_guncelle', { ogrenciAd: aktifOgrenci, ders: getDers(), ms: diff, kocKodu: kocKodu });
+                localStorage.setItem(`${aktifOgrenci}_running`, 'false'); running = false;
+                pauseBtn.style.display = 'none'; startBtn.style.display = 'block'; startBtn.innerHTML = otomatikMi ? "▶ Başla" : "▶ Devam Et"; document.getElementById('statusText').innerHTML = otomatikMi ? "🎉 Pomodoro Bitti!" : "⏸️ Mola Verildi.";
+                socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: getDers(), mesaj: otomatikMi ? 'Pomodoro Bitti, Molada.' : 'Mola verdi, durdurdu.', kocKodu: kocKodu });
+            }
+        }
+
+        socket.on('gorev_guncellendi', (tumVeriler) => {
+            let benimVerim = tumVeriler.find(v => v.ogrenciAd === aktifOgrenci);
+            if (benimVerim) {
+                anlikXp = benimVerim.xp || 0; document.getElementById('marketXpDisplay').innerText = anlikXp;
+                if(benimVerim.avatar) document.getElementById('aktifAvatar').innerHTML = benimVerim.avatar;
+                let xpBadge = document.getElementById('xpBadge');
+                if (!xpBadge) { xpBadge = document.createElement('div'); xpBadge.id = 'xpBadge'; xpBadge.style.cssText = "position:absolute; top:20px; left:20px; background: linear-gradient(135deg, #10b981, #059669); color:white; padding:8px 15px; border-radius:20px; font-weight:800; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.2);"; document.body.appendChild(xpBadge); }
+                xpBadge.innerHTML = `${unvanHesapla(anlikXp)} | ${anlikXp} XP`;
+
+                if (benimVerim.gorevler && benimVerim.gorevler.length > 0) {
+                    document.getElementById('taskBoard').style.display = 'block'; 
+                    let taskList = document.getElementById('studentTaskList'); taskList.innerHTML = ''; 
+                    benimVerim.gorevler.forEach(gorev => {
+                        let textStil = gorev.tamamlandi ? "text-decoration: line-through; color: #94a3b8;" : "color: #334155; font-weight: 800;";
+                        let sagKisim = gorev.tamamlandi ? `<span style="color: #10b981; font-weight: 800;">✅ Bitti</span>` : `<button class="finish-btn" onclick="goreviBitir(${gorev.id})">Bitir (+10 XP)</button>`;
+                        taskList.innerHTML += `<div class="task-item"><span style="${textStil}">${gorev.metin}</span>${sagKisim}</div>`;
+                    });
+                }
+            }
+        });
+        window.goreviBitir = function(id) { sesCal(); socket.emit('gorev_tamamlandi', { ogrenciAd: aktifOgrenci, gorevId: id, durum: true, kocKodu: kocKodu }); };
     </script>
 </body>
 </html>
