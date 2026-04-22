@@ -5,39 +5,109 @@
     <title>SincApp Kurucu Paneli</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
-        body { font-family: 'Nunito', sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .box { background: #1e293b; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); width: 400px; border: 2px solid #3b82f6;}
-        input { width: 90%; padding: 15px; border-radius: 10px; border: none; outline: none; font-size: 16px; font-weight: bold; text-align: center; margin-bottom: 20px; }
-        button { width: 100%; padding: 15px; background: #3b82f6; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: 900; cursor: pointer; }
+        body { font-family: 'Nunito', sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; margin: 0; min-height: 100vh;}
+        .box { background: #1e293b; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); width: 100%; max-width: 800px; border: 2px solid #3b82f6;}
+        input { width: 90%; max-width: 300px; padding: 15px; border-radius: 10px; border: none; outline: none; font-size: 16px; font-weight: bold; text-align: center; margin-bottom: 20px; }
+        button { padding: 15px 30px; background: #3b82f6; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: 900; cursor: pointer; transition: 0.2s;}
+        button:hover { background: #2563eb; }
         .stats { display: none; margin-top: 30px; gap: 20px; justify-content: center;}
         .stat-box { background: #334155; padding: 20px; border-radius: 15px; width: 150px; }
         .stat-box h2 { margin: 0; font-size: 40px; color: #10b981; }
         .stat-box p { margin: 5px 0 0 0; font-weight: bold; color: #94a3b8; }
+        
+        .table-container { display: none; margin-top: 40px; width: 100%; text-align: left; background: #334155; border-radius: 15px; overflow: hidden;}
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; border-bottom: 1px solid #475569; }
+        th { background: #475569; color: #cbd5e1; font-weight: 900; text-transform: uppercase; font-size: 13px;}
+        td { font-weight: bold; color: #f8fafc; }
+        .ban-btn { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 900; cursor: pointer; transition: 0.2s;}
+        .ban-btn:hover { background: #dc2626; transform: scale(1.05); }
     </style>
 </head>
 <body>
     <div class="box">
-        <h1 style="color: #60a5fa;">👑 SincApp God Mode</h1>
+        <h1 style="color: #60a5fa; margin-top:0;">👑 SincApp God Mode</h1>
+        
         <div id="loginDiv">
             <input type="password" id="adminPass" placeholder="Kurucu Şifresi">
+            <br>
             <button onclick="giris()">Sistemi Tarat</button>
         </div>
+
         <div class="stats" id="statsDiv">
             <div class="stat-box"><h2 id="kocCount">0</h2><p>Aktif Eğitmen</p></div>
             <div class="stat-box"><h2 id="ogrCount" style="color: #f59e0b;">0</h2><p>Toplam Öğrenci</p></div>
         </div>
+
+        <div class="table-container" id="tableDiv">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Eğitmen Adı</th>
+                        <th>Davet Kodu</th>
+                        <th>Öğrenci Sayısı</th>
+                        <th>Aksiyon</th>
+                    </tr>
+                </thead>
+                <tbody id="kocTablosu">
+                    </tbody>
+            </table>
+        </div>
     </div>
+
     <script>
+        let aktifSifre = '';
+
         async function giris() {
             let s = document.getElementById('adminPass').value;
+            if(!s) return;
             const res = await fetch('/api/admin', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({sifre: s}) });
             const data = await res.json();
             if(data.basari) {
+                aktifSifre = s; // Şifreyi sakla
                 document.getElementById('loginDiv').style.display = 'none';
                 document.getElementById('statsDiv').style.display = 'flex';
+                document.getElementById('tableDiv').style.display = 'block';
+                
                 document.getElementById('kocCount').innerText = data.data.koc;
                 document.getElementById('ogrCount').innerText = data.data.ogr;
-            } else { alert('Erişim Reddedildi!'); }
+                
+                tabloyuCiz(data.data.liste);
+            } else { 
+                alert('Erişim Reddedildi! Yanlış şifre.'); 
+            }
+        }
+
+        function tabloyuCiz(liste) {
+            let tablo = document.getElementById('kocTablosu');
+            tablo.innerHTML = '';
+            if(liste.length === 0) {
+                tablo.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Sistemde henüz kayıtlı eğitmen yok.</td></tr>';
+                return;
+            }
+            liste.forEach(koc => {
+                tablo.innerHTML += `
+                    <tr>
+                        <td>👨‍🏫 ${koc.isim}</td>
+                        <td style="color:#f59e0b;">${koc.kod}</td>
+                        <td>🎓 ${koc.ogrenciSayisi} Öğrenci</td>
+                        <td><button class="ban-btn" onclick="hocaSil('${koc.kod}', '${koc.isim}')">Sil (Banla)</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function hocaSil(kod, isim) {
+            if(confirm(`DİKKAT! ${isim} isimli eğitmeni ve ona bağlı TÜM öğrencileri kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) {
+                const res = await fetch('/api/admin/sil', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({sifre: aktifSifre, kod: kod}) });
+                const data = await res.json();
+                if(data.basari) {
+                    alert(`${isim} sistemden tamamen silindi!`);
+                    giris(); // Tabloyu yenile
+                } else {
+                    alert("Silme işlemi başarısız oldu.");
+                }
+            }
         }
     </script>
 </body>

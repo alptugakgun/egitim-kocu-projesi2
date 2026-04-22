@@ -13,12 +13,17 @@
         .header { margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
         .davet-kodu { background: #fef3c7; color: #d97706; padding: 6px 15px; border-radius: 8px; font-weight: 900; font-size: 16px; border: 2px dashed #f59e0b; margin-left: 15px;}
         .btn-red { background-color: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;}
+        .btn-blue { background-color: #3b82f6; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s;}
+        .btn-blue:hover { background-color: #2563eb; }
         .top-dashboard { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .box-title { font-size: 15px; font-weight: bold; color: #475569; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;}
         .chart-container { position: relative; height: 180px; width: 100%; }
         .leaderboard-list { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto;}
-        .leaderboard-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f1f5f9; }
+        .leaderboard-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #f8fafc; border-radius: 8px;}
+        .leader-name { font-size: 14px; color: #1e293b; display: flex; align-items: center; gap: 5px;}
+        .leader-xp { color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .lig-baslik { padding:5px; text-align:center; font-weight:900; font-size:12px; border-radius:5px; margin: 10px 0 5px 0;}
         .live-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
         .live-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); display: flex; flex-direction: column; border-left: 6px solid #10b981; position: relative; }
         .task-input-row { display: flex; gap: 10px; margin-top: 15px; }
@@ -26,12 +31,22 @@
         .task-input-row button { padding: 8px 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .task-list { list-style: none; padding: 0; margin-top: 10px; font-size: 13px; }
         .task-list li { margin-bottom: 6px; background: #f8fafc; padding: 8px 10px; border-radius: 4px; display: flex; align-items: center; gap: 8px; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;}
+        .modal-content { background: white; padding: 25px; border-radius: 20px; text-align: center; width: 400px; max-height: 80vh; overflow-y: auto;}
+        .kaynak-item { background: #f1f5f9; padding: 12px; border-radius: 10px; margin-bottom: 8px; text-align: left; font-weight: bold; font-size: 14px; border-left: 4px solid #8b5cf6; display: flex; justify-content: space-between; align-items: center;}
+        .kaynak-item a { color: #4f46e5; text-decoration: none; display: block; margin-top: 5px; font-size: 13px; font-weight: 900;}
+        .sil-btn { background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;}
     </style>
 </head>
 <body>
     <div class="header">
         <h1 id="kocKarsilama">🐿️ SincApp Paneli</h1>
-        <div><button class="btn-red" onclick="localStorage.clear(); window.location.href='ogretmen-login.html'">🚪 Çıkış</button></div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-blue" style="background:#8b5cf6;" onclick="document.getElementById('kutuphaneModal').style.display='flex'">📚 Kütüphane Yönetimi</button>
+            <button class="btn-blue" style="background:#f59e0b;" onclick="sifreleriGor()">🔐 Şifreler</button>
+            <button class="btn-red" onclick="localStorage.clear(); window.location.href='ogretmen-login.html'">🚪 Çıkış</button>
+        </div>
     </div>
     
     <div class="top-dashboard">
@@ -40,64 +55,104 @@
         
         <div class="box" style="grid-column: span 2;">
             <div class="box-title">📈 Öğrenci Net Gelişimi 
-                <select id="netOgrenciSecici" onchange="netGrafigiCiz()" style="padding:5px; border-radius:5px; font-weight:bold; outline:none; border:1px solid #cbd5e1;">
-                    <option value="">Öğrenci Seçin...</option>
-                </select>
+                <select id="netOgrenciSecici" onchange="netGrafigiCiz()" style="padding:5px; border-radius:5px; font-weight:bold; outline:none; border:1px solid #cbd5e1;"><option value="">Öğrenci Seçin...</option></select>
             </div>
             <div class="chart-container"><canvas id="lineGrafigi"></canvas></div>
+        </div>
+        
+        <div class="box" style="grid-column: span 4;">
+            <div class="box-title">🏆 SincApp Canlı Lig Tablosu <span style="font-size: 12px; font-weight: normal; color: #64748b;">(Sıralama XP'ye göre anlık değişir)</span></div>
+            <ul class="leaderboard-list" id="leaderboardList" style="max-height: 250px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                <li style="color: #94a3b8; text-align: center; grid-column: span 3;">Lig hesaplanıyor...</li>
+            </ul>
         </div>
     </div>
 
     <div class="live-grid" id="liveGrid"></div>
+
+    <div class="modal" id="kutuphaneModal">
+        <div class="modal-content">
+            <h2 style="color:#8b5cf6; margin-top:0;">📚 Kütüphane Yönetimi</h2>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px dashed #cbd5e1;">
+                <input type="text" id="kaynakBaslik" placeholder="Kaynak Başlığı (Örn: Limit Deneme Çözümleri)" style="padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-family: inherit; font-weight: bold;">
+                <input type="url" id="kaynakLink" placeholder="Drive, YouTube veya PDF Linki Yapıştır" style="padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-family: inherit; font-weight: bold;">
+                <button onclick="kaynakEkle()" style="background: #8b5cf6; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;">Öğrencilere Gönder 🚀</button>
+            </div>
+            <h4 style="text-align: left; margin-bottom: 5px; color: #475569;">Paylaşılan Kaynaklar</h4>
+            <div id="kaynakListesi" style="margin-bottom: 15px; max-height: 200px; overflow-y: auto;">
+                <div style="color: #94a3b8; font-style: italic;">Henüz kaynak eklemediniz.</div>
+            </div>
+            <button onclick="document.getElementById('kutuphaneModal').style.display='none'" style="padding:10px; background:#e2e8f0; border:none; border-radius:10px; font-weight:bold; width:100%; cursor:pointer;">Kapat</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="sifreModal"><div class="modal-content" style="width: 500px;"><h2 style="margin-top:0; color: #f59e0b;">🔐 Gizli Kasa (Şifreler)</h2><table style="width: 100%; text-align: left; border-collapse: collapse; margin-bottom: 20px;"><thead><tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><th style="padding: 10px;">Öğrenci Adı</th><th style="padding: 10px;">Şifresi</th></tr></thead><tbody id="sifreTablosu"></tbody></table><button onclick="document.getElementById('sifreModal').style.display='none'" style="background: #e2e8f0; border: none; padding: 10px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer;">Kapat</button></div></div>
     
     <script>
         const aktifKocIsmi = localStorage.getItem('ogretmenKimligi'); const kocKodu = localStorage.getItem('kocKodu');
-        document.getElementById('kocKarsilama').innerHTML = `👨‍🏫 ${aktifKocIsmi} <span class="davet-kodu">Davet Kodun: ${kocKodu}</span>`;
+        document.getElementById('kocKarsilama').innerHTML = `👨‍🏫 ${aktifKocIsmi} <span class="davet-kodu" title="Öğrencilerine bu kodu ver!">Davet Kodun: ${kocKodu}</span>`;
         const socket = io(); socket.emit('join_room', kocKodu);
 
         let sinifListesi = [], odakGrafikObjesi = null, barGrafikObjesi = null, lineGrafikObjesi = null; 
-        function unvanHesapla(xp) { return xp >= 300 ? '🏆 Efsane' : xp >= 150 ? '🔥 Odak Ustası' : xp >= 50 ? '⚡ Çalışkan' : '🌱 Çaylak'; }
 
-        // 📈 Net Grafiğini Çizen Fonksiyon
+        // 📚 Kaynak Fonksiyonları
+        window.kaynakEkle = function() {
+            let baslik = document.getElementById('kaynakBaslik').value.trim();
+            let link = document.getElementById('kaynakLink').value.trim();
+            if(!baslik || !link) return alert("Başlık ve link boş bırakılamaz!");
+            if(!link.startsWith('http')) link = 'https://' + link; // link formatını garantile
+            socket.emit('yeni_kaynak_ekle', { kocKodu: kocKodu, baslik: baslik, url: link });
+            document.getElementById('kaynakBaslik').value = ''; document.getElementById('kaynakLink').value = '';
+        };
+
+        window.kaynakSil = function(id) { if(confirm("Bu kaynağı silmek istediğine emin misin?")) socket.emit('kaynak_sil', { id: id, kocKodu: kocKodu }); };
+
+        socket.on('kaynaklari_yukle', (liste) => {
+            let kutu = document.getElementById('kaynakListesi'); kutu.innerHTML = '';
+            if(liste.length === 0) { kutu.innerHTML = '<div style="color: #94a3b8; font-style: italic;">Henüz kaynak eklemediniz.</div>'; return; }
+            liste.forEach(k => {
+                kutu.innerHTML += `<div class="kaynak-item">
+                    <div>${k.baslik} <span style="font-size:10px; color:#94a3b8; font-weight:normal;">(${k.tarih})</span><a href="${k.url}" target="_blank">🔗 Test Et</a></div>
+                    <button class="sil-btn" onclick="kaynakSil(${k.id})">Sil</button>
+                </div>`;
+            });
+        });
+
         window.netGrafigiCiz = function() {
-            let secilenAd = document.getElementById('netOgrenciSecici').value;
-            if(!secilenAd) return;
+            let secilenAd = document.getElementById('netOgrenciSecici').value; if(!secilenAd) return;
             let ogrenci = sinifListesi.find(o => o.ogrenciAd === secilenAd);
-            if(!ogrenci || !ogrenci.netler || ogrenci.netler.length === 0) {
-                if(lineGrafikObjesi) { lineGrafikObjesi.data.labels = []; lineGrafikObjesi.data.datasets[0].data = []; lineGrafikObjesi.update(); }
-                return;
-            }
-            let etiketler = ogrenci.netler.map(n => n.tarih + " (" + n.tur.split(' ')[0] + ")");
-            let veriler = ogrenci.netler.map(n => n.net);
-
-            if(lineGrafikObjesi) {
-                lineGrafikObjesi.data.labels = etiketler; lineGrafikObjesi.data.datasets[0].data = veriler; lineGrafikObjesi.update();
-            } else {
-                const ctx = document.getElementById('lineGrafigi').getContext('2d');
-                lineGrafikObjesi = new Chart(ctx, { type: 'line', data: { labels: etiketler, datasets: [{ label: 'Net Skoru', data: veriler, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.2)', tension: 0.3, fill: true, pointRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
-            }
+            if(!ogrenci || !ogrenci.netler || ogrenci.netler.length === 0) { if(lineGrafikObjesi) { lineGrafikObjesi.data.labels = []; lineGrafikObjesi.data.datasets[0].data = []; lineGrafikObjesi.update(); } return; }
+            let etiketler = ogrenci.netler.map(n => n.tarih + " (" + n.tur.split(' ')[0] + ")"); let veriler = ogrenci.netler.map(n => n.net);
+            if(lineGrafikObjesi) { lineGrafikObjesi.data.labels = etiketler; lineGrafikObjesi.data.datasets[0].data = veriler; lineGrafikObjesi.update(); } 
+            else { const ctx = document.getElementById('lineGrafigi').getContext('2d'); lineGrafikObjesi = new Chart(ctx, { type: 'line', data: { labels: etiketler, datasets: [{ label: 'Net Skoru', data: veriler, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.2)', tension: 0.3, fill: true, pointRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
         };
 
         function verileriGuncelle() {
-            // Net Grafiği İçin Seçiciyi Doldur
-            let secici = document.getElementById('netOgrenciSecici'); let mevcutSecim = secici.value;
-            secici.innerHTML = '<option value="">Öğrenci Seçin...</option>';
-            sinifListesi.forEach(o => { secici.innerHTML += `<option value="${o.ogrenciAd}">${o.ogrenciAd}</option>`; });
-            secici.value = mevcutSecim; netGrafigiCiz();
+            let secici = document.getElementById('netOgrenciSecici'); let mevcutSecim = secici.value; secici.innerHTML = '<option value="">Öğrenci Seçin...</option>';
+            sinifListesi.forEach(o => { secici.innerHTML += `<option value="${o.ogrenciAd}">${o.ogrenciAd}</option>`; }); secici.value = mevcutSecim; netGrafigiCiz();
 
-            // XP Bar Grafiği
             let siraliSinif = [...sinifListesi].sort((a, b) => (b.xp || 0) - (a.xp || 0));
+            let listeEl = document.getElementById('leaderboardList'); listeEl.innerHTML = '';
+            let superLig = '', lig1 = '', amatorLig = '';
+            siraliSinif.forEach((ogrenci, index) => {
+                if(ogrenci.xp > 0) {
+                    let borderRenk = index < 3 ? '#f59e0b' : index < 8 ? '#64748b' : '#d97706';
+                    let satir = `<li class="leaderboard-item" style="border-left: 4px solid ${borderRenk}; margin-bottom: 5px;"><span class="leader-name"><strong>${index + 1}.</strong> ${ogrenci.avatar || '👤'} ${ogrenci.ogrenciAd}</span><span class="leader-xp" style="background: ${borderRenk}">${ogrenci.xp} XP</span></li>`;
+                    if(index < 3) superLig += satir; else if(index < 8) lig1 += satir; else amatorLig += satir;
+                }
+            });
+            if(siraliSinif.filter(o => o.xp > 0).length === 0) { listeEl.innerHTML = '<li style="color: #94a3b8; text-align: center; grid-column: span 3;">Puanlar bekleniyor...</li>'; } 
+            else { listeEl.innerHTML += `<div><div class="lig-baslik" style="background:#fef3c7; color:#d97706;">🏆 SÜPER LİG (İlk 3)</div>${superLig}</div><div><div class="lig-baslik" style="background:#f1f5f9; color:#475569;">🥇 1. LİG (4. - 8. Sıra)</div>${lig1}</div><div><div class="lig-baslik" style="background:#ffedd5; color:#b45309;">🪵 AMATÖR LİG</div>${amatorLig}</div>`; }
+
             let isimler = siraliSinif.map(o => o.ogrenciAd.split(' ')[0]), xpler = siraliSinif.map(o => o.xp || 0);
             if (barGrafikObjesi) { barGrafikObjesi.data.labels = isimler; barGrafikObjesi.data.datasets[0].data = xpler; barGrafikObjesi.update(); } 
             else { barGrafikObjesi = new Chart(document.getElementById('barGrafigi').getContext('2d'), { type: 'bar', data: { labels: isimler, datasets: [{ label: 'Kazanılan XP', data: xpler, backgroundColor: '#3b82f6', borderRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
 
-            // Odak Grafiği
             let derste = sinifListesi.filter(o => o.mesaj && !o.mesaj.includes('Mola')).length, mola = sinifListesi.filter(o => o.mesaj && o.mesaj.includes('Mola')).length;
             if (odakGrafikObjesi) { odakGrafikObjesi.data.datasets[0].data = [derste, mola]; odakGrafikObjesi.update(); } 
             else { odakGrafikObjesi = new Chart(document.getElementById('odakGrafigi').getContext('2d'), { type: 'doughnut', data: { labels: ['Derste 🔥', 'Molada ☕'], datasets: [{ data: [derste, mola], backgroundColor: ['#10b981', '#f59e0b'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } } }); }
         }
 
-        // 🛒 YENİ: Market Bildirimi Dinleyici
         socket.on('ogretmene_market_bildirimi', (veri) => { alert(`🎉 MÜJDE! Öğrenciniz ${veri.ogrenci} marketten "${veri.odul}" satın aldı!`); });
 
         function kartiEkranaCiz(gelenVeri) {
@@ -112,13 +167,8 @@
                 const yeniKart = document.createElement('div'); yeniKart.className = 'live-card'; yeniKart.id = ogrenciID; yeniKart.style.borderLeftColor = renkKodu;
                 yeniKart.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <div>
-                            <div class="student-name"><span style="font-size:24px;">${gelenVeri.avatar || '👤'}</span> ${gelenVeri.ogrenciAd} <span style="font-size:12px; background:#f1f5f9; padding:2px 6px; border-radius:10px; color:#3b82f6;">${gelenVeri.xp || 0} XP</span></div>
-                            <div class="student-task">${gelenVeri.ders} ➔ ${gelenVeri.mesaj}</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div id="${timerID}" style="font-size: 22px; font-weight: 900; color: #4f46e5; font-variant-numeric: tabular-nums;">00:00:00</div>
-                        </div>
+                        <div><div class="student-name"><span style="font-size:24px;">${gelenVeri.avatar || '👤'}</span> ${gelenVeri.ogrenciAd} <span style="font-size:12px; background:#f1f5f9; padding:2px 6px; border-radius:10px; color:#3b82f6;">${gelenVeri.xp || 0} XP</span></div><div class="student-task">${gelenVeri.ders} ➔ ${gelenVeri.mesaj}</div></div>
+                        <div style="text-align: right;"><div id="${timerID}" style="font-size: 22px; font-weight: 900; color: #4f46e5; font-variant-numeric: tabular-nums;">00:00:00</div></div>
                     </div>
                     <div class="task-input-row"><input type="text" id="gorevInput-${ogrenciID}" placeholder="Yeni görev ver..."><button onclick="gorevGonder('${gelenVeri.ogrenciAd}', '${ogrenciID}')">Ekle</button></div>
                     <ul class="task-list" id="gorevListesi-${ogrenciID}"></ul>`;
@@ -144,6 +194,16 @@
             kartiEkranaCiz(gelenVeri); let index = sinifListesi.findIndex(o => o.ogrenciAd === gelenVeri.ogrenciAd);
             if(index !== -1) { sinifListesi[index] = gelenVeri; } else { sinifListesi.push(gelenVeri); } verileriGuncelle();
         });
+
+        async function sifreleriGor() {
+            try {
+                const response = await fetch('/api/sifreler', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kocKodu: kocKodu }) }); 
+                const ogrenciler = await response.json(); const tablo = document.getElementById('sifreTablosu'); tablo.innerHTML = '';
+                if(ogrenciler.length === 0) { tablo.innerHTML = `<tr><td colspan="2" style="padding: 10px; text-align: center; color: #94a3b8;">Henüz kayıtlı öğrenci yok.</td></tr>`; } 
+                else { ogrenciler.forEach(ogr => { tablo.innerHTML += `<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px; font-weight: bold; color: #334155;">${ogr.ogrenciAd}</td><td style="padding: 10px; font-family: monospace; font-size: 15px; color: #ef4444; font-weight: bold;">${ogr.sifre || "Şifre Belirlenmemiş"}</td></tr>`; }); }
+                document.getElementById('sifreModal').style.display = 'flex';
+            } catch (e) { alert("Şifreler çekilirken bir hata oluştu!"); }
+        }
     </script>
 </body>
 </html>
