@@ -1,98 +1,21 @@
 const socket = io(); 
 const aktifOgrenci = localStorage.getItem('ogrenciKimligi'); 
 const kocKodu = localStorage.getItem('kocKodu'); 
-const veliKodu = localStorage.getItem('veliKodu');
 socket.emit('join_room', kocKodu);
 
-if(document.getElementById('veliKoduGosterge')) { document.getElementById('veliKoduGosterge').innerText = veliKodu || 'V-XXXX'; }
+const MUFREDAT = { "YKS": { "TYT Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Paragraf", "Ses Bilgisi", "Yazım Kuralları", "Noktalama", "Sözcük Türleri", "Cümlenin Ögeleri", "Cümle Türleri", "Anlatım Bozuklukları"], "TYT Matematik": ["Temel Kavramlar", "Sayı Basamakları", "Bölme Bölünebilme", "EBOB-EKOK", "Rasyonel Sayılar", "Basit Eşitsizlikler", "Mutlak Değer", "Üslü Sayılar", "Köklü Sayılar", "Çarpanlara Ayırma", "Oran Orantı", "Problemler", "Mantık", "Kümeler", "Fonksiyonlar", "Polinomlar", "Olasılık"], "TYT Geometri": ["Açılar ve Üçgenler", "Çokgenler ve Dörtgenler", "Çember ve Daire", "Analitik Geometri", "Katı Cisimler"], "TYT Fizik": ["Fizik Bilimine Giriş", "Madde ve Özellikleri", "Hareket ve Kuvvet", "Enerji", "Isı ve Sıcaklık", "Elektrostatik", "Elektrik ve Manyetizma", "Basınç", "Kaldırma Kuvveti", "Dalgalar", "Optik"], "TYT Kimya": ["Kimya Bilimi", "Atom ve Periyodik Sistem", "Kimyasal Türler Arası Etkileşimler", "Maddenin Halleri", "Doğa ve Kimya", "Kimyanın Temel Kanunları", "Karışımlar", "Asitler, Bazlar, Tuzlar", "Kimya Her Yerde"], "TYT Biyoloji": ["Yaşam Bilimi Biyoloji", "Hücre", "Canlıların Dünyası", "Hücre Bölünmeleri", "Kalıtım", "Ekoloji"], "AYT Matematik": ["Polinomlar", "2. Dereceden Denklemler", "Parabol", "Eşitsizlikler", "Trigonometri", "Logaritma", "Diziler", "Seriler", "Limit ve Süreklilik", "Türev", "İntegral", "Permütasyon Kombinasyon Olasılık"], "AYT Fizik": ["Vektörler", "Bağıl Hareket", "Newton'un Hareket Yasaları", "Atışlar", "Enerji ve Hareket", "İtme ve Çizgisel Momentum", "Tork", "Denge", "Basit Makineler", "Elektrik ve Manyetizma", "Çembersel Hareket", "Basit Harmonik Hareket", "Dalga Mekaniği", "Modern Fizik"], "AYT Kimya": ["Modern Atom Teorisi", "Gazlar", "Sıvı Çözeltiler", "Kimyasal Tepkimelerde Enerji", "Hız", "Denge", "Kimya ve Elektrik", "Karbon Kimyasına Giriş", "Organik Kimya"], "AYT Biyoloji": ["İnsan Fizyolojisi", "Komünite ve Popülasyon Ekolojisi", "Genden Proteine", "Canlılarda Enerji Dönüşümleri", "Bitki Biyolojisi", "Canlılar ve Çevre"], "Genel Deneme": ["TYT Genel Deneme", "AYT Genel Deneme", "Türkiye Geneli Kurumsal"] }, "LGS": { "LGS Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Paragrafta Anlam", "Fiilimsiler", "Cümlenin Ögeleri", "Yazım Kuralları", "Noktalama İşaretleri", "Görsel Yorumlama", "Sözel Mantık"], "LGS Matematik": ["Çarpanlar ve Katlar", "Üslü İfadeler", "Kareköklü İfadeler", "Veri Analizi", "Basit Olasılık", "Cebirsel İfadeler", "Doğrusal Denklemler", "Eşitsizlikler", "Üçgenler", "Eşlik ve Benzerlik", "Dönüşüm Geometrisi", "Geometrik Cisimler"], "LGS Fen Bilimleri": ["Mevsimler ve İklim", "DNA ve Genetik Kod", "Basınç", "Madde ve Endüstri", "Basit Makineler", "Enerji Dönüşümleri", "Elektrik Yükleri"], "LGS İnkılap Tarihi": ["Bir Kahraman Doğuyor", "Milli Uyanış", "Milli Bir Destan", "Atatürkçülük", "Demokratikleşme Çabaları", "Dış Politika"], "LGS İngilizce": ["Friendship", "Teen Life", "In the Kitchen", "On the Phone", "The Internet", "Adventures", "Tourism", "Chores", "Science", "Natural Forces"], "LGS Din Kültürü": ["Kader İnancı", "Zekat ve Sadaka", "Din ve Hayat", "Hz. Muhammed'in Örnekliliği", "Kur'an-ı Kerim"], "Genel Deneme": ["LGS Genel Deneme", "Kurumsal Deneme"] } };
 
-// 📚 YENİ: Türkiye'nin En Kapsamlı LGS ve YKS Müfredat Haritası
-const MUFREDAT = {
-    "YKS": {
-        "TYT Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Paragraf", "Ses Bilgisi", "Yazım Kuralları", "Noktalama", "Sözcük Türleri", "Cümlenin Ögeleri", "Cümle Türleri", "Anlatım Bozuklukları"],
-        "TYT Matematik": ["Temel Kavramlar", "Sayı Basamakları", "Bölme Bölünebilme", "EBOB-EKOK", "Rasyonel Sayılar", "Basit Eşitsizlikler", "Mutlak Değer", "Üslü Sayılar", "Köklü Sayılar", "Çarpanlara Ayırma", "Oran Orantı", "Problemler", "Mantık", "Kümeler", "Fonksiyonlar", "Polinomlar", "Olasılık"],
-        "TYT Geometri": ["Açılar ve Üçgenler", "Çokgenler ve Dörtgenler", "Çember ve Daire", "Analitik Geometri", "Katı Cisimler"],
-        "TYT Fizik": ["Fizik Bilimine Giriş", "Madde ve Özellikleri", "Hareket ve Kuvvet", "Enerji", "Isı ve Sıcaklık", "Elektrostatik", "Elektrik ve Manyetizma", "Basınç", "Kaldırma Kuvveti", "Dalgalar", "Optik"],
-        "TYT Kimya": ["Kimya Bilimi", "Atom ve Periyodik Sistem", "Kimyasal Türler Arası Etkileşimler", "Maddenin Halleri", "Doğa ve Kimya", "Kimyanın Temel Kanunları", "Karışımlar", "Asitler, Bazlar, Tuzlar", "Kimya Her Yerde"],
-        "TYT Biyoloji": ["Yaşam Bilimi Biyoloji", "Hücre", "Canlıların Dünyası", "Hücre Bölünmeleri", "Kalıtım", "Ekoloji"],
-        "AYT Matematik": ["Polinomlar", "2. Dereceden Denklemler", "Parabol", "Eşitsizlikler", "Trigonometri", "Logaritma", "Diziler", "Seriler", "Limit ve Süreklilik", "Türev", "İntegral", "Permütasyon Kombinasyon Olasılık"],
-        "AYT Fizik": ["Vektörler", "Bağıl Hareket", "Newton'un Hareket Yasaları", "Atışlar", "Enerji ve Hareket", "İtme ve Çizgisel Momentum", "Tork", "Denge", "Basit Makineler", "Elektrik ve Manyetizma", "Çembersel Hareket", "Basit Harmonik Hareket", "Dalga Mekaniği", "Modern Fizik"],
-        "AYT Kimya": ["Modern Atom Teorisi", "Gazlar", "Sıvı Çözeltiler", "Kimyasal Tepkimelerde Enerji", "Hız", "Denge", "Kimya ve Elektrik", "Karbon Kimyasına Giriş", "Organik Kimya"],
-        "AYT Biyoloji": ["İnsan Fizyolojisi", "Komünite ve Popülasyon Ekolojisi", "Genden Proteine", "Canlılarda Enerji Dönüşümleri", "Bitki Biyolojisi", "Canlılar ve Çevre"],
-        "Genel Deneme": ["TYT Genel Deneme", "AYT Genel Deneme", "Türkiye Geneli Kurumsal"]
-    },
-    "LGS": {
-        "LGS Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Paragrafta Anlam", "Fiilimsiler", "Cümlenin Ögeleri", "Yazım Kuralları", "Noktalama İşaretleri", "Görsel Yorumlama", "Sözel Mantık"],
-        "LGS Matematik": ["Çarpanlar ve Katlar", "Üslü İfadeler", "Kareköklü İfadeler", "Veri Analizi", "Basit Olasılık", "Cebirsel İfadeler", "Doğrusal Denklemler", "Eşitsizlikler", "Üçgenler", "Eşlik ve Benzerlik", "Dönüşüm Geometrisi", "Geometrik Cisimler"],
-        "LGS Fen Bilimleri": ["Mevsimler ve İklim", "DNA ve Genetik Kod", "Basınç", "Madde ve Endüstri", "Basit Makineler", "Enerji Dönüşümleri", "Elektrik Yükleri"],
-        "LGS İnkılap Tarihi": ["Bir Kahraman Doğuyor", "Milli Uyanış", "Milli Bir Destan", "Atatürkçülük", "Demokratikleşme Çabaları", "Dış Politika"],
-        "LGS İngilizce": ["Friendship", "Teen Life", "In the Kitchen", "On the Phone", "The Internet", "Adventures", "Tourism", "Chores", "Science", "Natural Forces"],
-        "LGS Din Kültürü": ["Kader İnancı", "Zekat ve Sadaka", "Din ve Hayat", "Hz. Muhammed'in Örnekliliği", "Kur'an-ı Kerim"],
-        "Genel Deneme": ["LGS Genel Deneme", "Kurumsal Deneme"]
-    }
-};
-
-const sinavSecimi = document.getElementById('sinavSecimi');
-const dersSecimiUI = document.getElementById('dersSecimiUI');
-const konuSecimi = document.getElementById('konuSecimi');
+const sinavSecimi = document.getElementById('sinavSecimi'); const dersSecimiUI = document.getElementById('dersSecimiUI'); const konuSecimi = document.getElementById('konuSecimi');
 let aktifDersString = localStorage.getItem(`${aktifOgrenci}_activeDers`) || "[YKS] TYT Matematik - Temel Kavramlar";
 
 function getDers() { return `[${sinavSecimi.value}] ${dersSecimiUI.value} - ${konuSecimi.value}`; }
 
-function mufredatYukle(ilkYukleme = false) {
-    const sinav = sinavSecimi.value;
-    dersSecimiUI.innerHTML = '';
-    for(let d in MUFREDAT[sinav]) { dersSecimiUI.innerHTML += `<option value="${d}">${d}</option>`; }
-    if(!ilkYukleme) konuYukle();
-}
+function mufredatYukle(ilkYukleme = false) { const sinav = sinavSecimi.value; dersSecimiUI.innerHTML = ''; for(let d in MUFREDAT[sinav]) { dersSecimiUI.innerHTML += `<option value="${d}">${d}</option>`; } if(!ilkYukleme) konuYukle(); }
+function konuYukle(ilkYukleme = false) { const sinav = sinavSecimi.value; const ders = dersSecimiUI.value; konuSecimi.innerHTML = ''; if(MUFREDAT[sinav] && MUFREDAT[sinav][ders]) { MUFREDAT[sinav][ders].forEach(k => { konuSecimi.innerHTML += `<option value="${k}">${k}</option>`; }); } if(!ilkYukleme) dersDegisikliginiKaydet(); }
+function dersDegisikliginiKaydet() { let yeniDers = getDers(); if(yeniDers === aktifDersString) return; if (running) { let st = parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)); let oldSaved = parseInt(localStorage.getItem(`${aktifOgrenci}_${aktifDersString}_savedTime`)) || 0; let diff = new Date().getTime() - st + oldSaved; localStorage.setItem(`${aktifOgrenci}_${aktifDersString}_savedTime`, diff); socket.emit('istatistik_guncelle', { ogrenciAd: aktifOgrenci, ders: aktifDersString, ms: diff, kocKodu: kocKodu }); clearInterval(tInterval); running = false; localStorage.setItem(`${aktifOgrenci}_running`, 'false'); pauseBtn.style.display = 'none'; startBtn.style.display = 'block'; startBtn.innerHTML = "▶ Başla"; document.getElementById('statusText').innerHTML = "Ders değişti, sayaç durduruldu."; document.getElementById('statusText').style.backgroundColor = "#f1f5f9"; document.getElementById('statusText').style.color = "#64748b"; document.getElementById('pomoInput').disabled = false; socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: aktifDersString, mesaj: 'Ders değiştirdi, durdurdu.', kocKodu: kocKodu }); } aktifDersString = yeniDers; localStorage.setItem(`${aktifOgrenci}_activeDers`, aktifDersString); localStorage.setItem(`${aktifOgrenci}_secilenSinav`, sinavSecimi.value); localStorage.setItem(`${aktifOgrenci}_secilenDers`, dersSecimiUI.value); localStorage.setItem(`${aktifOgrenci}_secilenKonu`, konuSecimi.value); let currentSaved = parseInt(localStorage.getItem(`${aktifOgrenci}_${yeniDers}_savedTime`)) || 0; gostergeyiGuncelle(currentSaved); socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML, kocKodu: kocKodu }); if(currentSaved > 0) { startBtn.innerHTML = "▶ Devam Et"; } else { startBtn.innerHTML = "▶ Başla"; } }
 
-function konuYukle(ilkYukleme = false) {
-    const sinav = sinavSecimi.value; const ders = dersSecimiUI.value;
-    konuSecimi.innerHTML = '';
-    if(MUFREDAT[sinav] && MUFREDAT[sinav][ders]) {
-        MUFREDAT[sinav][ders].forEach(k => { konuSecimi.innerHTML += `<option value="${k}">${k}</option>`; });
-    }
-    if(!ilkYukleme) dersDegisikliginiKaydet();
-}
+sinavSecimi.addEventListener('change', () => mufredatYukle(false)); dersSecimiUI.addEventListener('change', () => konuYukle(false)); konuSecimi.addEventListener('change', dersDegisikliginiKaydet);
 
-// 🔄 Ders değiştiğinde süreyi kaydetme zekası
-function dersDegisikliginiKaydet() {
-    let yeniDers = getDers();
-    if(yeniDers === aktifDersString) return;
-
-    if (running) {
-        let st = parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`));
-        let oldSaved = parseInt(localStorage.getItem(`${aktifOgrenci}_${aktifDersString}_savedTime`)) || 0;
-        let diff = new Date().getTime() - st + oldSaved;
-        localStorage.setItem(`${aktifOgrenci}_${aktifDersString}_savedTime`, diff);
-        socket.emit('istatistik_guncelle', { ogrenciAd: aktifOgrenci, ders: aktifDersString, ms: diff, kocKodu: kocKodu });
-        
-        clearInterval(tInterval); running = false; localStorage.setItem(`${aktifOgrenci}_running`, 'false');
-        pauseBtn.style.display = 'none'; startBtn.style.display = 'block'; startBtn.innerHTML = "▶ Başla";
-        document.getElementById('statusText').innerHTML = "Ders değişti, sayaç durduruldu."; document.getElementById('statusText').style.backgroundColor = "#f1f5f9"; document.getElementById('statusText').style.color = "#64748b";
-        document.getElementById('pomoInput').disabled = false;
-        socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: aktifDersString, mesaj: 'Ders değiştirdi, durdurdu.', kocKodu: kocKodu });
-    }
-    
-    aktifDersString = yeniDers;
-    localStorage.setItem(`${aktifOgrenci}_activeDers`, aktifDersString);
-    localStorage.setItem(`${aktifOgrenci}_secilenSinav`, sinavSecimi.value);
-    localStorage.setItem(`${aktifOgrenci}_secilenDers`, dersSecimiUI.value);
-    localStorage.setItem(`${aktifOgrenci}_secilenKonu`, konuSecimi.value);
-    
-    let currentSaved = parseInt(localStorage.getItem(`${aktifOgrenci}_${yeniDers}_savedTime`)) || 0;
-    gostergeyiGuncelle(currentSaved);
-    socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML, kocKodu: kocKodu });
-    if(currentSaved > 0) { startBtn.innerHTML = "▶ Devam Et"; } else { startBtn.innerHTML = "▶ Başla"; }
-}
-
-// Event Listeners for Select Boxes
-sinavSecimi.addEventListener('change', () => mufredatYukle(false));
-dersSecimiUI.addEventListener('change', () => konuYukle(false));
-konuSecimi.addEventListener('change', dersDegisikliginiKaydet);
-
-
-// --- STANDART KODLAR (Müzik, Düello, Timer vb.) ---
 function radyoKapat() { document.getElementById('radyoLofi').pause(); document.getElementById('radyoYagmur').pause(); document.getElementById('radyoKafe').pause(); document.querySelectorAll('.radyo-btn').forEach(b => b.classList.remove('aktif')); }
 window.radyoCal = function(tur) { radyoKapat(); document.getElementById('btn' + tur).classList.add('aktif'); let audio = document.getElementById('radyo' + tur); audio.volume = 0.5; audio.play().catch(e=>alert("Tarayıcınız otomatik müziği engelledi.")); };
 
@@ -126,33 +49,21 @@ function startTimer() { if (!running) { localStorage.setItem(`${aktifOgrenci}_st
 function pauseTimer(otomatikMi = false) { if (running) { clearInterval(tInterval); let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${aktifDersString}_savedTime`)) || 0); localStorage.setItem(`${aktifOgrenci}_${aktifDersString}_savedTime`, otomatikMi && mode === 'pomodoro' ? 0 : diff); socket.emit('istatistik_guncelle', { ogrenciAd: aktifOgrenci, ders: aktifDersString, ms: diff, kocKodu: kocKodu }); localStorage.setItem(`${aktifOgrenci}_running`, 'false'); running = false; pauseBtn.style.display = 'none'; startBtn.style.display = 'block'; startBtn.innerHTML = otomatikMi ? "▶ Başla" : "▶ Devam Et"; document.getElementById('statusText').innerHTML = otomatikMi ? "🎉 Pomodoro Bitti!" : "⏸️ Mola Verildi."; document.getElementById('statusText').style.backgroundColor = "#fef3c7"; document.getElementById('statusText').style.color = "#d97706"; document.getElementById('pomoInput').disabled = false; socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: aktifDersString, mesaj: otomatikMi ? 'Pomodoro Bitti, Molada.' : 'Mola verdi, durdurdu.', kocKodu: kocKodu }); } }
 
 window.onload = () => {
-    // Sınav Seçeneklerini Yükle
     for(let s in MUFREDAT) { sinavSecimi.innerHTML += `<option value="${s}">${s}</option>`; }
-    
-    let savedSinav = localStorage.getItem(`${aktifOgrenci}_secilenSinav`) || 'YKS';
-    let savedDers = localStorage.getItem(`${aktifOgrenci}_secilenDers`) || 'TYT Matematik';
-    let savedKonu = localStorage.getItem(`${aktifOgrenci}_secilenKonu`) || 'Temel Kavramlar';
-
+    let savedSinav = localStorage.getItem(`${aktifOgrenci}_secilenSinav`) || 'YKS'; let savedDers = localStorage.getItem(`${aktifOgrenci}_secilenDers`) || 'TYT Matematik'; let savedKonu = localStorage.getItem(`${aktifOgrenci}_secilenKonu`) || 'Temel Kavramlar';
     sinavSecimi.value = savedSinav; mufredatYukle(true);
     if(dersSecimiUI.querySelector(`option[value="${savedDers}"]`)) dersSecimiUI.value = savedDers; else dersSecimiUI.selectedIndex = 0;
     konuYukle(true);
     if(konuSecimi.querySelector(`option[value="${savedKonu}"]`)) konuSecimi.value = savedKonu; else konuSecimi.selectedIndex = 0;
-    
     aktifDersString = getDers();
-
     mode = localStorage.getItem(`${aktifOgrenci}_mode`) || 'normal';
-    if(mode === 'pomodoro') { document.getElementById('pomoInput').value = localStorage.getItem(`${aktifOgrenci}_pomoDuration`) || 25; document.getElementById('pomoInput').style.display = 'block'; document.getElementById('modeNormal').className = 'mode-btn mode-passive'; document.getElementById('modePomo').className = 'mode-btn mode-active'; document.getElementById('modePomo').style.background = '#ef4444'; document.getElementById('modePomo').style.boxShadow = '0 4px 0 #b91c1c'; } 
-    else { document.getElementById('pomoInput').style.display = 'none'; }
-    
+    if(mode === 'pomodoro') { document.getElementById('pomoInput').value = localStorage.getItem(`${aktifOgrenci}_pomoDuration`) || 25; document.getElementById('pomoInput').style.display = 'block'; document.getElementById('modeNormal').className = 'mode-btn mode-passive'; document.getElementById('modePomo').className = 'mode-btn mode-active'; document.getElementById('modePomo').style.background = '#ef4444'; document.getElementById('modePomo').style.boxShadow = '0 4px 0 #b91c1c'; } else { document.getElementById('pomoInput').style.display = 'none'; }
     let sTime = parseInt(localStorage.getItem(`${aktifOgrenci}_${aktifDersString}_savedTime`)) || 0;
     if(localStorage.getItem(`${aktifOgrenci}_running`) === 'true') {
         startBtn.style.display = 'none'; pauseBtn.style.display = 'block'; document.getElementById('statusText').innerHTML = "🟢 Odak modu aktif!"; document.getElementById('statusText').style.backgroundColor = "#d1fae5"; document.getElementById('statusText').style.color = "#059669"; document.getElementById('pomoInput').disabled = true;
         tInterval = setInterval(() => { let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${aktifDersString}_savedTime`)) || 0); if (gostergeyiGuncelle(diff) && mode === 'pomodoro') { sesCal(); pauseTimer(true); } socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML, kocKodu: kocKodu }); }, 1000);
         socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: aktifDersString, mesaj: 'Derse geri döndü (Devam ediyor)', kocKodu: kocKodu });
-    } else {
-        if (sTime > 0) startBtn.innerHTML = "▶ Devam Et";
-        gostergeyiGuncelle(sTime);
-    }
+    } else { if (sTime > 0) startBtn.innerHTML = "▶ Devam Et"; gostergeyiGuncelle(sTime); }
 };
 
 socket.on('gorev_guncellendi', (tumVeriler) => {
@@ -160,6 +71,13 @@ socket.on('gorev_guncellendi', (tumVeriler) => {
 
     let benimVerim = tumVeriler.find(v => v.ogrenciAd === aktifOgrenci);
     if (benimVerim) {
+        
+        // 🔐 YENİ: Veli kodunu canlı olarak çek ve bas (eski hesapları kurtarır)
+        if(benimVerim.veliKodu && document.getElementById('veliKoduGosterge')) {
+            document.getElementById('veliKoduGosterge').innerText = benimVerim.veliKodu;
+            localStorage.setItem('veliKodu', benimVerim.veliKodu); // Hafızaya da kaydet
+        }
+
         anlikXp = benimVerim.xp || 0; if(document.getElementById('marketXpDisplay')) document.getElementById('marketXpDisplay').innerText = anlikXp;
         if(benimVerim.avatar && document.getElementById('aktifAvatar')) document.getElementById('aktifAvatar').innerHTML = benimVerim.avatar;
         let xpBadge = document.getElementById('xpBadge'); if (!xpBadge) { xpBadge = document.createElement('div'); xpBadge.id = 'xpBadge'; xpBadge.style.cssText = "position:absolute; top:20px; left:20px; color:white; padding:8px 15px; border-radius:20px; font-weight:800; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.2);"; document.body.appendChild(xpBadge); }
@@ -168,7 +86,7 @@ socket.on('gorev_guncellendi', (tumVeriler) => {
         if(benimSira !== -1 && benimVerim.xp > 0) { if(benimSira < 3) { ligIsmi = '🏆 Süper Lig'; ligRengi = '#fef3c7'; anaRenk = '#f59e0b'; } else if(benimSira < 8) { ligIsmi = '🥇 1. Lig'; ligRengi = '#f1f5f9'; anaRenk = '#64748b'; } else { ligIsmi = '🪵 Amatör Lig'; ligRengi = '#ffedd5'; anaRenk = '#d97706'; } }
         xpBadge.style.background = anaRenk; xpBadge.innerHTML = `<span style="background:${ligRengi}; color:${anaRenk}; padding:4px 8px; border-radius:10px; margin-right:6px;">${ligIsmi}</span> ${unvanHesapla(anlikXp)} | ${anlikXp} XP`;
         
-        if(benimVerim.aktifDuello && benimVerim.aktifDuello.rakip) { xpBadge.innerHTML += `<div style="background:#ef4444; color:white; padding:4px; border-radius:6px; margin-top:5px; font-size:11px; text-align:center;">⚔️ ${benimVerim.aktifDuello.rakip} ile Düelloda!</div>`; }
+        if(benimVerim.aktifDuello && benimVerim.aktifDuello.rakip) { xpBadge.innerHTML += `<div style="background:#ef4444; color:white; padding:4px; border-radius:6px; margin-top:5px; font-size:11px; text-align:center; animation: zippla 1s infinite;">⚔️ ${benimVerim.aktifDuello.rakip} ile Düelloda!</div>`; }
 
         if (benimVerim.gorevler && benimVerim.gorevler.length > 0) { let tb = document.getElementById('taskBoard'); if(tb) tb.style.display = 'block'; let taskList = document.getElementById('studentTaskList'); if(taskList) { taskList.innerHTML = ''; benimVerim.gorevler.forEach(gorev => { let textStil = gorev.tamamlandi ? "text-decoration: line-through; color: #94a3b8;" : "color: #334155; font-weight: 800;"; let sagKisim = gorev.tamamlandi ? `<span style="color: #10b981; font-weight: 800;">✅ Bitti</span>` : `<button class="finish-btn" onclick="goreviBitir(${gorev.id})">Bitir (+10 XP)</button>`; taskList.innerHTML += `<div class="task-item"><span style="${textStil}">${gorev.metin}</span>${sagKisim}</div>`; }); } }
     }

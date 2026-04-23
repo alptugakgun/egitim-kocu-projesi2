@@ -44,7 +44,7 @@
         <h1 id="kocKarsilama">🐿️ SincApp Paneli</h1>
         <div style="display: flex; gap: 10px;">
             <button class="btn-blue" style="background:#8b5cf6;" onclick="document.getElementById('kutuphaneModal').style.display='flex'">📚 Kütüphane Yönetimi</button>
-            <button class="btn-blue" style="background:#f59e0b;" onclick="sifreleriGor()">🔐 Şifreler</button>
+            <button class="btn-blue" style="background:#f59e0b;" onclick="sifreleriGor()">🔐 Gizli Kasa</button>
             <button class="btn-red" onclick="localStorage.clear(); window.location.href='ogretmen-login.html'">🚪 Çıkış</button>
         </div>
     </div>
@@ -52,14 +52,12 @@
     <div class="top-dashboard">
         <div class="box"><div class="box-title">⏱️ Odaklanma</div><div class="chart-container"><canvas id="odakGrafigi"></canvas></div></div>
         <div class="box"><div class="box-title">📊 XP Dağılımı</div><div class="chart-container"><canvas id="barGrafigi"></canvas></div></div>
-        
         <div class="box" style="grid-column: span 2;">
             <div class="box-title">📈 Öğrenci Net Gelişimi 
                 <select id="netOgrenciSecici" onchange="netGrafigiCiz()" style="padding:5px; border-radius:5px; font-weight:bold; outline:none; border:1px solid #cbd5e1;"><option value="">Öğrenci Seçin...</option></select>
             </div>
             <div class="chart-container"><canvas id="lineGrafigi"></canvas></div>
         </div>
-        
         <div class="box" style="grid-column: span 4;">
             <div class="box-title">🏆 SincApp Canlı Lig Tablosu <span style="font-size: 12px; font-weight: normal; color: #64748b;">(Sıralama XP'ye göre anlık değişir)</span></div>
             <ul class="leaderboard-list" id="leaderboardList" style="max-height: 250px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
@@ -70,23 +68,25 @@
 
     <div class="live-grid" id="liveGrid"></div>
 
-    <div class="modal" id="kutuphaneModal">
-        <div class="modal-content">
-            <h2 style="color:#8b5cf6; margin-top:0;">📚 Kütüphane Yönetimi</h2>
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px dashed #cbd5e1;">
-                <input type="text" id="kaynakBaslik" placeholder="Kaynak Başlığı (Örn: Limit Deneme Çözümleri)" style="padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-family: inherit; font-weight: bold;">
-                <input type="url" id="kaynakLink" placeholder="Drive, YouTube veya PDF Linki Yapıştır" style="padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-family: inherit; font-weight: bold;">
-                <button onclick="kaynakEkle()" style="background: #8b5cf6; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;">Öğrencilere Gönder 🚀</button>
-            </div>
-            <h4 style="text-align: left; margin-bottom: 5px; color: #475569;">Paylaşılan Kaynaklar</h4>
-            <div id="kaynakListesi" style="margin-bottom: 15px; max-height: 200px; overflow-y: auto;">
-                <div style="color: #94a3b8; font-style: italic;">Henüz kaynak eklemediniz.</div>
-            </div>
-            <button onclick="document.getElementById('kutuphaneModal').style.display='none'" style="padding:10px; background:#e2e8f0; border:none; border-radius:10px; font-weight:bold; width:100%; cursor:pointer;">Kapat</button>
+    <div class="modal" id="kutuphaneModal"><div class="modal-content"><h2 style="color:#8b5cf6; margin-top:0;">📚 Kütüphane Yönetimi</h2><div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px dashed #cbd5e1;"><input type="text" id="kaynakBaslik" placeholder="Kaynak Başlığı" style="padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-family: inherit; font-weight: bold;"><input type="url" id="kaynakLink" placeholder="Drive, YouTube Linki" style="padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-family: inherit; font-weight: bold;"><button onclick="kaynakEkle()" style="background: #8b5cf6; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;">Öğrencilere Gönder 🚀</button></div><h4 style="text-align: left; margin-bottom: 5px; color: #475569;">Paylaşılan Kaynaklar</h4><div id="kaynakListesi" style="margin-bottom: 15px; max-height: 200px; overflow-y: auto;"><div style="color: #94a3b8; font-style: italic;">Henüz kaynak eklemediniz.</div></div><button onclick="document.getElementById('kutuphaneModal').style.display='none'" style="padding:10px; background:#e2e8f0; border:none; border-radius:10px; font-weight:bold; width:100%; cursor:pointer;">Kapat</button></div></div>
+    
+    <div class="modal" id="sifreModal">
+        <div class="modal-content" style="width: 600px;">
+            <h2 style="margin-top:0; color: #f59e0b;">🔐 Gizli Kasa</h2>
+            <p style="font-size: 13px; color: #64748b;">Öğrenciler veli kodunu veya şifresini unutursa buradan paylaşabilirsiniz.</p>
+            <table style="width: 100%; text-align: left; border-collapse: collapse; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                        <th style="padding: 10px;">Öğrenci Adı</th>
+                        <th style="padding: 10px;">Şifresi</th>
+                        <th style="padding: 10px; color:#d97706;">👨‍👩‍👧‍👦 Veli Kodu</th>
+                    </tr>
+                </thead>
+                <tbody id="sifreTablosu"></tbody>
+            </table>
+            <button onclick="document.getElementById('sifreModal').style.display='none'" style="background: #e2e8f0; border: none; padding: 10px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer;">Kapat</button>
         </div>
     </div>
-    
-    <div class="modal" id="sifreModal"><div class="modal-content" style="width: 500px;"><h2 style="margin-top:0; color: #f59e0b;">🔐 Gizli Kasa (Şifreler)</h2><table style="width: 100%; text-align: left; border-collapse: collapse; margin-bottom: 20px;"><thead><tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;"><th style="padding: 10px;">Öğrenci Adı</th><th style="padding: 10px;">Şifresi</th></tr></thead><tbody id="sifreTablosu"></tbody></table><button onclick="document.getElementById('sifreModal').style.display='none'" style="background: #e2e8f0; border: none; padding: 10px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer;">Kapat</button></div></div>
     
     <script>
         const aktifKocIsmi = localStorage.getItem('ogretmenKimligi'); const kocKodu = localStorage.getItem('kocKodu');
@@ -95,37 +95,11 @@
 
         let sinifListesi = [], odakGrafikObjesi = null, barGrafikObjesi = null, lineGrafikObjesi = null; 
 
-        // 📚 Kaynak Fonksiyonları
-        window.kaynakEkle = function() {
-            let baslik = document.getElementById('kaynakBaslik').value.trim();
-            let link = document.getElementById('kaynakLink').value.trim();
-            if(!baslik || !link) return alert("Başlık ve link boş bırakılamaz!");
-            if(!link.startsWith('http')) link = 'https://' + link; // link formatını garantile
-            socket.emit('yeni_kaynak_ekle', { kocKodu: kocKodu, baslik: baslik, url: link });
-            document.getElementById('kaynakBaslik').value = ''; document.getElementById('kaynakLink').value = '';
-        };
-
+        window.kaynakEkle = function() { let baslik = document.getElementById('kaynakBaslik').value.trim(); let link = document.getElementById('kaynakLink').value.trim(); if(!baslik || !link) return alert("Başlık ve link boş bırakılamaz!"); if(!link.startsWith('http')) link = 'https://' + link; socket.emit('yeni_kaynak_ekle', { kocKodu: kocKodu, baslik: baslik, url: link }); document.getElementById('kaynakBaslik').value = ''; document.getElementById('kaynakLink').value = ''; };
         window.kaynakSil = function(id) { if(confirm("Bu kaynağı silmek istediğine emin misin?")) socket.emit('kaynak_sil', { id: id, kocKodu: kocKodu }); };
+        socket.on('kaynaklari_yukle', (liste) => { let kutu = document.getElementById('kaynakListesi'); kutu.innerHTML = ''; if(liste.length === 0) { kutu.innerHTML = '<div style="color: #94a3b8; font-style: italic;">Henüz kaynak eklemediniz.</div>'; return; } liste.forEach(k => { kutu.innerHTML += `<div class="kaynak-item"><div>${k.baslik} <span style="font-size:10px; color:#94a3b8; font-weight:normal;">(${k.tarih})</span><a href="${k.url}" target="_blank">🔗 Test Et</a></div><button class="sil-btn" onclick="kaynakSil(${k.id})">Sil</button></div>`; }); });
 
-        socket.on('kaynaklari_yukle', (liste) => {
-            let kutu = document.getElementById('kaynakListesi'); kutu.innerHTML = '';
-            if(liste.length === 0) { kutu.innerHTML = '<div style="color: #94a3b8; font-style: italic;">Henüz kaynak eklemediniz.</div>'; return; }
-            liste.forEach(k => {
-                kutu.innerHTML += `<div class="kaynak-item">
-                    <div>${k.baslik} <span style="font-size:10px; color:#94a3b8; font-weight:normal;">(${k.tarih})</span><a href="${k.url}" target="_blank">🔗 Test Et</a></div>
-                    <button class="sil-btn" onclick="kaynakSil(${k.id})">Sil</button>
-                </div>`;
-            });
-        });
-
-        window.netGrafigiCiz = function() {
-            let secilenAd = document.getElementById('netOgrenciSecici').value; if(!secilenAd) return;
-            let ogrenci = sinifListesi.find(o => o.ogrenciAd === secilenAd);
-            if(!ogrenci || !ogrenci.netler || ogrenci.netler.length === 0) { if(lineGrafikObjesi) { lineGrafikObjesi.data.labels = []; lineGrafikObjesi.data.datasets[0].data = []; lineGrafikObjesi.update(); } return; }
-            let etiketler = ogrenci.netler.map(n => n.tarih + " (" + n.tur.split(' ')[0] + ")"); let veriler = ogrenci.netler.map(n => n.net);
-            if(lineGrafikObjesi) { lineGrafikObjesi.data.labels = etiketler; lineGrafikObjesi.data.datasets[0].data = veriler; lineGrafikObjesi.update(); } 
-            else { const ctx = document.getElementById('lineGrafigi').getContext('2d'); lineGrafikObjesi = new Chart(ctx, { type: 'line', data: { labels: etiketler, datasets: [{ label: 'Net Skoru', data: veriler, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.2)', tension: 0.3, fill: true, pointRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
-        };
+        window.netGrafigiCiz = function() { let secilenAd = document.getElementById('netOgrenciSecici').value; if(!secilenAd) return; let ogrenci = sinifListesi.find(o => o.ogrenciAd === secilenAd); if(!ogrenci || !ogrenci.netler || ogrenci.netler.length === 0) { if(lineGrafikObjesi) { lineGrafikObjesi.data.labels = []; lineGrafikObjesi.data.datasets[0].data = []; lineGrafikObjesi.update(); } return; } let etiketler = ogrenci.netler.map(n => n.tarih + " (" + n.tur.split(' ')[0] + ")"); let veriler = ogrenci.netler.map(n => n.net); if(lineGrafikObjesi) { lineGrafikObjesi.data.labels = etiketler; lineGrafikObjesi.data.datasets[0].data = veriler; lineGrafikObjesi.update(); } else { const ctx = document.getElementById('lineGrafigi').getContext('2d'); lineGrafikObjesi = new Chart(ctx, { type: 'line', data: { labels: etiketler, datasets: [{ label: 'Net Skoru', data: veriler, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.2)', tension: 0.3, fill: true, pointRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); } };
 
         function verileriGuncelle() {
             let secici = document.getElementById('netOgrenciSecici'); let mevcutSecim = secici.value; secici.innerHTML = '<option value="">Öğrenci Seçin...</option>';
@@ -134,23 +108,15 @@
             let siraliSinif = [...sinifListesi].sort((a, b) => (b.xp || 0) - (a.xp || 0));
             let listeEl = document.getElementById('leaderboardList'); listeEl.innerHTML = '';
             let superLig = '', lig1 = '', amatorLig = '';
-            siraliSinif.forEach((ogrenci, index) => {
-                if(ogrenci.xp > 0) {
-                    let borderRenk = index < 3 ? '#f59e0b' : index < 8 ? '#64748b' : '#d97706';
-                    let satir = `<li class="leaderboard-item" style="border-left: 4px solid ${borderRenk}; margin-bottom: 5px;"><span class="leader-name"><strong>${index + 1}.</strong> ${ogrenci.avatar || '👤'} ${ogrenci.ogrenciAd}</span><span class="leader-xp" style="background: ${borderRenk}">${ogrenci.xp} XP</span></li>`;
-                    if(index < 3) superLig += satir; else if(index < 8) lig1 += satir; else amatorLig += satir;
-                }
-            });
+            siraliSinif.forEach((ogrenci, index) => { if(ogrenci.xp > 0) { let borderRenk = index < 3 ? '#f59e0b' : index < 8 ? '#64748b' : '#d97706'; let satir = `<li class="leaderboard-item" style="border-left: 4px solid ${borderRenk}; margin-bottom: 5px;"><span class="leader-name"><strong>${index + 1}.</strong> ${ogrenci.avatar || '👤'} ${ogrenci.ogrenciAd}</span><span class="leader-xp" style="background: ${borderRenk}">${ogrenci.xp} XP</span></li>`; if(index < 3) superLig += satir; else if(index < 8) lig1 += satir; else amatorLig += satir; } });
             if(siraliSinif.filter(o => o.xp > 0).length === 0) { listeEl.innerHTML = '<li style="color: #94a3b8; text-align: center; grid-column: span 3;">Puanlar bekleniyor...</li>'; } 
             else { listeEl.innerHTML += `<div><div class="lig-baslik" style="background:#fef3c7; color:#d97706;">🏆 SÜPER LİG (İlk 3)</div>${superLig}</div><div><div class="lig-baslik" style="background:#f1f5f9; color:#475569;">🥇 1. LİG (4. - 8. Sıra)</div>${lig1}</div><div><div class="lig-baslik" style="background:#ffedd5; color:#b45309;">🪵 AMATÖR LİG</div>${amatorLig}</div>`; }
 
             let isimler = siraliSinif.map(o => o.ogrenciAd.split(' ')[0]), xpler = siraliSinif.map(o => o.xp || 0);
-            if (barGrafikObjesi) { barGrafikObjesi.data.labels = isimler; barGrafikObjesi.data.datasets[0].data = xpler; barGrafikObjesi.update(); } 
-            else { barGrafikObjesi = new Chart(document.getElementById('barGrafigi').getContext('2d'), { type: 'bar', data: { labels: isimler, datasets: [{ label: 'Kazanılan XP', data: xpler, backgroundColor: '#3b82f6', borderRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
+            if (barGrafikObjesi) { barGrafikObjesi.data.labels = isimler; barGrafikObjesi.data.datasets[0].data = xpler; barGrafikObjesi.update(); } else { barGrafikObjesi = new Chart(document.getElementById('barGrafigi').getContext('2d'), { type: 'bar', data: { labels: isimler, datasets: [{ label: 'Kazanılan XP', data: xpler, backgroundColor: '#3b82f6', borderRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
 
             let derste = sinifListesi.filter(o => o.mesaj && !o.mesaj.includes('Mola')).length, mola = sinifListesi.filter(o => o.mesaj && o.mesaj.includes('Mola')).length;
-            if (odakGrafikObjesi) { odakGrafikObjesi.data.datasets[0].data = [derste, mola]; odakGrafikObjesi.update(); } 
-            else { odakGrafikObjesi = new Chart(document.getElementById('odakGrafigi').getContext('2d'), { type: 'doughnut', data: { labels: ['Derste 🔥', 'Molada ☕'], datasets: [{ data: [derste, mola], backgroundColor: ['#10b981', '#f59e0b'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } } }); }
+            if (odakGrafikObjesi) { odakGrafikObjesi.data.datasets[0].data = [derste, mola]; odakGrafikObjesi.update(); } else { odakGrafikObjesi = new Chart(document.getElementById('odakGrafigi').getContext('2d'), { type: 'doughnut', data: { labels: ['Derste 🔥', 'Molada ☕'], datasets: [{ data: [derste, mola], backgroundColor: ['#10b981', '#f59e0b'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } } }); }
         }
 
         socket.on('ogretmene_market_bildirimi', (veri) => { alert(`🎉 MÜJDE! Öğrenciniz ${veri.ogrenci} marketten "${veri.odul}" satın aldı!`); });
@@ -165,42 +131,33 @@
                 mevcutKart.querySelector('.student-task').innerText = gelenVeri.ders + ' ➔ ' + gelenVeri.mesaj;
             } else {
                 const yeniKart = document.createElement('div'); yeniKart.className = 'live-card'; yeniKart.id = ogrenciID; yeniKart.style.borderLeftColor = renkKodu;
-                yeniKart.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <div><div class="student-name"><span style="font-size:24px;">${gelenVeri.avatar || '👤'}</span> ${gelenVeri.ogrenciAd} <span style="font-size:12px; background:#f1f5f9; padding:2px 6px; border-radius:10px; color:#3b82f6;">${gelenVeri.xp || 0} XP</span></div><div class="student-task">${gelenVeri.ders} ➔ ${gelenVeri.mesaj}</div></div>
-                        <div style="text-align: right;"><div id="${timerID}" style="font-size: 22px; font-weight: 900; color: #4f46e5; font-variant-numeric: tabular-nums;">00:00:00</div></div>
-                    </div>
-                    <div class="task-input-row"><input type="text" id="gorevInput-${ogrenciID}" placeholder="Yeni görev ver..."><button onclick="gorevGonder('${gelenVeri.ogrenciAd}', '${ogrenciID}')">Ekle</button></div>
-                    <ul class="task-list" id="gorevListesi-${ogrenciID}"></ul>`;
+                yeniKart.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;"><div><div class="student-name"><span style="font-size:24px;">${gelenVeri.avatar || '👤'}</span> ${gelenVeri.ogrenciAd} <span style="font-size:12px; background:#f1f5f9; padding:2px 6px; border-radius:10px; color:#3b82f6;">${gelenVeri.xp || 0} XP</span></div><div class="student-task">${gelenVeri.ders} ➔ ${gelenVeri.mesaj}</div></div><div style="text-align: right;"><div id="${timerID}" style="font-size: 22px; font-weight: 900; color: #4f46e5; font-variant-numeric: tabular-nums;">00:00:00</div></div></div><div class="task-input-row"><input type="text" id="gorevInput-${ogrenciID}" placeholder="Yeni görev ver..."><button onclick="gorevGonder('${gelenVeri.ogrenciAd}', '${ogrenciID}')">Ekle</button></div><ul class="task-list" id="gorevListesi-${ogrenciID}"></ul>`;
                 document.getElementById('liveGrid').prepend(yeniKart);
             }
         }
 
         window.gorevGonder = function(ogrenciAd, ogrenciID) { let input = document.getElementById(`gorevInput-${ogrenciID}`); if(input.value.trim() !== '') { socket.emit('yeni_gorev_ekle', { ogrenciAd: ogrenciAd, gorevMetni: input.value, kocKodu: kocKodu }); input.value = ''; } };
         socket.on('ogretmene_sure_guncelle', (veri) => { let timerEl = document.getElementById("timer-card-" + veri.ogrenciAd.replace(/\s+/g, '-')); if(timerEl) timerEl.innerText = veri.sure; });
-        socket.on('gorev_guncellendi', (tumVeriler) => {
-            sinifListesi = tumVeriler; verileriGuncelle(); 
-            tumVeriler.forEach(veri => {
-                kartiEkranaCiz(veri); 
-                let ogrenciID = "card-" + veri.ogrenciAd.replace(/\s+/g, '-'), listeElementi = document.getElementById(`gorevListesi-${ogrenciID}`);
-                if(listeElementi && veri.gorevler) {
-                    listeElementi.innerHTML = ''; 
-                    veri.gorevler.forEach(g => { listeElementi.innerHTML += `<li style="${g.tamamlandi ? 'text-decoration: line-through; color: #94a3b8;' : 'color: #0f172a; font-weight: bold;'}">${g.tamamlandi ? '✅' : '⏳'} ${g.metin}</li>`; });
-                }
-            });
-        });
+        socket.on('gorev_guncellendi', (tumVeriler) => { sinifListesi = tumVeriler; verileriGuncelle(); tumVeriler.forEach(veri => { kartiEkranaCiz(veri); let ogrenciID = "card-" + veri.ogrenciAd.replace(/\s+/g, '-'), listeElementi = document.getElementById(`gorevListesi-${ogrenciID}`); if(listeElementi && veri.gorevler) { listeElementi.innerHTML = ''; veri.gorevler.forEach(g => { listeElementi.innerHTML += `<li style="${g.tamamlandi ? 'text-decoration: line-through; color: #94a3b8;' : 'color: #0f172a; font-weight: bold;'}">${g.tamamlandi ? '✅' : '⏳'} ${g.metin}</li>`; }); } }); });
         socket.on('eski_verileri_yukle', (gecmisListe) => { sinifListesi = gecmisListe; gecmisListe.forEach(veri => kartiEkranaCiz(veri)); if(sinifListesi.length > 0) verileriGuncelle(); });
-        socket.on('ogretmene_canli_bildirim', (gelenVeri) => {
-            kartiEkranaCiz(gelenVeri); let index = sinifListesi.findIndex(o => o.ogrenciAd === gelenVeri.ogrenciAd);
-            if(index !== -1) { sinifListesi[index] = gelenVeri; } else { sinifListesi.push(gelenVeri); } verileriGuncelle();
-        });
+        socket.on('ogretmene_canli_bildirim', (gelenVeri) => { kartiEkranaCiz(gelenVeri); let index = sinifListesi.findIndex(o => o.ogrenciAd === gelenVeri.ogrenciAd); if(index !== -1) { sinifListesi[index] = gelenVeri; } else { sinifListesi.push(gelenVeri); } verileriGuncelle(); });
 
+        // 🔐 YENİ: Veli Kodu Çeken ve 3 Sütuna Basan Fonksiyon
         async function sifreleriGor() {
             try {
                 const response = await fetch('/api/sifreler', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kocKodu: kocKodu }) }); 
                 const ogrenciler = await response.json(); const tablo = document.getElementById('sifreTablosu'); tablo.innerHTML = '';
-                if(ogrenciler.length === 0) { tablo.innerHTML = `<tr><td colspan="2" style="padding: 10px; text-align: center; color: #94a3b8;">Henüz kayıtlı öğrenci yok.</td></tr>`; } 
-                else { ogrenciler.forEach(ogr => { tablo.innerHTML += `<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px; font-weight: bold; color: #334155;">${ogr.ogrenciAd}</td><td style="padding: 10px; font-family: monospace; font-size: 15px; color: #ef4444; font-weight: bold;">${ogr.sifre || "Şifre Belirlenmemiş"}</td></tr>`; }); }
+                if(ogrenciler.length === 0) { tablo.innerHTML = `<tr><td colspan="3" style="padding: 10px; text-align: center; color: #94a3b8;">Henüz kayıtlı öğrenci yok.</td></tr>`; } 
+                else { 
+                    ogrenciler.forEach(ogr => { 
+                        let vKod = ogr.veliKodu ? ogr.veliKodu : "Eski Hesap (Öğrenci Giriş Yapsın)";
+                        tablo.innerHTML += `<tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 10px; font-weight: bold; color: #334155;">${ogr.ogrenciAd}</td>
+                            <td style="padding: 10px; font-family: monospace; font-size: 15px; color: #ef4444; font-weight: bold;">${ogr.sifre || "Şifre Belirlenmemiş"}</td>
+                            <td style="padding: 10px; font-family: monospace; font-size: 15px; color: #10b981; font-weight: bold;">${vKod}</td>
+                        </tr>`; 
+                    }); 
+                }
                 document.getElementById('sifreModal').style.display = 'flex';
             } catch (e) { alert("Şifreler çekilirken bir hata oluştu!"); }
         }
