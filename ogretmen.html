@@ -35,7 +35,6 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;}
         .modal-content { background: white; padding: 25px; border-radius: 20px; text-align: center; width: 500px; max-height: 80vh; overflow-y: auto;}
         
-        /* Ajanda & Finans Tablosu */
         table.ajanda-tablo { width: 100%; border-collapse: collapse; margin-top: 15px;}
         .ajanda-tablo th { background: #f1f5f9; padding: 10px; font-size: 12px; }
         .ajanda-tablo td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 13px; font-weight: bold;}
@@ -64,10 +63,8 @@
             <div class="chart-container"><canvas id="lineGrafigi"></canvas></div>
         </div>
         <div class="box" style="grid-column: span 4;">
-            <div class="box-title">🏆 KatalizApp Canlı Lig Tablosu <span style="font-size: 12px; font-weight: normal; color: #64748b;">(Sıralama XP'ye göre anlık değişir)</span></div>
-            <ul class="leaderboard-list" id="leaderboardList" style="max-height: 250px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                <li style="color: #94a3b8; text-align: center; grid-column: span 3;">Lig hesaplanıyor...</li>
-            </ul>
+            <div class="box-title">🏆 KatalizApp Canlı Lig Tablosu</div>
+            <ul class="leaderboard-list" id="leaderboardList" style="max-height: 250px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;"></ul>
         </div>
     </div>
 
@@ -77,38 +74,25 @@
     
     <div class="modal" id="sifreModal"><div class="modal-content" style="width: 600px;"><h2 style="margin-top:0; color: #f59e0b;">🔐 Gizli Kasa</h2><p style="font-size: 13px; color: #64748b;">Öğrenciler veli kodunu veya şifresini unutursa buradan paylaşabilirsiniz.</p><table class="ajanda-tablo"><thead><tr><th>Öğrenci Adı</th><th>Şifresi</th><th style="color:#d97706;">👨‍👩‍👧‍👦 Veli Kodu</th></tr></thead><tbody id="sifreTablosu"></tbody></table><button onclick="document.getElementById('sifreModal').style.display='none'" style="background: #e2e8f0; border: none; padding: 10px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer;">Kapat</button></div></div>
 
-    <div class="modal" id="ajandaModal">
-        <div class="modal-content" style="width: 700px;">
-            <h2 style="margin-top:0; color: #10b981;">📅 Ajanda & Finans Yönetimi</h2>
-            <p style="font-size: 13px; color: #64748b;">Öğrencilerin sıradaki ders saatlerini ve ödeme durumlarını ayarlayın.</p>
-            <table class="ajanda-tablo">
-                <thead><tr><th>Öğrenci Adı</th><th>Ödeme Durumu</th><th>Sıradaki Özel Ders (Tarih/Saat)</th><th>Kaydet</th></tr></thead>
-                <tbody id="ajandaTablosu"></tbody>
-            </table>
-            <button onclick="document.getElementById('ajandaModal').style.display='none'" style="margin-top:15px; background: #e2e8f0; border: none; padding: 10px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer;">Kapat</button>
-        </div>
-    </div>
+    <div class="modal" id="ajandaModal"><div class="modal-content" style="width: 700px;"><h2 style="margin-top:0; color: #10b981;">📅 Ajanda & Finans Yönetimi</h2><table class="ajanda-tablo"><thead><tr><th>Öğrenci Adı</th><th>Ödeme Durumu</th><th>Sıradaki Özel Ders (Tarih/Saat)</th><th>Kaydet</th></tr></thead><tbody id="ajandaTablosu"></tbody></table><button onclick="document.getElementById('ajandaModal').style.display='none'" style="margin-top:15px; background: #e2e8f0; border: none; padding: 10px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer;">Kapat</button></div></div>
 
-    <div class="modal" id="isiModal">
-        <div class="modal-content" style="width: 600px;">
-            <h2 style="margin-top:0; color: #ef4444;">🗺️ Konu Isı Haritası</h2>
-            <p style="font-size: 13px; color: #64748b;">Öğrencinin eksik olduğu veya iyi olduğu konuları renklerle işaretleyin.</p>
+    <div class="modal" id="isiModal"><div class="modal-content" style="width: 600px;"><h2 style="margin-top:0; color: #ef4444;">🗺️ Konu Isı Haritası</h2><div style="display:flex; gap:10px; margin-bottom: 15px;"><select id="isiOgrenciSecici" onchange="isiHaritasiGoster()" class="btn-blue" style="background:#f1f5f9; color:#1e293b; flex:1; outline:none;"><option value="">Öğrenci Seçin...</option></select></div><div style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #cbd5e1; margin-bottom: 15px; display:flex; gap:10px; align-items:center;"><input type="text" id="isiKonuAdi" placeholder="Konu (Örn: Polinomlar)" style="flex:2; padding:8px; border-radius:6px; border:1px solid #cbd5e1; outline:none; font-weight:bold;"><button class="isi-btn" style="background:#10b981;" onclick="isiGuncelle('🟩 İyi')">İyi</button><button class="isi-btn" style="background:#f59e0b;" onclick="isiGuncelle('🟨 Orta')">Orta</button><button class="isi-btn" style="background:#ef4444;" onclick="isiGuncelle('🟥 Zayıf')">Zayıf</button></div><div id="isiMevcutHarita" style="text-align:left; max-height:200px; overflow-y:auto; padding:10px; border:1px dashed #cbd5e1; border-radius:10px; font-weight:bold; font-size:14px; line-height:1.8;">Öğrenci seçin...</div><button onclick="document.getElementById('isiModal').style.display='none'" style="margin-top:15px; background: #e2e8f0; border: none; padding: 10px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer;">Kapat</button></div></div>
+    
+    <div class="modal" id="aiModal">
+        <div class="modal-content" style="border: 3px solid #8b5cf6;">
+            <div style="font-size: 40px;">🤖</div>
+            <h2 style="margin-top:0; color: #8b5cf6;">AI Strateji Asistanı</h2>
+            <p id="aiRaporMetni" style="font-weight:bold; font-size:15px; color:#334155; line-height: 1.6;">Analiz ediliyor...</p>
             
-            <div style="display:flex; gap:10px; margin-bottom: 15px;">
-                <select id="isiOgrenciSecici" onchange="isiHaritasiGoster()" class="btn-blue" style="background:#f1f5f9; color:#1e293b; flex:1; outline:none;"><option value="">Öğrenci Seçin...</option></select>
-            </div>
-            
-            <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #cbd5e1; margin-bottom: 15px; display:flex; gap:10px; align-items:center;">
-                <input type="text" id="isiKonuAdi" placeholder="Konu (Örn: Polinomlar)" style="flex:2; padding:8px; border-radius:6px; border:1px solid #cbd5e1; outline:none; font-weight:bold;">
-                <button class="isi-btn" style="background:#10b981;" onclick="isiGuncelle('🟩 İyi')">İyi</button>
-                <button class="isi-btn" style="background:#f59e0b;" onclick="isiGuncelle('🟨 Orta')">Orta</button>
-                <button class="isi-btn" style="background:#ef4444;" onclick="isiGuncelle('🟥 Zayıf')">Zayıf</button>
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">Önerilen Hedef Görev:</span>
+                <input type="text" id="aiOnerilenGorev" style="width: 90%; padding: 10px; margin-top: 5px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: bold; color: #4f46e5; text-align: center;">
             </div>
 
-            <div id="isiMevcutHarita" style="text-align:left; max-height:200px; overflow-y:auto; padding:10px; border:1px dashed #cbd5e1; border-radius:10px; font-weight:bold; font-size:14px; line-height:1.8;">
-                Öğrenci seçin...
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn-blue" style="flex:1; background:#10b981; padding:12px;" onclick="aiGoreviOnayla()">🚀 Onayla ve Gönder</button>
+                <button class="btn-red" style="flex:1; padding:12px;" onclick="document.getElementById('aiModal').style.display='none'">İptal</button>
             </div>
-            <button onclick="document.getElementById('isiModal').style.display='none'" style="margin-top:15px; background: #e2e8f0; border: none; padding: 10px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer;">Kapat</button>
         </div>
     </div>
     
@@ -118,53 +102,70 @@
         const socket = io(); socket.emit('join_room', kocKodu);
 
         let sinifListesi = [], odakGrafikObjesi = null, barGrafikObjesi = null, lineGrafikObjesi = null; 
+        let aktifAiOgrenci = ""; // Yapay zeka kimi analiz ediyor?
 
-        // 📅 Ajanda Fonksiyonları
-        window.ajandaAc = function() {
-            let tablo = document.getElementById('ajandaTablosu'); tablo.innerHTML = '';
-            if(sinifListesi.length === 0) { tablo.innerHTML = '<tr><td colspan="4" style="text-align:center;">Öğrenci yok.</td></tr>'; }
-            sinifListesi.forEach(o => {
-                let checked = o.aidatOdendi ? 'checked' : '';
-                let dDeger = o.sonrakiDers ? o.sonrakiDers : '';
-                tablo.innerHTML += `<tr>
-                    <td>${o.ogrenciAd}</td>
-                    <td><label><input type="checkbox" id="aidat_${o.ogrenciAd}" ${checked}> Ödendi</label></td>
-                    <td><input type="datetime-local" id="tarih_${o.ogrenciAd}" value="${dDeger}" style="padding:5px; border-radius:5px; border:1px solid #cbd5e1;"></td>
-                    <td><button class="btn-blue" onclick="ajandaKaydet('${o.ogrenciAd}')">Kaydet</button></td>
-                </tr>`;
-            });
-            document.getElementById('ajandaModal').style.display = 'flex';
-        };
-        window.ajandaKaydet = function(ad) {
-            let odendi = document.getElementById(`aidat_${ad}`).checked; let tarih = document.getElementById(`tarih_${ad}`).value;
-            socket.emit('ajanda_kaydet', { ogrenciAd: ad, kocKodu: kocKodu, aidatOdendi: odendi, sonrakiDers: tarih });
-            alert("Kaydedildi! Öğrenci ekranına yansıdı.");
-        };
+        // 📄 YENİ (Geri Gelen): PDF Karne Alma
+        window.pdfKarneAl = function(ad) {
+            let ogr = sinifListesi.find(o => o.ogrenciAd === ad);
+            if(!ogr) return alert("Öğrenci verisi bulunamadı!");
+            
+            let raporDiv = document.createElement('div');
+            raporDiv.style.padding = "40px"; raporDiv.style.fontFamily = "sans-serif";
+            
+            let htmlIcerik = `<div style="text-align:center; border-bottom:3px solid #4f46e5; padding-bottom:20px; margin-bottom:20px;">
+                <h1 style="color:#4f46e5; margin:0;">⚡ KatalizApp</h1>
+                <h2 style="color:#334155; margin:5px 0;">Öğrenci Gelişim Raporu</h2>
+            </div>
+            <h3>Öğrenci: ${ogr.ogrenciAd}</h3>
+            <p><strong>Kazanılan Deneyim (XP):</strong> ${ogr.xp || 0} XP</p>
+            <p><strong>Biten Görev Sayısı:</strong> ${ogr.gorevler ? ogr.gorevler.filter(g=>g.tamamlandi).length : 0}</p>
+            <h4 style="color:#ef4444; margin-top:20px;">🗺️ Konu Isı Haritası Analizi:</h4><ul>`;
+            
+            if(ogr.isiHaritasi && Object.keys(ogr.isiHaritasi).length > 0) {
+                for(let k in ogr.isiHaritasi) { htmlIcerik += `<li><b>${k}:</b> ${ogr.isiHaritasi[k]}</li>`; }
+            } else { htmlIcerik += `<li>Henüz konu analizi girilmemiştir.</li>`; }
+            
+            htmlIcerik += `</ul><hr style="margin-top:40px;"><p style="font-size:12px; color:#94a3b8; text-align:center;">Bu rapor, Eğitmen ${aktifKocIsmi} tarafından KatalizApp (Eğitim Yönetim Sistemi) üzerinden otomatik üretilmiştir.</p>`;
+            raporDiv.innerHTML = htmlIcerik;
 
-        // 🗺️ Isı Haritası Fonksiyonları
-        window.isiHaritasiAc = function() {
-            let secici = document.getElementById('isiOgrenciSecici'); secici.innerHTML = '<option value="">Öğrenci Seçin...</option>';
-            sinifListesi.forEach(o => { secici.innerHTML += `<option value="${o.ogrenciAd}">${o.ogrenciAd}</option>`; });
-            document.getElementById('isiModal').style.display = 'flex';
-        };
-        window.isiHaritasiGoster = function() {
-            let ad = document.getElementById('isiOgrenciSecici').value; let kutu = document.getElementById('isiMevcutHarita'); kutu.innerHTML = '';
-            if(!ad) return; let ogrenci = sinifListesi.find(o => o.ogrenciAd === ad);
-            if(!ogrenci || !ogrenci.isiHaritasi || Object.keys(ogrenci.isiHaritasi).length === 0) { kutu.innerHTML = '<span style="color:#94a3b8;">Henüz analiz girilmedi.</span>'; return; }
-            for(let konu in ogrenci.isiHaritasi) { kutu.innerHTML += `<div>${ogrenci.isiHaritasi[konu]} - ${konu}</div>`; }
-        };
-        window.isiGuncelle = function(durum) {
-            let ad = document.getElementById('isiOgrenciSecici').value; let konu = document.getElementById('isiKonuAdi').value.trim();
-            if(!ad || !konu) return alert("Öğrenci ve Konu adı boş bırakılamaz!");
-            socket.emit('isi_haritasi_guncelle', { ogrenciAd: ad, kocKodu: kocKodu, konu: konu, durum: durum });
-            document.getElementById('isiKonuAdi').value = ''; alert("Isı Haritası Güncellendi!");
-            setTimeout(isiHaritasiGoster, 500); // 0.5sn bekleip güncel hali çek
+            // PDF'i oluştur ve indir
+            alert("Rapor hazırlanıyor, lütfen bekleyin...");
+            html2pdf(raporDiv, { margin: 0.5, filename: `${ad}_Karne.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } });
         };
 
-        // Standart Fonksiyonlar
-        window.kaynakEkle = function() { let baslik = document.getElementById('kaynakBaslik').value.trim(); let link = document.getElementById('kaynakLink').value.trim(); if(!baslik || !link) return alert("Başlık ve link boş bırakılamaz!"); if(!link.startsWith('http')) link = 'https://' + link; socket.emit('yeni_kaynak_ekle', { kocKodu: kocKodu, baslik: baslik, url: link }); document.getElementById('kaynakBaslik').value = ''; document.getElementById('kaynakLink').value = ''; };
-        window.kaynakSil = function(id) { if(confirm("Bu kaynağı silmek istediğine emin misin?")) socket.emit('kaynak_sil', { id: id, kocKodu: kocKodu }); };
-        socket.on('kaynaklari_yukle', (liste) => { let kutu = document.getElementById('kaynakListesi'); kutu.innerHTML = ''; if(liste.length === 0) { kutu.innerHTML = '<div style="color: #94a3b8; font-style: italic;">Henüz kaynak eklemediniz.</div>'; return; } liste.forEach(k => { kutu.innerHTML += `<div class="kaynak-item"><div>${k.baslik} <span style="font-size:10px; color:#94a3b8; font-weight:normal;">(${k.tarih})</span><a href="${k.url}" target="_blank">🔗 Test Et</a></div><button class="sil-btn" onclick="kaynakSil(${k.id})">Sil</button></div>`; }); });
+        // 🤖 YENİ: Yapay Zeka Asistanı Tetikleyici
+        window.yapayZekaAnaliz = function(ad) {
+            aktifAiOgrenci = ad;
+            document.getElementById('aiRaporMetni').innerText = "Veriler taranıyor, ısı haritası okunuyor...";
+            document.getElementById('aiOnerilenGorev').value = "";
+            document.getElementById('aiModal').style.display = 'flex';
+            socket.emit('yapay_zeka_analiz_istegi', { ogrenciAd: ad, kocKodu: kocKodu });
+        };
+
+        socket.on('yapay_zeka_raporu', (veri) => {
+            if(veri.ad === aktifAiOgrenci) {
+                document.getElementById('aiRaporMetni').innerHTML = veri.rapor;
+                document.getElementById('aiOnerilenGorev').value = veri.oneri;
+            }
+        });
+
+        window.aiGoreviOnayla = function() {
+            let gorev = document.getElementById('aiOnerilenGorev').value;
+            if(!gorev) return alert("Görev boş olamaz!");
+            socket.emit('yeni_gorev_ekle', { ogrenciAd: aktifAiOgrenci, gorevMetni: gorev, kocKodu: kocKodu });
+            document.getElementById('aiModal').style.display = 'none';
+            alert("✅ Yapay Zekanın belirlediği hedef öğrenciye yollandı!");
+        };
+
+        // Standart Fonksiyonlar (Ajanda, Isı Haritası vb. aynen duruyor)
+        window.ajandaAc = function() { let tablo = document.getElementById('ajandaTablosu'); tablo.innerHTML = ''; if(sinifListesi.length === 0) { tablo.innerHTML = '<tr><td colspan="4" style="text-align:center;">Öğrenci yok.</td></tr>'; } sinifListesi.forEach(o => { let checked = o.aidatOdendi ? 'checked' : ''; let dDeger = o.sonrakiDers ? o.sonrakiDers : ''; tablo.innerHTML += `<tr><td>${o.ogrenciAd}</td><td><label><input type="checkbox" id="aidat_${o.ogrenciAd}" ${checked}> Ödendi</label></td><td><input type="datetime-local" id="tarih_${o.ogrenciAd}" value="${dDeger}" style="padding:5px; border-radius:5px; border:1px solid #cbd5e1;"></td><td><button class="btn-blue" onclick="ajandaKaydet('${o.ogrenciAd}')">Kaydet</button></td></tr>`; }); document.getElementById('ajandaModal').style.display = 'flex'; };
+        window.ajandaKaydet = function(ad) { let odendi = document.getElementById(`aidat_${ad}`).checked; let tarih = document.getElementById(`tarih_${ad}`).value; socket.emit('ajanda_kaydet', { ogrenciAd: ad, kocKodu: kocKodu, aidatOdendi: odendi, sonrakiDers: tarih }); alert("Kaydedildi!"); };
+        window.isiHaritasiAc = function() { let secici = document.getElementById('isiOgrenciSecici'); secici.innerHTML = '<option value="">Öğrenci Seçin...</option>'; sinifListesi.forEach(o => { secici.innerHTML += `<option value="${o.ogrenciAd}">${o.ogrenciAd}</option>`; }); document.getElementById('isiModal').style.display = 'flex'; };
+        window.isiHaritasiGoster = function() { let ad = document.getElementById('isiOgrenciSecici').value; let kutu = document.getElementById('isiMevcutHarita'); kutu.innerHTML = ''; if(!ad) return; let ogrenci = sinifListesi.find(o => o.ogrenciAd === ad); if(!ogrenci || !ogrenci.isiHaritasi || Object.keys(ogrenci.isiHaritasi).length === 0) { kutu.innerHTML = '<span style="color:#94a3b8;">Henüz analiz girilmedi.</span>'; return; } for(let konu in ogrenci.isiHaritasi) { kutu.innerHTML += `<div>${ogrenci.isiHaritasi[konu]} - ${konu}</div>`; } };
+        window.isiGuncelle = function(durum) { let ad = document.getElementById('isiOgrenciSecici').value; let konu = document.getElementById('isiKonuAdi').value.trim(); if(!ad || !konu) return alert("Öğrenci ve Konu adı boş bırakılamaz!"); socket.emit('isi_haritasi_guncelle', { ogrenciAd: ad, kocKodu: kocKodu, konu: konu, durum: durum }); document.getElementById('isiKonuAdi').value = ''; setTimeout(isiHaritasiGoster, 500); };
+        window.kaynakEkle = function() { let baslik = document.getElementById('kaynakBaslik').value.trim(); let link = document.getElementById('kaynakLink').value.trim(); if(!baslik || !link) return; if(!link.startsWith('http')) link = 'https://' + link; socket.emit('yeni_kaynak_ekle', { kocKodu: kocKodu, baslik: baslik, url: link }); document.getElementById('kaynakBaslik').value = ''; document.getElementById('kaynakLink').value = ''; };
+        window.kaynakSil = function(id) { if(confirm("Sil?")) socket.emit('kaynak_sil', { id: id, kocKodu: kocKodu }); };
+        socket.on('kaynaklari_yukle', (liste) => { let kutu = document.getElementById('kaynakListesi'); kutu.innerHTML = ''; if(liste.length === 0) { kutu.innerHTML = '<div style="color: #94a3b8; font-style: italic;">Yok.</div>'; return; } liste.forEach(k => { kutu.innerHTML += `<div class="kaynak-item"><div>${k.baslik} <a href="${k.url}" target="_blank">🔗 Git</a></div><button class="sil-btn" onclick="kaynakSil(${k.id})">Sil</button></div>`; }); });
 
         window.netGrafigiCiz = function() { let secilenAd = document.getElementById('netOgrenciSecici').value; if(!secilenAd) return; let ogrenci = sinifListesi.find(o => o.ogrenciAd === secilenAd); if(!ogrenci || !ogrenci.netler || ogrenci.netler.length === 0) { if(lineGrafikObjesi) { lineGrafikObjesi.data.labels = []; lineGrafikObjesi.data.datasets[0].data = []; lineGrafikObjesi.update(); } return; } let etiketler = ogrenci.netler.map(n => n.tarih + " (" + n.tur.split(' ')[0] + ")"); let veriler = ogrenci.netler.map(n => n.net); if(lineGrafikObjesi) { lineGrafikObjesi.data.labels = etiketler; lineGrafikObjesi.data.datasets[0].data = veriler; lineGrafikObjesi.update(); } else { const ctx = document.getElementById('lineGrafigi').getContext('2d'); lineGrafikObjesi = new Chart(ctx, { type: 'line', data: { labels: etiketler, datasets: [{ label: 'Net Skoru', data: veriler, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.2)', tension: 0.3, fill: true, pointRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); } };
 
@@ -174,8 +175,7 @@
             if(document.getElementById('isiModal').style.display === 'flex') isiHaritasiGoster();
 
             let siraliSinif = [...sinifListesi].sort((a, b) => (b.xp || 0) - (a.xp || 0));
-            let listeEl = document.getElementById('leaderboardList'); listeEl.innerHTML = '';
-            let superLig = '', lig1 = '', amatorLig = '';
+            let listeEl = document.getElementById('leaderboardList'); listeEl.innerHTML = ''; let superLig = '', lig1 = '', amatorLig = '';
             siraliSinif.forEach((ogrenci, index) => { if(ogrenci.xp > 0) { let borderRenk = index < 3 ? '#f59e0b' : index < 8 ? '#64748b' : '#d97706'; let satir = `<li class="leaderboard-item" style="border-left: 4px solid ${borderRenk}; margin-bottom: 5px;"><span class="leader-name"><strong>${index + 1}.</strong> ${ogrenci.avatar || '👤'} ${ogrenci.ogrenciAd}</span><span class="leader-xp" style="background: ${borderRenk}">${ogrenci.xp} XP</span></li>`; if(index < 3) superLig += satir; else if(index < 8) lig1 += satir; else amatorLig += satir; } });
             if(siraliSinif.filter(o => o.xp > 0).length === 0) { listeEl.innerHTML = '<li style="color: #94a3b8; text-align: center; grid-column: span 3;">Puanlar bekleniyor...</li>'; } 
             else { listeEl.innerHTML += `<div><div class="lig-baslik" style="background:#fef3c7; color:#d97706;">🏆 SÜPER LİG (İlk 3)</div>${superLig}</div><div><div class="lig-baslik" style="background:#f1f5f9; color:#475569;">🥇 1. LİG (4. - 8. Sıra)</div>${lig1}</div><div><div class="lig-baslik" style="background:#ffedd5; color:#b45309;">🪵 AMATÖR LİG</div>${amatorLig}</div>`; }
@@ -193,13 +193,21 @@
             let molaMi = gelenVeri.mesaj && gelenVeri.mesaj.includes('Mola'), renkKodu = molaMi ? '#f59e0b' : '#10b981';
             let ogrenciID = "card-" + gelenVeri.ogrenciAd.replace(/\s+/g, '-'), timerID = "timer-card-" + gelenVeri.ogrenciAd.replace(/\s+/g, '-'), mevcutKart = document.getElementById(ogrenciID);
 
+            // 🤖 ve 📄 BUTONLARININ EKLENDİĞİ KISIM:
+            let actionButtons = `<div style="display:flex; gap:5px; margin-top:10px;">
+                <button class="btn-blue" style="background:#8b5cf6; font-size:12px; padding:6px; flex:1;" onclick="yapayZekaAnaliz('${gelenVeri.ogrenciAd}')">🤖 AI Analiz</button>
+                <button class="btn-blue" style="background:#f59e0b; font-size:12px; padding:6px; flex:1;" onclick="pdfKarneAl('${gelenVeri.ogrenciAd}')">📄 PDF Karne</button>
+            </div>`;
+
             if (mevcutKart) {
                 mevcutKart.style.borderLeftColor = renkKodu;
                 mevcutKart.querySelector('.student-name').innerHTML = `<span style="font-size:24px;">${gelenVeri.avatar || '👤'}</span> ${gelenVeri.ogrenciAd} <span style="font-size:12px; background:#f1f5f9; padding:2px 6px; border-radius:10px; color:#3b82f6;">${gelenVeri.xp || 0} XP</span>`;
                 mevcutKart.querySelector('.student-task').innerText = gelenVeri.ders + ' ➔ ' + gelenVeri.mesaj;
             } else {
                 const yeniKart = document.createElement('div'); yeniKart.className = 'live-card'; yeniKart.id = ogrenciID; yeniKart.style.borderLeftColor = renkKodu;
-                yeniKart.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;"><div><div class="student-name"><span style="font-size:24px;">${gelenVeri.avatar || '👤'}</span> ${gelenVeri.ogrenciAd} <span style="font-size:12px; background:#f1f5f9; padding:2px 6px; border-radius:10px; color:#3b82f6;">${gelenVeri.xp || 0} XP</span></div><div class="student-task">${gelenVeri.ders} ➔ ${gelenVeri.mesaj}</div></div><div style="text-align: right;"><div id="${timerID}" style="font-size: 22px; font-weight: 900; color: #4f46e5; font-variant-numeric: tabular-nums;">00:00:00</div></div></div><div class="task-input-row"><input type="text" id="gorevInput-${ogrenciID}" placeholder="Yeni görev ver..."><button onclick="gorevGonder('${gelenVeri.ogrenciAd}', '${ogrenciID}')">Ekle</button></div><ul class="task-list" id="gorevListesi-${ogrenciID}"></ul>`;
+                yeniKart.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;"><div><div class="student-name"><span style="font-size:24px;">${gelenVeri.avatar || '👤'}</span> ${gelenVeri.ogrenciAd} <span style="font-size:12px; background:#f1f5f9; padding:2px 6px; border-radius:10px; color:#3b82f6;">${gelenVeri.xp || 0} XP</span></div><div class="student-task">${gelenVeri.ders} ➔ ${gelenVeri.mesaj}</div></div><div style="text-align: right;"><div id="${timerID}" style="font-size: 22px; font-weight: 900; color: #4f46e5; font-variant-numeric: tabular-nums;">00:00:00</div></div></div>
+                ${actionButtons}
+                <div class="task-input-row"><input type="text" id="gorevInput-${ogrenciID}" placeholder="Yeni görev ver..."><button onclick="gorevGonder('${gelenVeri.ogrenciAd}', '${ogrenciID}')">Ekle</button></div><ul class="task-list" id="gorevListesi-${ogrenciID}"></ul>`;
                 document.getElementById('liveGrid').prepend(yeniKart);
             }
         }
@@ -210,15 +218,7 @@
         socket.on('eski_verileri_yukle', (gecmisListe) => { sinifListesi = gecmisListe; gecmisListe.forEach(veri => kartiEkranaCiz(veri)); if(sinifListesi.length > 0) verileriGuncelle(); });
         socket.on('ogretmene_canli_bildirim', (gelenVeri) => { kartiEkranaCiz(gelenVeri); let index = sinifListesi.findIndex(o => o.ogrenciAd === gelenVeri.ogrenciAd); if(index !== -1) { sinifListesi[index] = gelenVeri; } else { sinifListesi.push(gelenVeri); } verileriGuncelle(); });
 
-        async function sifreleriGor() {
-            try {
-                const response = await fetch('/api/sifreler', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kocKodu: kocKodu }) }); 
-                const ogrenciler = await response.json(); const tablo = document.getElementById('sifreTablosu'); tablo.innerHTML = '';
-                if(ogrenciler.length === 0) { tablo.innerHTML = `<tr><td colspan="3" style="padding: 10px; text-align: center; color: #94a3b8;">Henüz kayıtlı öğrenci yok.</td></tr>`; } 
-                else { ogrenciler.forEach(ogr => { let vKod = ogr.veliKodu ? ogr.veliKodu : "Eski Hesap"; tablo.innerHTML += `<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px; font-weight: bold; color: #334155;">${ogr.ogrenciAd}</td><td style="padding: 10px; font-family: monospace; font-size: 15px; color: #ef4444; font-weight: bold;">${ogr.sifre || "Şifre Belirlenmemiş"}</td><td style="padding: 10px; font-family: monospace; font-size: 15px; color: #10b981; font-weight: bold;">${vKod}</td></tr>`; }); }
-                document.getElementById('sifreModal').style.display = 'flex';
-            } catch (e) { alert("Şifreler çekilirken bir hata oluştu!"); }
-        }
+        async function sifreleriGor() { try { const response = await fetch('/api/sifreler', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kocKodu: kocKodu }) }); const ogrenciler = await response.json(); const tablo = document.getElementById('sifreTablosu'); tablo.innerHTML = ''; if(ogrenciler.length === 0) { tablo.innerHTML = `<tr><td colspan="3" style="padding: 10px; text-align: center; color: #94a3b8;">Henüz kayıtlı öğrenci yok.</td></tr>`; } else { ogrenciler.forEach(ogr => { let vKod = ogr.veliKodu ? ogr.veliKodu : "Eski Hesap"; tablo.innerHTML += `<tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 10px; font-weight: bold; color: #334155;">${ogr.ogrenciAd}</td><td style="padding: 10px; font-family: monospace; font-size: 15px; color: #ef4444; font-weight: bold;">${ogr.sifre || "Şifre Belirlenmemiş"}</td><td style="padding: 10px; font-family: monospace; font-size: 15px; color: #10b981; font-weight: bold;">${vKod}</td></tr>`; }); } document.getElementById('sifreModal').style.display = 'flex'; } catch (e) { alert("Şifreler çekilirken bir hata oluştu!"); } }
     </script>
 </body>
 </html>
