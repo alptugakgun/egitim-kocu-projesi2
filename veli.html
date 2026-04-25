@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SincApp - Veli Portalı</title>
+    <title>KatalizApp - Veli Portalı</title>
     <script>if (!localStorage.getItem('veliKimligi')) window.location.href = 'veli-login.html';</script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/socket.io/socket.io.js"></script>
@@ -18,12 +18,18 @@
         .chart-container { position: relative; height: 250px; width: 100%; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px;}
         .stat-card { background: #f1f5f9; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold;}
+        .ajanda-kutu { background: #fef3c7; color: #d97706; padding: 15px; border-radius: 12px; font-weight: 900; border: 2px dashed #f59e0b; margin-bottom: 20px; font-size: 16px;}
     </style>
 </head>
 <body>
     <div class="header">
-        <h1 id="veliKarsilama">👨‍👩‍👧‍👦 Veli Portalı</h1>
+        <h1 id="veliKarsilama">👨‍👩‍👧‍👦 KatalizApp Veli Portalı</h1>
         <button onclick="localStorage.clear(); window.location.href='veli-login.html'" style="background:#ef4444; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">Çıkış</button>
+    </div>
+
+    <div class="ajanda-kutu" id="ajandaKutu">
+        📅 Sıradaki Özel Ders / Görüşme: <br>
+        <span id="siradakiDersTxt" style="font-size: 22px; color: #b45309;">Planlanmadı</span>
     </div>
 
     <div class="box">
@@ -44,6 +50,14 @@
             <div class="chart-container"><canvas id="netGrafigi"></canvas></div>
         </div>
     </div>
+    
+    <div class="box" style="margin-top: 20px;">
+        <h3 style="margin-top:0; color:#ef4444;">🗺️ Konu Analizi (Isı Haritası)</h3>
+        <p style="font-size:13px; color:#64748b; margin-bottom:15px;">Koç tarafından işaretlenen güçlü ve zayıf konular.</p>
+        <div id="isiMevcutHarita" style="text-align:left; max-height:200px; overflow-y:auto; padding:15px; background:#f8fafc; border-radius:10px; font-weight:bold; font-size:15px; line-height:2;">
+            <span style="color:#94a3b8;">Henüz analiz girilmedi.</span>
+        </div>
+    </div>
 
     <script>
         const ogrAd = localStorage.getItem('veliKimligi'); const kocKodu = localStorage.getItem('kocKodu');
@@ -56,6 +70,17 @@
         socket.on('gorev_guncellendi', (tumVeriler) => {
             let benimVerim = tumVeriler.find(v => v.ogrenciAd === ogrAd);
             if(benimVerim) {
+                // Ajanda Çek
+                if(benimVerim.sonrakiDers) {
+                    let d = new Date(benimVerim.sonrakiDers);
+                    document.getElementById('siradakiDersTxt').innerText = d.toLocaleString('tr-TR');
+                } else { document.getElementById('siradakiDersTxt').innerText = "Planlanmadı"; }
+
+                // Isı Haritası Çek
+                let kutu = document.getElementById('isiMevcutHarita'); kutu.innerHTML = '';
+                if(!benimVerim.isiHaritasi || Object.keys(benimVerim.isiHaritasi).length === 0) { kutu.innerHTML = '<span style="color:#94a3b8;">Henüz analiz girilmedi.</span>'; }
+                else { for(let konu in benimVerim.isiHaritasi) { kutu.innerHTML += `<div>${benimVerim.isiHaritasi[konu]} - ${konu}</div>`; } }
+
                 document.getElementById('veliXp').innerText = `${benimVerim.xp || 0} XP`;
                 
                 let sirali = tumVeriler.sort((a,b) => (b.xp||0) - (a.xp||0)); let sira = sirali.findIndex(v => v.ogrenciAd === ogrAd);
@@ -76,8 +101,7 @@
         socket.on('ogretmene_sure_guncelle', (veri) => { if(veri.ogrenciAd === ogrAd) document.getElementById('sureGosterge').innerText = veri.sure; });
         socket.on('ogretmene_canli_bildirim', (veri) => {
             if(veri.ogrenciAd === ogrAd) {
-                let molaMi = veri.mesaj && veri.mesaj.includes('Mola');
-                let kutu = document.getElementById('canliDurumKutusu');
+                let molaMi = veri.mesaj && veri.mesaj.includes('Mola'); let kutu = document.getElementById('canliDurumKutusu');
                 if(molaMi) { kutu.style.color = '#f59e0b'; kutu.querySelector('.pulse-dot').style.background = '#f59e0b'; document.getElementById('canliAktivite').innerText = 'MOLA VERDİ'; } 
                 else { kutu.style.color = '#10b981'; kutu.querySelector('.pulse-dot').style.background = '#10b981'; document.getElementById('canliAktivite').innerText = 'CANLI ÇALIŞIYOR'; }
                 document.getElementById('canliMesaj').innerText = `${veri.ders} ➔ ${veri.mesaj}`;
