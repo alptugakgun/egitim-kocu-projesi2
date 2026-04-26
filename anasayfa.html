@@ -6,42 +6,213 @@
     <title>KatalizApp - Eğitim Reaksiyonunu Hızlandır!</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
-        body { font-family: 'Nunito', sans-serif; margin: 0; background: #f8fafc; color: #1e293b; overflow-x: hidden; }
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 28px; font-weight: 900; color: #4f46e5; display: flex; align-items: center; gap: 10px;}
-        .hero { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; text-align: center; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); position: relative;}
-        .hero h1 { font-size: 56px; font-weight: 900; color: #1e293b; margin-bottom: 20px; line-height: 1.2; max-width: 800px;}
-        .hero p { font-size: 20px; font-weight: bold; color: #334155; margin-bottom: 40px; max-width: 600px;}
-        .btn-group { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;}
-        .btn { padding: 15px 30px; border-radius: 12px; font-size: 18px; font-weight: 900; text-decoration: none; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.1);}
-        .btn-ogr { background: #10b981; color: white; } .btn-ogr:hover { background: #059669; transform: translateY(-3px); }
-        .btn-koc { background: #4f46e5; color: white; } .btn-koc:hover { background: #4338ca; transform: translateY(-3px); }
-        .btn-veli { background: #f59e0b; color: white; } .btn-veli:hover { background: #d97706; transform: translateY(-3px); }
-        @keyframes pulseLogo { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        .sincap { font-size: 80px; animation: pulseLogo 2s infinite; margin-bottom: 10px; }
-        .features-section { padding: 80px 20px; text-align: center; background: white; }
-        .features-section h2 { font-size: 36px; font-weight: 900; color: #4f46e5; margin-bottom: 50px; }
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1100px; margin: 0 auto; }
-        .feature-card { background: #f8fafc; padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 2px solid #e2e8f0; transition: 0.3s; }
-        .feature-card:hover { transform: translateY(-10px); border-color: #4f46e5; box-shadow: 0 20px 40px rgba(79, 70, 229, 0.15); }
-        .feature-icon { font-size: 50px; margin-bottom: 20px; }
-        .feature-card h3 { font-size: 22px; font-weight: 900; color: #1e293b; margin-bottom: 15px; }
-        .feature-card p { font-size: 16px; color: #64748b; font-weight: bold; line-height: 1.6; }
-        .footer { padding: 30px; text-align: center; background: #1e293b; color: #94a3b8; font-weight: bold; font-size: 14px; }
+        
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            margin: 0; 
+            background: #f8fafc; 
+            color: #1e293b; 
+            overflow-x: hidden; 
+        }
+        
+        .navbar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 20px 50px; 
+            background: rgba(255,255,255,0.9); 
+            backdrop-filter: blur(10px); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+        }
+        
+        .logo { 
+            font-size: 28px; 
+            font-weight: 900; 
+            color: #4f46e5; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+        }
+        
+        .hero { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 100px 20px; 
+            text-align: center; 
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); 
+            position: relative;
+        }
+        
+        .hero h1 { 
+            font-size: 56px; 
+            font-weight: 900; 
+            color: #1e293b; 
+            margin-bottom: 20px; 
+            line-height: 1.2; 
+            max-width: 800px;
+        }
+        
+        .hero p { 
+            font-size: 20px; 
+            font-weight: bold; 
+            color: #334155; 
+            margin-bottom: 40px; 
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        
+        .btn-group { 
+            display: flex; 
+            gap: 20px; 
+            flex-wrap: wrap; 
+            justify-content: center;
+        }
+        
+        .btn { 
+            padding: 18px 35px; 
+            border-radius: 12px; 
+            font-size: 18px; 
+            font-weight: 900; 
+            text-decoration: none; 
+            transition: 0.3s; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .btn-ogr { background: #10b981; color: white; } 
+        .btn-ogr:hover { background: #059669; transform: translateY(-3px); }
+        
+        .btn-koc { background: #4f46e5; color: white; } 
+        .btn-koc:hover { background: #4338ca; transform: translateY(-3px); }
+        
+        .btn-veli { background: #f59e0b; color: white; } 
+        .btn-veli:hover { background: #d97706; transform: translateY(-3px); }
+        
+        @keyframes pulseLogo { 
+            0%, 100% { transform: scale(1); } 
+            50% { transform: scale(1.1); } 
+        }
+        
+        .sincap { 
+            font-size: 80px; 
+            animation: pulseLogo 2s infinite; 
+            margin-bottom: 10px; 
+        }
+        
+        .features-section { 
+            padding: 80px 20px; 
+            text-align: center; 
+            background: white; 
+        }
+        
+        .features-section h2 { 
+            font-size: 36px; 
+            font-weight: 900; 
+            color: #4f46e5; 
+            margin-bottom: 50px; 
+        }
+        
+        .features-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 30px; 
+            max-width: 1100px; 
+            margin: 0 auto; 
+        }
+        
+        .feature-card { 
+            background: #f8fafc; 
+            padding: 40px 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            border: 2px solid #e2e8f0; 
+            transition: 0.3s; 
+        }
+        
+        .feature-card:hover { 
+            transform: translateY(-10px); 
+            border-color: #4f46e5; 
+            box-shadow: 0 20px 40px rgba(79, 70, 229, 0.15); 
+        }
+        
+        .feature-icon { 
+            font-size: 50px; 
+            margin-bottom: 20px; 
+        }
+        
+        .feature-card h3 { 
+            font-size: 22px; 
+            font-weight: 900; 
+            color: #1e293b; 
+            margin-bottom: 15px; 
+        }
+        
+        .feature-card p { 
+            font-size: 16px; 
+            color: #64748b; 
+            font-weight: bold; 
+            line-height: 1.6; 
+        }
+        
+        .footer { 
+            padding: 30px; 
+            text-align: center; 
+            background: #1e293b; 
+            color: #94a3b8; 
+            font-weight: bold; 
+            font-size: 14px; 
+        }
     </style>
 </head>
 <body>
-    <div class="navbar"><div class="logo">⚡ KatalizApp</div><div style="font-weight: bold; color: #64748b; display: none; @media (min-width: 600px) { display: block; }">Eğitim Yönetim Sistemi</div></div>
+    
+    <div class="navbar">
+        <div class="logo">⚡ KatalizApp</div>
+        <div style="font-weight: bold; color: #64748b; display: none; @media (min-width: 600px) { display: block; }">
+            Yeni Nesil Eğitim Yönetim Sistemi
+        </div>
+    </div>
+    
     <div class="hero">
-        <div class="sincap">⚡</div><h1>Eğitim Reaksiyonunu <br>Hızlandır!</h1>
+        <div class="sincap">⚡</div>
+        <h1>Eğitim Reaksiyonunu <br>Hızlandır!</h1>
         <p>LGS ve YKS maratonunda öğrencilerinizi XP'lerle motive edin, konu bazlı ısı haritaları oluşturun ve kendi dijital eğitim ofisinizi kurun.</p>
+        
         <div class="btn-group">
             <a href="login.html" class="btn btn-ogr">🎓 Öğrenci Girişi</a>
             <a href="ogretmen-login.html" class="btn btn-koc">👨‍🏫 Eğitmen Portalı</a>
             <a href="veli-login.html" class="btn btn-veli">👨‍👩‍👧‍👦 Veli Portalı</a>
         </div>
     </div>
-    <div class="features-section"><h2>KatalizApp Nasıl Çalışır?</h2><div class="features-grid"><div class="feature-card"><div class="feature-icon">👨‍🏫</div><h3>1. Ofisini Kur</h3><p>Eğitmen olarak kayıt ol, sistemin sana özel ürettiği 6 haneli <b>Davet Kodu</b>'nu paylaş ve ajandanı yönet.</p></div><div class="feature-card"><div class="feature-icon">🗺️</div><h3>2. Isı Haritası & Analiz</h3><p>Öğrenciler çalışıp netlerini girdikçe, onlara özel <b>Konu Isı Haritaları</b> oluşturup eksiklerini kırmızıyla işaretle.</p></div><div class="feature-card"><div class="feature-icon">📈</div><h3>3. Raporla & Oyunlaştır</h3><p>Kaptan Köşkü'nde odaklanma sürelerini izle. Velilere tek tıkla canlı erişim kodları ver.</p></div></div></div>
-    <div class="footer">© 2026 KatalizApp Eğitim Teknolojileri. Tüm hakları saklıdır.</div>
+    
+    <div class="features-section">
+        <h2>KatalizApp Nasıl Çalışır?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">👨‍🏫</div>
+                <h3>1. Ofisini Kur</h3>
+                <p>Eğitmen olarak kayıt ol, sistemin sana özel ürettiği 6 haneli <b>Davet Kodu</b>'nu paylaş ve 10 aylık finans ajandanı yönet.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🗺️</div>
+                <h3>2. Isı Haritası & Analiz</h3>
+                <p>Öğrenciler çalışıp netlerini girdikçe, onlara özel <b>Konu Isı Haritaları</b> oluşturup eksiklerini kırmızıyla işaretle. AI Asistanın sana görev üretsin.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <h3>3. Raporla & Oyunlaştır</h3>
+                <p>Kaptan Köşkü'nde odaklanma sürelerini izle. Velilere tek tıkla canlı erişim kodları ver ve tek tuşla PDF Karne oluştur.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        © 2026 KatalizApp Eğitim Teknolojileri. Tüm hakları saklıdır.
+    </div>
+
 </body>
 </html>
