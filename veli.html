@@ -108,6 +108,37 @@
         @media (max-width: 768px) {
             .stats-grid { grid-template-columns: 1fr; }
         }
+    
+    
+        /* EKRAN KÜÇÜLDÜĞÜNDE DEVREYE GİREN MOBİL UYUM KODU */
+@media (max-width: 768px) {
+    .container, .modal-content, .login-box {
+        width: 90% !important;
+        max-width: 90% !important;
+        padding: 20px !important;
+        box-sizing: border-box;
+    }
+    .top-dashboard, .live-grid, .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .bottom-panel {
+        width: 90% !important;
+        left: 5% !important;
+        right: 5% !important;
+    }
+    #display {
+        font-size: 40px !important;
+    }
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    .task-input-row {
+        flex-direction: column;
+    }
+}
+
     </style>
 </head>
 <body>
