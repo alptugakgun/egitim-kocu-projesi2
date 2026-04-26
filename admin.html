@@ -17,7 +17,7 @@
         }
         
         .sidebar { 
-            width: 250px; 
+            width: 260px; 
             background: #1e293b; 
             padding: 30px 20px; 
             display: flex; 
@@ -66,10 +66,7 @@
         
         .login-overlay { 
             position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
+            top: 0; left: 0; width: 100%; height: 100%; 
             background: #0f172a; 
             display: flex; 
             justify-content: center; 
@@ -148,6 +145,7 @@
             border-radius: 15px; 
             overflow: hidden; 
             border: 1px solid #334155;
+            margin-bottom: 20px;
         }
         
         table { 
@@ -193,14 +191,46 @@
         }
         
         .btn-red:hover { 
-            background: #dc2626; 
-            transform: scale(1.05);
+            transform: scale(1.05); 
         }
         
+        .btn-blue { 
+            background: #3b82f6; 
+            color: white; 
+            border: none; 
+            padding: 8px 12px; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+        
+        .btn-blue:hover { 
+            transform: scale(1.05); 
+        }
+
         h2 { 
             border-bottom: 2px solid #334155; 
             padding-bottom: 15px; 
             margin-top: 0;
+        }
+
+        .ay-kutusu { 
+            display: inline-block; 
+            background: #334155; 
+            color: #94a3b8;
+            padding: 5px 10px; 
+            border-radius: 6px; 
+            margin: 3px; 
+            font-size: 12px; 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+        
+        .ay-kutusu.odendi { 
+            background: #10b981; 
+            color: white; 
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
         }
     </style>
 </head>
@@ -216,6 +246,7 @@
     <div class="sidebar">
         <div class="logo">⚡ KatalizApp MIS</div>
         <div class="menu-item active" onclick="sekmeAc('ozet', this)">📊 Genel Özet</div>
+        <div class="menu-item" onclick="sekmeAc('muhasebe', this)" style="color: #10b981;">💰 Muhasebe (SaaS)</div>
         <div class="menu-item" onclick="sekmeAc('koclar', this)">👨‍🏫 Eğitmenler</div>
         <div class="menu-item" onclick="sekmeAc('ogrenciler', this)">🎓 Öğrenciler</div>
         <div style="flex-grow: 1;"></div>
@@ -237,6 +268,23 @@
                 <h3>Toplam Üretilen XP</h3>
                 <h1 id="met_xp">0</h1>
             </div>
+        </div>
+    </div>
+
+    <div class="content" id="sec_muhasebe">
+        <h2 style="color: #10b981; border-bottom-color: #10b981;">SaaS Lisans & Muhasebe Takibi</h2>
+        <p style="color: #94a3b8; margin-bottom: 20px;">Sistemi kullanan öğretmenlerin size yaptıkları platform kullanım (lisans) ödemelerini buradan takip edin.</p>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Eğitmen İsmi & Kodu</th>
+                        <th style="width: 50%;">Aylık Platform Ödemesi Takibi (10 Ay)</th>
+                        <th>Aksiyon</th>
+                    </tr>
+                </thead>
+                <tbody id="tablo_muhasebe"></tbody>
+            </table>
         </div>
     </div>
 
@@ -281,8 +329,10 @@
         let aktifSifre = ''; 
         let tumKoclar = []; 
         let tumOgrler = [];
+        
+        const AYLAR = ["Eyl", "Eki", "Kas", "Ara", "Oca", "Sub", "Mar", "Nis", "May", "Haz"];
 
-        // Sayfa yenilendiğinde hafızadaki şifreyi kontrol et
+        // Sayfa yenilendiğinde kontrol
         window.onload = function() {
             let kayitliSifre = localStorage.getItem('adminPass');
             if(kayitliSifre === 'sincap-boss-2026') {
@@ -291,28 +341,35 @@
             }
         };
 
+        // Sistemi Başlat (Login)
         async function giris() { 
             let s = document.getElementById('adminPass').value; 
             if(!s) return; 
             
-            const res = await fetch('/api/admin', { 
-                method: 'POST', 
-                headers:{'Content-Type':'application/json'}, 
-                body: JSON.stringify({sifre: s}) 
-            }); 
-            
-            const result = await res.json(); 
-            
-            if(result.basari) { 
-                aktifSifre = s; 
-                localStorage.setItem('adminPass', s); // Şifreyi hafızaya kazı
-                document.getElementById('loginScreen').style.display = 'none'; 
-                tumKoclar = result.data.koclar; 
-                tumOgrler = result.data.ogrler; 
-                verileriRenderEt(); 
-            } else { 
-                alert('Hatalı Şifre!'); 
-            } 
+            try {
+                const res = await fetch('/api/admin', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ sifre: s }) 
+                }); 
+                
+                const result = await res.json(); 
+                
+                if(result.basari) { 
+                    aktifSifre = s; 
+                    localStorage.setItem('adminPass', s); 
+                    
+                    document.getElementById('loginScreen').style.display = 'none'; 
+                    tumKoclar = result.data.koclar; 
+                    tumOgrler = result.data.ogrler; 
+                    
+                    verileriRenderEt(); 
+                } else { 
+                    alert('Hatalı Şifre!'); 
+                } 
+            } catch (err) {
+                console.error("Giriş hatası:", err);
+            }
         }
 
         function adminCikis() {
@@ -320,26 +377,101 @@
             location.reload();
         }
 
+        // Sol Menü Geçişi
         function sekmeAc(id, el) { 
             document.querySelectorAll('.content').forEach(c => c.classList.remove('active')); 
             document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active')); 
+            
             document.getElementById('sec_' + id).classList.add('active'); 
             el.classList.add('active'); 
         }
 
+        // Tıklanan ayı yeşile çevirme (UI)
+        window.ayDegistir = function(el) {
+            el.classList.toggle('odendi');
+        };
+
+        // Finans verisini veritabanına yollama
+        window.muhasebeKaydet = async function(kod) {
+            let finansData = {};
+            
+            AYLAR.forEach(ay => {
+                let el = document.getElementById(`fin_${kod}_${ay}`);
+                if (el) {
+                    finansData[ay] = el.classList.contains('odendi');
+                }
+            });
+
+            try {
+                const res = await fetch('/api/admin/finans_kaydet', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        sifre: aktifSifre, 
+                        kocKodu: kod, 
+                        finans: finansData
+                    })
+                });
+                
+                const data = await res.json();
+                
+                if (data.basari) {
+                    alert("Eğitmen lisans ödeme bilgisi başarıyla kaydedildi!");
+                    giris(); // Tabloları tazele
+                } else {
+                    alert("Kaydetme başarısız!");
+                }
+            } catch (err) {
+                console.error("Muhasebe kaydetme hatası:", err);
+            }
+        };
+
+        // Tabloları Oluşturma Motoru
         function verileriRenderEt() {
+            
+            // 1. Özet Metrikleri
             document.getElementById('met_koc').innerText = tumKoclar.length; 
             document.getElementById('met_ogr').innerText = tumOgrler.length; 
             
             let totalXp = tumOgrler.reduce((sum, ogr) => sum + (ogr.xp || 0), 0); 
             document.getElementById('met_xp').innerText = totalXp;
             
-            // Koçları Tabloya Bas
+            // 2. Muhasebe Tablosunu Doldur
+            let mTablo = document.getElementById('tablo_muhasebe'); 
+            mTablo.innerHTML = '';
+            
+            if (tumKoclar.length === 0) {
+                mTablo.innerHTML = '<tr><td colspan="3" style="text-align:center;">Sistemde kayıtlı eğitmen yok.</td></tr>';
+            }
+            
+            tumKoclar.forEach(k => {
+                let aylarHtml = "";
+                let kocFinans = k.finans || {}; 
+                
+                AYLAR.forEach(ay => {
+                    let sinif = kocFinans[ay] ? "ay-kutusu odendi" : "ay-kutusu";
+                    aylarHtml += `<span class="${sinif}" id="fin_${k.kocKodu}_${ay}" onclick="ayDegistir(this)">${ay}</span>`;
+                });
+                
+                mTablo.innerHTML += `
+                    <tr>
+                        <td>
+                            👨‍🏫 ${k.kocAd} <br>
+                            <span class="badge" style="background:#fef3c7; color:#d97706; margin-top:5px; display:inline-block;">${k.kocKodu}</span>
+                        </td>
+                        <td>${aylarHtml}</td>
+                        <td>
+                            <button class="btn-blue" style="background:#10b981;" onclick="muhasebeKaydet('${k.kocKodu}')">Kaydet</button>
+                        </td>
+                    </tr>`;
+            });
+
+            // 3. Eğitmenler Tablosunu Doldur
             let kTablo = document.getElementById('tablo_koc'); 
             kTablo.innerHTML = '';
             
-            if(tumKoclar.length === 0) {
-                kTablo.innerHTML = '<tr><td colspan="5" style="text-align:center;">Veri bulunamadı.</td></tr>';
+            if (tumKoclar.length === 0) {
+                kTablo.innerHTML = '<tr><td colspan="5" style="text-align:center;">Sistemde kayıtlı eğitmen yok.</td></tr>';
             }
             
             tumKoclar.forEach(k => {
@@ -350,16 +482,18 @@
                         <td style="color:#10b981; font-family:monospace; font-size:16px;">${k.sifre}</td>
                         <td><span class="badge" style="background:#fef3c7; color:#d97706;">${k.kocKodu}</span></td>
                         <td>${bagliOgrenciSayisi}</td>
-                        <td><button class="btn-red" onclick="kocSil('${k.kocKodu}', '${k.kocAd}')">Sil (Banla)</button></td>
+                        <td>
+                            <button class="btn-red" onclick="kocSil('${k.kocKodu}', '${k.kocAd}')">Sil (Banla)</button>
+                        </td>
                     </tr>`;
             });
 
-            // Öğrencileri Tabloya Bas
+            // 4. Öğrenciler Tablosunu Doldur
             let oTablo = document.getElementById('tablo_ogr'); 
             oTablo.innerHTML = '';
             
-            if(tumOgrler.length === 0) {
-                oTablo.innerHTML = '<tr><td colspan="6" style="text-align:center;">Veri bulunamadı.</td></tr>';
+            if (tumOgrler.length === 0) {
+                oTablo.innerHTML = '<tr><td colspan="6" style="text-align:center;">Sistemde kayıtlı öğrenci yok.</td></tr>';
             }
             
             tumOgrler.forEach(o => { 
@@ -370,38 +504,53 @@
                         <td><span class="badge" style="background:#e0e7ff; color:#4f46e5;">${o.kocKodu}</span></td>
                         <td><span class="badge" style="background:#d1fae5; color:#059669;">${o.veliKodu || 'Yok'}</span></td>
                         <td style="color:#f59e0b;">${o.xp || 0} XP</td>
-                        <td><button class="btn-red" onclick="ogrenciSil('${o._id}', '${o.ogrenciAd}')">Kov</button></td>
+                        <td>
+                            <button class="btn-red" onclick="ogrenciSil('${o._id}', '${o.ogrenciAd}')">Kov</button>
+                        </td>
                     </tr>`; 
             });
         }
 
+        // Veritabanı Silme İşlemleri
         async function kocSil(kod, isim) { 
-            if(confirm(`Eğitmeni ve bağlı tüm öğrencileri silmek istediğinize emin misiniz?`)) { 
-                const res = await fetch('/api/admin/sil', { 
-                    method: 'POST', 
-                    headers:{'Content-Type':'application/json'}, 
-                    body: JSON.stringify({sifre: aktifSifre, kod: kod}) 
-                }); 
-                const data = await res.json(); 
-                if(data.basari) { 
-                    alert("Eğitmen silindi!"); 
-                    giris(); 
-                } 
+            if (confirm(`Eğitmeni ve bağlı tüm öğrencileri silmek istediğinize emin misiniz?`)) { 
+                try {
+                    const res = await fetch('/api/admin/sil', { 
+                        method: 'POST', 
+                        headers: {'Content-Type': 'application/json'}, 
+                        body: JSON.stringify({ sifre: aktifSifre, kod: kod }) 
+                    }); 
+                    
+                    const data = await res.json(); 
+                    
+                    if (data.basari) { 
+                        alert("Eğitmen silindi!"); 
+                        giris(); 
+                    } 
+                } catch (err) {
+                    console.error("Silme hatası:", err);
+                }
             } 
         }
 
         async function ogrenciSil(id, isim) { 
-            if(confirm(`Bu öğrenciyi sistemden atmak istediğinize emin misiniz?`)) { 
-                const res = await fetch('/api/admin/sil_ogrenci', { 
-                    method: 'POST', 
-                    headers:{'Content-Type':'application/json'}, 
-                    body: JSON.stringify({sifre: aktifSifre, ogrenciId: id}) 
-                }); 
-                const data = await res.json(); 
-                if(data.basari) { 
-                    alert("Öğrenci silindi!"); 
-                    giris(); 
-                } 
+            if (confirm(`Bu öğrenciyi sistemden atmak istediğinize emin misiniz?`)) { 
+                try {
+                    const res = await fetch('/api/admin/sil_ogrenci', { 
+                        method: 'POST', 
+                        headers: {'Content-Type': 'application/json'}, 
+                        body: JSON.stringify({ sifre: aktifSifre, ogrenciId: id }) 
+                    }); 
+                    
+                    const data = await res.json(); 
+                    
+                    if (data.basari) { 
+                        alert("Öğrenci silindi!"); 
+                        giris(); 
+                    } 
+                } catch (err) {
+                    console.error("Silme hatası:", err);
+                }
             } 
         }
     </script>
