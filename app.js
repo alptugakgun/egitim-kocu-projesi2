@@ -19,29 +19,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Dev Müfredat Veritabanı
     const MUFREDAT = { 
-        "YKS": { 
-            "TYT Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Paragraf", "Ses Bilgisi", "Yazım Kuralları", "Noktalama", "Sözcük Türleri", "Cümlenin Ögeleri", "Cümle Türleri", "Anlatım Bozuklukları"], 
-            "TYT Matematik": ["Temel Kavramlar", "Sayı Basamakları", "Bölme Bölünebilme", "EBOB-EKOK", "Rasyonel Sayılar", "Basit Eşitsizlikler", "Mutlak Değer", "Üslü Sayılar", "Köklü Sayılar", "Çarpanlara Ayırma", "Oran Orantı", "Problemler", "Mantık", "Kümeler", "Fonksiyonlar", "Polinomlar", "Olasılık"], 
-            "TYT Geometri": ["Açılar ve Üçgenler", "Çokgenler ve Dörtgenler", "Çember ve Daire", "Analitik Geometri", "Katı Cisimler"], 
-            "TYT Fizik": ["Fizik Bilimine Giriş", "Madde ve Özellikleri", "Hareket ve Kuvvet", "Enerji", "Isı ve Sıcaklık", "Elektrostatik", "Elektrik ve Manyetizma", "Basınç", "Kaldırma Kuvveti", "Dalgalar", "Optik"], 
-            "TYT Kimya": ["Kimya Bilimi", "Atom ve Periyodik Sistem", "Kimyasal Türler Arası Etkileşimler", "Maddenin Halleri", "Doğa ve Kimya", "Kimyanın Temel Kanunları", "Karışımlar", "Asitler, Bazlar, Tuzlar", "Kimya Her Yerde"], 
-            "TYT Biyoloji": ["Yaşam Bilimi Biyoloji", "Hücre", "Canlıların Dünyası", "Hücre Bölünmeleri", "Kalıtım", "Ekoloji"], 
-            "AYT Matematik": ["Polinomlar", "2. Dereceden Denklemler", "Parabol", "Eşitsizlikler", "Trigonometri", "Logaritma", "Diziler", "Seriler", "Limit ve Süreklilik", "Türev", "İntegral", "Permütasyon Kombinasyon Olasılık"], 
-            "AYT Fizik": ["Vektörler", "Bağıl Hareket", "Newton'un Hareket Yasaları", "Atışlar", "Enerji ve Hareket", "İtme ve Çizgisel Momentum", "Tork", "Denge", "Basit Makineler", "Elektrik ve Manyetizma", "Çembersel Hareket", "Basit Harmonik Hareket", "Dalga Mekaniği", "Modern Fizik"], 
-            "AYT Kimya": ["Modern Atom Teorisi", "Gazlar", "Sıvı Çözeltiler", "Kimyasal Tepkimelerde Enerji", "Hız", "Denge", "Kimya ve Elektrik", "Karbon Kimyasına Giriş", "Organik Kimya"], 
-            "AYT Biyoloji": ["İnsan Fizyolojisi", "Komünite ve Popülasyon Ekolojisi", "Genden Proteine", "Canlılarda Enerji Dönüşümleri", "Bitki Biyolojisi", "Canlılar ve Çevre"], 
-            "Genel Deneme": ["TYT Genel Deneme", "AYT Genel Deneme", "Türkiye Geneli Kurumsal"] 
-        }, 
-        "LGS": { 
-            "LGS Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Paragrafta Anlam", "Fiilimsiler", "Cümlenin Ögeleri", "Yazım Kuralları", "Noktalama İşaretleri", "Görsel Yorumlama", "Sözel Mantık"], 
-            "LGS Matematik": ["Çarpanlar ve Katlar", "Üslü İfadeler", "Kareköklü İfadeler", "Veri Analizi", "Basit Olasılık", "Cebirsel İfadeler", "Doğrusal Denklemler", "Eşitsizlikler", "Üçgenler", "Eşlik ve Benzerlik", "Dönüşüm Geometrisi", "Geometrik Cisimler"], 
-            "LGS Fen Bilimleri": ["Mevsimler ve İklim", "DNA ve Genetik Kod", "Basınç", "Madde ve Endüstri", "Basit Makineler", "Enerji Dönüşümleri", "Elektrik Yükleri"], 
-            "LGS İnkılap Tarihi": ["Bir Kahraman Doğuyor", "Milli Uyanış", "Milli Bir Destan", "Atatürkçülük", "Demokratikleşme Çabaları", "Dış Politika"], 
-            "LGS İngilizce": ["Friendship", "Teen Life", "In the Kitchen", "On the Phone", "The Internet", "Adventures", "Tourism", "Chores", "Science", "Natural Forces"], 
-            "LGS Din Kültürü": ["Kader İnancı", "Zekat ve Sadaka", "Din ve Hayat", "Hz. Muhammed'in Örnekliliği", "Kur'an-ı Kerim"], 
-            "Genel Deneme": ["LGS Genel Deneme", "Kurumsal Deneme"] 
-        } 
-    };
+    "YKS": { 
+        "TYT Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Paragraf", "Ses Bilgisi", "Yazım Kuralları", "Noktalama İşaretleri", "Sözcükte Yapı", "Sözcük Türleri", "Fiiller ve Fiilimsiler", "Cümlenin Ögeleri", "Cümle Türleri", "Anlatım Bozuklukları"], 
+        "TYT Matematik": ["Temel Kavramlar", "Sayı Basamakları", "Bölme ve Bölünebilme", "EBOB-EKOK", "Rasyonel Sayılar", "Ondalık Sayılar", "Basit Eşitsizlikler", "Mutlak Değer", "Üslü İfadeler", "Köklü İfadeler", "Çarpanlara Ayırma", "Denklem Çözme", "Oran ve Orantı", "Problemler (Sayı, Kesir, Yaş vb.)", "Problemler (Hareket, İşçi, Karışım vb.)", "Mantık", "Kümeler", "Fonksiyonlar", "Polinomlar", "Veri, Sayma ve Olasılık"], 
+        "TYT Geometri": ["Doğruda ve Üçgende Açılar", "Dik ve Özel Üçgenler", "İkizkenar ve Eşkenar Üçgen", "Üçgende Alan ve Benzerlik", "Açıortay ve Kenarortay", "Çokgenler", "Dörtgenler (Kare, Dikdörtgen vb.)", "Çember ve Daire", "Analitik Geometri", "Katı Cisimler"], 
+        "TYT Fizik": ["Fizik Bilimine Giriş", "Madde ve Özellikleri", "Hareket ve Kuvvet", "İş, Güç ve Enerji", "Isı, Sıcaklık ve Genleşme", "Elektrostatik", "Elektrik Akımı ve Devreler", "Manyetizma", "Basınç", "Kaldırma Kuvveti", "Dalgalar", "Optik"], 
+        "TYT Kimya": ["Kimya Bilimi", "Atom ve Periyodik Sistem", "Kimyasal Türler Arası Etkileşimler", "Maddenin Halleri", "Doğa ve Kimya", "Kimyanın Temel Kanunları ve Mol", "Kimyasal Hesaplamalar", "Karışımlar", "Asitler, Bazlar ve Tuzlar", "Kimya Her Yerde"], 
+        "TYT Biyoloji": ["Yaşam Bilimi Biyoloji", "Canlıların Temel Bileşenleri", "Hücre ve Organelleri", "Canlıların Dünyası (Sınıflandırma)", "Hücre Bölünmeleri (Mitoz-Mayoz)", "Kalıtım", "Ekosistem Ekolojisi", "Güncel Çevre Sorunları"], 
+        "TYT Tarih": ["Tarih ve Zaman", "İnsanlığın İlk Dönemleri", "Orta Çağ'da Dünya", "İlk ve Orta Çağlarda Türk Dünyası", "İslam Medeniyetinin Doğuşu", "Türklerin İslamiyet'i Kabulü", "Yerleşme ve Devletleşme Sürecinde Selçuklu Türkiyesi", "Beylikten Devlete Osmanlı", "Dünya Gücü Osmanlı", "Değişim Çağında Avrupa ve Osmanlı", "En Uzun Yüzyıl", "20. Yüzyıl Başlarında Osmanlı", "Milli Mücadele", "Atatürkçülük ve Türk İnkılabı"], 
+        "TYT Coğrafya": ["Doğa ve İnsan", "Dünya'nın Şekli ve Hareketleri", "Coğrafi Konum ve Koordinat Sistemi", "Harita Bilgisi", "Atmosfer ve İklim", "Türkiye'nin İklimi", "Yerin Yapısı ve Oluşum Süreci", "İç ve Dış Kuvvetler", "Su, Toprak ve Bitki", "Nüfus ve Yerleşme", "Göç", "Ekonomik Faaliyetler", "Bölgeler ve Ülkeler", "Doğal Afetler"], 
+        "TYT Felsefe": ["Felsefeyi Tanıma", "Felsefeyle Düşünme", "Varlık Felsefesi", "Bilgi Felsefesi", "Bilim Felsefesi", "Ahlak Felsefesi", "Din Felsefesi", "Siyaset Felsefesi", "Sanat Felsefesi"], 
+        "TYT Din Kültürü": ["Bilgi ve İnanç", "Din ve İslam", "İslam ve İbadet", "Gençlik ve Değerler", "Allah İnsan İlişkisi", "Hz. Muhammed", "Vahiy ve Akıl", "İslam Düşüncesinde Yorumlar"], 
+        "AYT Matematik": ["Polinomlar", "2. Dereceden Denklemler ve Eşitsizlikler", "Parabol", "Trigonometri", "Logaritma", "Diziler ve Seriler", "Limit ve Süreklilik", "Türev", "İntegral", "Sayma ve Olasılık"], 
+        "AYT Edebiyat": ["Güzel Sanatlar ve Edebiyat", "Şiir Bilgisi", "Söz Sanatları", "İslamiyet Öncesi Türk Edebiyatı", "Geçiş Dönemi Türk Edebiyatı", "Halk Edebiyatı", "Divan Edebiyatı", "Tanzimat Edebiyatı", "Servetifünun ve Fecriati Edebiyatı", "Milli Edebiyat Dönemi", "Cumhuriyet Dönemi Edebiyatı", "Edebi Akımlar"], 
+        "AYT Fizik": ["Vektörler ve Bağıl Hareket", "Newton'un Hareket Yasaları", "Atışlar ve Bir Boyutta Hareket", "İş, Enerji ve Güç", "İtme ve Çizgisel Momentum", "Tork ve Denge", "Basit Makineler", "Elektriksel Kuvvet, Potansiyel ve İş", "Paralel Levhalar ve Sığa", "Manyetizma ve Elektromanyetik İndüklenme", "Alternatif Akım ve Transformatör", "Çembersel Hareket", "Basit Harmonik Hareket", "Dalga Mekaniği", "Atom Fiziğine Giriş ve Radyoaktivite", "Modern Fizik", "Modern Fiziğin Teknolojideki Uygulamaları"], 
+        "AYT Kimya": ["Modern Atom Teorisi", "Gazlar", "Sıvı Çözeltiler ve Çözünürlük", "Kimyasal Tepkimelerde Enerji", "Kimyasal Tepkimelerde Hız", "Kimyasal Tepkimelerde Denge", "Asit-Baz Dengesi", "Çözünürlük Dengesi (Kçç)", "Kimya ve Elektrik (Elektrokimya)", "Karbon Kimyasına Giriş", "Organik Kimya"], 
+        "AYT Biyoloji": ["Sinir Sistemi", "Endokrin Sistem", "Duyu Organları", "Destek ve Hareket Sistemi", "Sindirim Sistemi", "Dolaşım Sistemi", "Solunum Sistemi", "Üriner Sistem (Boşaltım)", "Üreme Sistemi ve Embriyonik Gelişim", "Komünite ve Popülasyon Ekolojisi", "Nükleik Asitler ve Protein Sentezi", "Fotosentez ve Kemosentez", "Hücresel Solunum", "Bitki Biyolojisi"], 
+        "AYT Tarih": ["Tarih ve Zaman", "İnsanlığın İlk Dönemleri", "Orta Çağ'da Dünya", "İlk ve Orta Çağlarda Türk Dünyası", "İslam Medeniyetinin Doğuşu", "Türklerin İslamiyet'i Kabulü ve İlk Türk İslam Devletleri", "Türkiye Tarihi (11-13. Yüzyıllar)", "Osmanlı Devleti (Kuruluş, Yükselme, Duraklama, Gerileme, Dağılma)", "20. Yüzyıl Başlarında Osmanlı", "Milli Mücadele", "Atatürkçülük ve Türk İnkılabı", "İki Savaş Arasındaki Dönemde Türkiye ve Dünya", "II. Dünya Savaşı Sürecinde Türkiye ve Dünya", "Soğuk Savaş Dönemi", "Yumuşama (Detant) Dönemi ve Sonrası", "Küreselleşen Dünya"], 
+        "AYT Coğrafya": ["Biyoçeşitlilik ve Ekosistem", "Şehirlerin Fonksiyonları ve Etki Alanları", "Türkiye'nin Nüfus Politikaları ve Projeksiyonları", "Türkiye'de Tarım, Hayvancılık ve Ormancılık", "Türkiye'de Madenler ve Enerji Kaynakları", "Türkiye'de Sanayi", "Türkiye'de Ulaşım ve Turizm", "Ülkeler ve Bölgeler", "Çevre Sorunları ve Koruma", "Küresel ve Bölgesel Örgütler"], 
+        "Genel Deneme": ["TYT Genel Deneme", "AYT Genel Deneme", "Türkiye Geneli Kurumsal Deneme", "Alan Denemesi (Sosyal/Fen/Mat)"] 
+    }, 
+    "LGS": { 
+        "LGS Türkçe": ["Sözcükte Anlam", "Cümlede Anlam", "Paragrafta Anlam", "Fiilimsiler", "Cümlenin Ögeleri", "Cümle Türleri", "Yazım Kuralları", "Noktalama İşaretleri", "Anlatım Bozuklukları", "Metin Türleri ve Söz Sanatları", "Görsel Yorumlama ve Sözel Mantık"], 
+        "LGS Matematik": ["Çarpanlar ve Katlar", "Üslü İfadeler", "Kareköklü İfadeler", "Veri Analizi", "Basit Olayların Olma Olasılığı", "Cebirsel İfadeler ve Özdeşlikler", "Doğrusal Denklemler", "Eşitsizlikler", "Üçgenler", "Eşlik ve Benzerlik", "Dönüşüm Geometrisi", "Geometrik Cisimler"], 
+        "LGS Fen Bilimleri": ["Mevsimler ve İklim", "DNA ve Genetik Kod", "Basınç", "Madde ve Endüstri", "Basit Makineler", "Enerji Dönüşümleri ve Çevre Bilimi", "Elektrik Yükleri ve Elektrik Enerjisi"], 
+        "LGS İnkılap Tarihi": ["Bir Kahraman Doğuyor", "Milli Uyanış: Bağımsızlık Yolunda Atılan Adımlar", "Milli Bir Destan: Ya İstiklal Ya Ölüm", "Atatürkçülük ve Çağdaşlaşan Türkiye", "Demokratikleşme Çabaları", "Atatürk Dönemi Türk Dış Politikası", "Atatürk'ün Ölümü ve Sonrası"], 
+        "LGS İngilizce": ["Friendship", "Teen Life", "In the Kitchen", "On the Phone", "The Internet", "Adventures", "Tourism", "Chores", "Science", "Natural Forces"], 
+        "LGS Din Kültürü": ["Kader İnancı", "Zekat ve Sadaka", "Din ve Hayat", "Hz. Muhammed'in Örnekliliği", "Kur'an-ı Kerim ve Özellikleri"], 
+        "Genel Deneme": ["LGS Genel Deneme", "Kurumsal Deneme", "Branş Denemesi"] 
+    } 
+};
 
     const sinavSecimi = document.getElementById('sinavSecimi'); 
     const dersSecimiUI = document.getElementById('dersSecimiUI'); 
