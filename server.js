@@ -23,7 +23,7 @@ mongoose.connect(mongoURI)
     });
 
 // ==========================================
-// 1. VERİTABANI ŞEMALARI (YENİ MODÜLLER EKLENDİ)
+// 1. VERİTABANI ŞEMALARI
 // ==========================================
 
 const ogretmenSchema = new mongoose.Schema({ 
@@ -54,8 +54,8 @@ const ogrenciSchema = new mongoose.Schema({
     canliDersLink: { type: String, default: '' }, 
     isiHaritasi: { type: Object, default: {} }, 
     hataDefteri: { type: Array, default: [] },
-    // 🧠 YENİ: Psikolojik Testler ve Detaylı Optik Sonuçları
-    rehberlikTestleri: { type: Array, default: [] }
+    rehberlikTestleri: { type: Array, default: [] },
+    tamamlananKaynaklar: { type: Array, default: [] } // 📚 YENİ: Bitirilen Kaynaklar
 });
 const Ogrenci = mongoose.model('Ogrenci', ogrenciSchema);
 
@@ -156,7 +156,7 @@ app.post('/api/kayit', async (req, res) => {
         let vKodu = 'V-' + Math.floor(1000 + Math.random() * 9000); 
         let yeniOgrenci = new Ogrenci({ 
             ogrenciAd, sifre, kocKodu, veliKodu: vKodu, 
-            xp: 0, avatar: '👤', finans: {}, hataDefteri: [], rehberlikTestleri: []
+            xp: 0, avatar: '👤', finans: {}, hataDefteri: [], rehberlikTestleri: [], tamamlananKaynaklar: []
         }); 
         
         await yeniOgrenci.save(); 
@@ -175,6 +175,20 @@ app.post('/api/giris', async (req, res) => {
             res.json({ basari: true, kocKodu: ogrenci.kocKodu, veliKodu: ogrenci.veliKodu }); 
         } else { 
             res.json({ basari: false, mesaj: "Hatalı!" }); 
+        }
+    } catch (e) { 
+        res.json({ basari: false }); 
+    } 
+});
+
+app.post('/api/veli/giris', async (req, res) => { 
+    try { 
+        let ogrenci = await Ogrenci.findOne({ veliKodu: req.body.veliKodu }); 
+        
+        if (ogrenci) { 
+            res.json({ basari: true, ogrenciAd: ogrenci.ogrenciAd, kocKodu: ogrenci.kocKodu }); 
+        } else { 
+            res.json({ basari: false, mesaj: "Geçersiz Veli Kodu!" }); 
         }
     } catch (e) { 
         res.json({ basari: false }); 
@@ -252,7 +266,6 @@ io.on('connection', (socket) => {
         } catch(e) {} 
     });
 
-    // 🚨 YENİ: Masa Başı Denetimi (AFK Yakalama)
     socket.on('masa_basi_uyarisi', async (veri) => {
         try {
             let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu });
@@ -261,7 +274,6 @@ io.on('connection', (socket) => {
                 ogrenci.mesaj = "Sistem tarafından otomatik durduruldu.";
                 await ogrenci.save();
 
-                // Öğretmene Şok Bildirim Gönder
                 io.to(veri.kocKodu).emit('ogretmene_canli_bildirim', ogrenci);
                 io.to(veri.kocKodu).emit('afk_kacak_ogrenci', {
                     ogrenciAd: veri.ogrenciAd,
@@ -271,13 +283,11 @@ io.on('connection', (socket) => {
         } catch(e) {}
     });
 
-    // 🧠 YENİ: Akıllı Deneme ve Oto-Isı Haritası
     socket.on('net_ekle', async (veri) => { 
         try { 
             let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu }); 
             
             if (ogrenci) { 
-                // Neti kaydet
                 ogrenci.netler.push({ 
                     id: Date.now(), 
                     tur: veri.sinavTuru, 
@@ -287,12 +297,10 @@ io.on('connection', (socket) => {
                 }); 
                 ogrenci.markModified('netler'); 
                 
-                // Eğer detaylı net girilmişse Isı Haritasını otomatik güncelle
                 if (veri.detay) {
                     let harita = ogrenci.isiHaritasi || {};
-                    // Kötü yapılan dersleri tespit et (Örn: Matematik %50 altındaysa)
                     for (const [dersAdi, netSayisi] of Object.entries(veri.detay)) {
-                        if (netSayisi < 10) { // MVP eşiği
+                        if (netSayisi < 10) {
                             harita[dersAdi + " (Genel)"] = "🟥 Zayıf (Oto-Analiz)";
                         } else if (netSayisi > 25) {
                             harita[dersAdi + " (Genel)"] = "🟩 İyi (Oto-Analiz)";
@@ -310,7 +318,6 @@ io.on('connection', (socket) => {
         } catch(e) {} 
     });
 
-    // 🧠 YENİ: Psikolojik Test ve Rehberlik Envanteri
     socket.on('rehberlik_testi_kaydet', async (veri) => {
         try {
             let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu });
@@ -330,7 +337,6 @@ io.on('connection', (socket) => {
         } catch(e) {}
     });
 
-    // Market İşlemleri
     socket.on('odul_satin_al', async (veri) => { 
         try { 
             let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu }); 
@@ -429,6 +435,7 @@ io.on('connection', (socket) => {
                 if (gIndex !== -1 && ogrenci.gorevler[gIndex].tamamlandi === false) { 
                     ogrenci.gorevler[gIndex].tamamlandi = true; 
                     ogrenci.xp = Number(ogrenci.xp || 0) + 10; 
+                    
                     if (ogrenci.aktifDuello && ogrenci.aktifDuello.rakip) { 
                         let rakipOgrenci = await Ogrenci.findOne({ ogrenciAd: ogrenci.aktifDuello.rakip, kocKodu: veri.kocKodu }); 
                         if (rakipOgrenci) { 
@@ -442,6 +449,7 @@ io.on('connection', (socket) => {
                         } 
                         ogrenci.aktifDuello = null; 
                     } 
+                    
                     ogrenci.markModified('gorevler'); 
                     await ogrenci.save(); 
                     let list = await Ogrenci.find({ kocKodu: veri.kocKodu });
@@ -481,6 +489,32 @@ io.on('connection', (socket) => {
             const list = await Kaynak.find({ kocKodu: veri.kocKodu }).sort({id: -1}); 
             io.to(veri.kocKodu).emit('kaynaklari_yukle', list); 
         } catch(e) {} 
+    });
+
+    // 📚 YENİ: KAYNAK BİTİRME MOTORU
+    socket.on('kaynak_cozuldu', async (veri) => {
+        try {
+            let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu });
+            if (ogrenci) {
+                if(!ogrenci.tamamlananKaynaklar) ogrenci.tamamlananKaynaklar = [];
+                
+                if(!ogrenci.tamamlananKaynaklar.includes(veri.kaynakId)) {
+                    ogrenci.tamamlananKaynaklar.push(veri.kaynakId);
+                    ogrenci.xp += 5; // 5 XP Ödül
+                    ogrenci.markModified('tamamlananKaynaklar');
+                    await ogrenci.save();
+
+                    let list = await Ogrenci.find({ kocKodu: veri.kocKodu });
+                    io.to(veri.kocKodu).emit('gorev_guncellendi', list);
+                    
+                    // Öğretmene Bildirim
+                    io.to(veri.kocKodu).emit('ogretmene_market_bildirimi', { 
+                        ogrenci: veri.ogrenciAd, 
+                        odul: `📚 "${veri.kaynakBaslik}" kaynağını bitirdi! (+5 XP)` 
+                    });
+                }
+            }
+        } catch(e){}
     });
 
     socket.on('ogrenci_derse_basladi', async (veri) => { 
@@ -532,6 +566,49 @@ io.on('connection', (socket) => {
 
     socket.on('sure_guncelle', (veri) => { 
         io.to(veri.kocKodu).emit('ogretmene_sure_guncelle', veri); 
+    });
+
+    socket.on('yapay_zeka_analiz_istegi', async (veri) => { 
+        try { 
+            let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu }); 
+            if (!ogrenci) return; 
+            
+            let zayifKonular = []; 
+            if (ogrenci.isiHaritasi) { 
+                for (let k in ogrenci.isiHaritasi) { 
+                    if (ogrenci.isiHaritasi[k].includes('Zayıf') || ogrenci.isiHaritasi[k].includes('Orta')) {
+                        zayifKonular.push(k);
+                    } 
+                } 
+            }
+            
+            let biten = ogrenci.gorevler.filter(g => g.tamamlandi).length; 
+            let bekleyen = ogrenci.gorevler.length - biten; 
+            let xp = ogrenci.xp || 0; 
+            
+            let raporMetni = ""; 
+            let onerilenGorev = "";
+            
+            if (zayifKonular.length > 0) { 
+                raporMetni = `Kaptan, ${ogrenci.ogrenciAd} adlı öğrencinin "<b>${zayifKonular[0]}</b>" konusunda eksikleri var. Kurtarma operasyonu yapalım mı?`; 
+                onerilenGorev = `${zayifKonular[0]} - Kritik Soru Çözümü`; 
+            } else if (bekleyen > 2) { 
+                raporMetni = `⚠️ Dikkat! Öğrencinin ${bekleyen} görevi birikmiş. "Tekrar ve Toparlama" verelim.`; 
+                onerilenGorev = "Biriken Görevleri Eritme Kampı"; 
+            } else if (xp > 150) { 
+                raporMetni = `🚀 ${ogrenci.ogrenciAd} Odak Ustası! Türkiye Geneli Deneme atayabiliriz.`; 
+                onerilenGorev = "YKS/LGS Genel Deneme Çözümü"; 
+            } else { 
+                raporMetni = `⏳ ${ogrenci.ogrenciAd} ısınma aşamasında. Ufak bir görev verelim.`; 
+                onerilenGorev = "Güne Başlangıç: 20 Paragraf"; 
+            }
+            
+            io.to(veri.kocKodu).emit('yapay_zeka_raporu', { 
+                ad: veri.ogrenciAd, 
+                rapor: raporMetni, 
+                oneri: onerilenGorev 
+            }); 
+        } catch(e) {} 
     });
 
     socket.on('ogrenci_chatbot_mesaji', async (veri) => { 

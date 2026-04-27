@@ -80,7 +80,7 @@
         .btn-net      { background: linear-gradient(135deg, #60a5fa, #3b82f6); } 
         .btn-market   { background: linear-gradient(135deg, #fbbf24, #f59e0b); } 
         .btn-duel     { background: linear-gradient(135deg, #f43f5e, #e11d48); } 
-        .btn-rehberlik{ background: linear-gradient(135deg, #14b8a6, #0d9488); } /* YENİ PSİKOLOJİ BUTONU */
+        .btn-rehberlik{ background: linear-gradient(135deg, #14b8a6, #0d9488); } 
         
         .avatar-btn { 
             font-size: 45px; 
@@ -248,7 +248,7 @@
             padding: 35px; 
             border-radius: 35px; 
             text-align: center; 
-            width: 360px; 
+            width: 450px; 
             max-height: 85vh; 
             overflow-y: auto; 
             box-shadow: 0 30px 60px rgba(0,0,0,0.25);
@@ -270,7 +270,29 @@
         }
         .close-modal-btn:hover { background: #e2e8f0; color: #1e293b; }
 
-        /* Alt Paneller */
+        /* Zoom Butonu */
+        @keyframes zoomPulse { 
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); } 
+            50% { transform: scale(1.03); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } 
+        }
+        .zoom-btn { 
+            background: linear-gradient(135deg, #ef4444, #e11d48); 
+            color: white; 
+            padding: 18px; 
+            border-radius: 20px; 
+            text-decoration: none; 
+            font-weight: 900; 
+            display: block; 
+            margin-bottom: 25px; 
+            animation: zoomPulse 2s infinite; 
+            font-size: 16px; 
+            border: none; 
+            display: none;
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Alt Paneller (AI ve Sohbet) */
         .bottom-panel { 
             position: fixed; 
             bottom: 25px; 
@@ -296,14 +318,19 @@
             font-size: 16px;
         }
 
-        /* 🚨 YOKLAMA EKRANI ÖZEL ANİMASYON */
+        /* Arka Plan Şekilleri */
+        .bg-shape-1 { position: absolute; top: -10%; left: -10%; width: 300px; height: 300px; background: #ff7a7a; border-radius: 50%; opacity: 0.1; filter: blur(40px); z-index: -1; animation: floatShape 10s infinite alternate;}
+        .bg-shape-2 { position: absolute; bottom: -10%; right: -10%; width: 400px; height: 400px; background: #a855f7; border-radius: 50%; opacity: 0.1; filter: blur(50px); z-index: -1; animation: floatShape 12s infinite alternate-reverse;}
+        @keyframes floatShape { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(30px, 30px) scale(1.2); } }
+
+        /* YOKLAMA EKRANI ÖZEL ANİMASYON */
         @keyframes emergencyFlash {
             0% { background-color: rgba(239, 68, 68, 0.2); }
             50% { background-color: rgba(239, 68, 68, 0.8); }
             100% { background-color: rgba(239, 68, 68, 0.2); }
         }
 
-        /* 📱 MOBİL UYUM (RESPONSIVE) - TAŞMAYI ÖNLER */
+        /* MOBİL UYUM (RESPONSIVE) */
         @media (max-width: 768px) {
             .container, .modal-content {
                 width: 90% !important;
@@ -329,6 +356,12 @@
 </head>
 <body>
     <audio id="bildirimSesi" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="radyoLofi" src="https://assets.mixkit.co/music/preview/mixkit-lofi-study-112.mp3" loop preload="none"></audio>
+    <audio id="radyoYagmur" src="https://assets.mixkit.co/active_storage/sfx/1244/1244-preview.mp3" loop preload="none"></audio>
+    <audio id="radyoKafe" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3" loop preload="none"></audio>
+
+    <div class="bg-shape-1"></div>
+    <div class="bg-shape-2"></div>
 
     <div class="container">
         
@@ -343,6 +376,8 @@
         
         <div class="avatar-btn" id="aktifAvatar" onclick="document.getElementById('avatarModal').style.display='flex'">👤</div>
         
+        <a href="#" id="zoomLinkBtn" target="_blank" class="zoom-btn">🔴 Koç Canlı Yayında! Katıl</a>
+
         <div class="radyo-widget">
             <span style="color:#64748b; font-weight:900; font-size:13px;">🎧 Odak:</span>
             <button class="radyo-btn" id="btnLofi" onclick="radyoCal('Lofi')" title="Lofi Beats">🎵</button>
@@ -398,38 +433,21 @@
     </div>
 
     <div class="modal" id="rehberlikModal">
-        <div class="modal-content">
-            <h2 style="color:#0d9488; margin-top:0;">🧠 Sınav Kaygısı Testi</h2>
-            <p style="font-size:13px; color:#64748b; font-weight:bold; margin-bottom: 20px;">Duygularını hocanla paylaş ki sana daha iyi koçluk yapabilsin.</p>
+        <div class="modal-content" style="width: 450px;">
+            <h2 style="color:#0d9488; margin-top:0;">🧠 Rehberlik Merkezi</h2>
+            <p style="font-size:14px; color:#64748b; font-weight:bold; margin-bottom: 20px;">Analiz edilmek istediğin alanı seç ve dürüstçe yanıtla.</p>
             
-            <div style="text-align: left; margin-bottom: 15px;">
-                <label style="font-weight: 800; color: #334155; font-size: 14px;">1. Sınav anında bildiklerimi unuturum.</label>
-                <select id="anketSoru1" class="select-box" style="width: 100%; margin-top: 5px;">
-                    <option value="1">Hiç Katılmıyorum (1)</option>
-                    <option value="3">Bazen (3)</option>
-                    <option value="5">Kesinlikle Katılıyorum (5)</option>
-                </select>
+            <select id="testSecici" class="select-box" style="width: 100%; margin-bottom: 20px;" onchange="testiYukle()">
+                <option value="">Bir Test Seç...</option>
+                <option value="Sınav Kaygısı Envanteri">Sınav Kaygısı Envanteri</option>
+                <option value="Motivasyon ve Odaklanma Testi">Motivasyon ve Odaklanma Testi</option>
+                <option value="Öğrenme Stili Belirleme">Öğrenme Stili Belirleme</option>
+            </select>
+
+            <div id="dinamikSoruAlani" style="text-align: left; max-height: 300px; overflow-y: auto; display:none;">
             </div>
 
-            <div style="text-align: left; margin-bottom: 15px;">
-                <label style="font-weight: 800; color: #334155; font-size: 14px;">2. Ailemin beklentileri beni çok stres yapıyor.</label>
-                <select id="anketSoru2" class="select-box" style="width: 100%; margin-top: 5px;">
-                    <option value="1">Hiç Katılmıyorum (1)</option>
-                    <option value="3">Bazen (3)</option>
-                    <option value="5">Kesinlikle Katılıyorum (5)</option>
-                </select>
-            </div>
-
-            <div style="text-align: left; margin-bottom: 20px;">
-                <label style="font-weight: 800; color: #334155; font-size: 14px;">3. Geleceğimi düşündükçe uykularım kaçıyor.</label>
-                <select id="anketSoru3" class="select-box" style="width: 100%; margin-top: 5px;">
-                    <option value="1">Hiç Katılmıyorum (1)</option>
-                    <option value="3">Bazen (3)</option>
-                    <option value="5">Kesinlikle Katılıyorum (5)</option>
-                </select>
-            </div>
-
-            <button onclick="psikolojikTestKaydet()" style="background: linear-gradient(135deg, #14b8a6, #0d9488); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 900; font-size:16px; width: 100%; cursor: pointer;">Testi Gönder</button>
+            <button id="testGonderBtn" onclick="psikolojikTestKaydet()" style="background: linear-gradient(135deg, #14b8a6, #0d9488); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 900; font-size:16px; width: 100%; cursor: pointer; display:none; margin-top:20px;">Analizi Koçuma Gönder</button>
             <button class="close-modal-btn" onclick="document.getElementById('rehberlikModal').style.display='none'">Kapat</button>
         </div>
     </div>
@@ -498,7 +516,8 @@
     <div class="modal" id="kutuphaneModal">
         <div class="modal-content">
             <h2 style="color:#8b5cf6; margin-top:0;">📚 Kütüphanem</h2>
-            <div id="kaynakListesi" style="margin-bottom: 20px;"></div>
+            <p style="font-size:13px; color:#64748b; font-weight:bold; margin-bottom: 15px;">Koçunun gönderdiği kaynakları çöz ve bitir tuşuna basarak XP kazan!</p>
+            <div id="kaynakListesi" style="margin-bottom: 20px; max-height: 300px; overflow-y: auto;"></div>
             <button class="close-modal-btn" onclick="document.getElementById('kutuphaneModal').style.display='none'">Kapat</button>
         </div>
     </div>
@@ -521,7 +540,63 @@
         </div>
     </div>
 
+    <div class="modal" id="duelloIstekModal">
+        <div class="modal-content" style="border: 5px solid #ef4444; background: #fff5f5;">
+            <div style="font-size: 70px; margin-bottom: 10px; animation: pulse 1s infinite;">⚔️</div>
+            <h2 style="color:#ef4444; margin-top:0;">MEYDAN OKUMA!</h2>
+            <p id="duelloIstekMetni" style="font-weight:900; font-size:18px; color:#1e293b;">[İsim] sana meydan okuyor!</p>
+            <div style="display:flex; gap:15px; margin-top:20px;">
+                <button onclick="duelloKabulEt()" style="flex:1; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; padding:15px; border-radius:15px; font-weight:900; cursor:pointer; font-size:16px;">Kabul Et</button>
+                <button onclick="document.getElementById('duelloIstekModal').style.display='none'" style="flex:1; background:linear-gradient(135deg, #ef4444, #e11d48); color:white; border:none; padding:15px; border-radius:15px; font-weight:900; cursor:pointer; font-size:16px;">Reddet</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="avatarModal">
+        <div class="modal-content">
+            <h3 style="margin:0 0 20px 0; color:#1e293b; font-size:22px;">Karakterini Seç</h3>
+            <div style="display:flex; flex-wrap:wrap; gap:15px; justify-content:center; margin-bottom: 30px;">
+                <div style="font-size:45px; cursor:pointer; background:#f8fafc; padding:15px; border-radius:50%; box-shadow:0 5px 15px rgba(0,0,0,0.05); transition:0.2s;" onclick="avatarSec('👤')">👤</div>
+                <div style="font-size:45px; cursor:pointer; background:#f8fafc; padding:15px; border-radius:50%; box-shadow:0 5px 15px rgba(0,0,0,0.05); transition:0.2s;" onclick="avatarSec('👨‍🎓')">👨‍🎓</div>
+                <div style="font-size:45px; cursor:pointer; background:#f8fafc; padding:15px; border-radius:50%; box-shadow:0 5px 15px rgba(0,0,0,0.05); transition:0.2s;" onclick="avatarSec('👩‍🎓')">👩‍🎓</div>
+                <div style="font-size:45px; cursor:pointer; background:#f8fafc; padding:15px; border-radius:50%; box-shadow:0 5px 15px rgba(0,0,0,0.05); transition:0.2s;" onclick="avatarSec('🥷')">🥷</div>
+                <div style="font-size:45px; cursor:pointer; background:#f8fafc; padding:15px; border-radius:50%; box-shadow:0 5px 15px rgba(0,0,0,0.05); transition:0.2s;" onclick="avatarSec('🦸‍♂️')">🦸‍♂️</div>
+                <div style="font-size:45px; cursor:pointer; background:#f8fafc; padding:15px; border-radius:50%; box-shadow:0 5px 15px rgba(0,0,0,0.05); transition:0.2s;" onclick="avatarSec('🦸‍♀️')">🦸‍♀️</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #fffcf5, #fef4ea); padding: 25px; border-radius: 25px; border: 3px dashed #fbbf24;">
+                <p style="margin:0; font-size:14px; font-weight:900; color:#d97706;">👨‍👩‍👧‍👦 Ailen İçin Veli Takip Kodun:</p>
+                <h2 id="veliKoduGosterge" style="margin:15px 0 0 0; color:#b45309; letter-spacing: 4px; font-size:32px;">V-XXXX</h2>
+            </div>
+            <button class="close-modal-btn" onclick="document.getElementById('avatarModal').style.display='none'">Kapat</button>
+        </div>
+    </div>
+
+    <div class="bottom-panel" style="left: 25px;">
+        <div class="bottom-panel-header" style="background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);" onclick="toggleBot()">
+            <span>🤖 KatalizApp AI Koç</span>
+        </div>
+        <div id="botBody" style="height: 320px; background: #f8fafc; padding: 20px; overflow-y: auto; display: none; flex-direction: column;"></div>
+        <div id="botFooter" style="padding: 15px; background: white; border-top: 2px solid #f1f5f9; display: none; gap: 10px;">
+            <input type="text" id="botInput" placeholder="Bana bir şey sor..." style="flex: 1; padding: 15px; border: 2px solid #e2e8f0; border-radius: 15px; outline: none; font-family: inherit; font-weight:bold; background:#f8fafc;" onkeypress="if(event.key === 'Enter') botMesajGonder()">
+            <button onclick="botMesajGonder()" style="background: #a855f7; color: white; border: none; padding: 15px 25px; border-radius: 15px; cursor: pointer; font-weight: 900; font-family: inherit;">Sor</button>
+        </div>
+    </div>
+    
+    <div class="bottom-panel" style="right: 25px;">
+        <div class="bottom-panel-header" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);" onclick="toggleChat()">
+            <span>💬 Sınıf Sohbeti</span>
+            <span id="chatUyari" style="background: #ef4444; color: white; border-radius: 50%; width: 26px; height: 26px; display: none; align-items: center; justify-content: center; font-size: 14px; font-weight:900;">!</span>
+        </div>
+        <div id="chatBody" style="height: 320px; background: #f8fafc; padding: 20px; overflow-y: auto; display: none; flex-direction: column;"></div>
+        <div id="chatFooter" style="padding: 15px; background: white; border-top: 2px solid #f1f5f9; display: none; gap: 10px; align-items: center;">
+            <input type="file" id="resimInput" accept="image/*" style="display: none;" onchange="resimGonder(this)">
+            <button onclick="document.getElementById('resimInput').click()" style="background: #f1f5f9; border: none; border-radius:15px; font-size: 22px; cursor: pointer; padding: 12px 18px;">📸</button>
+            <input type="text" id="chatInput" placeholder="Sınıfa yaz..." style="flex: 1; padding: 15px; border: 2px solid #e2e8f0; border-radius: 15px; outline: none; font-family: inherit; font-weight:bold; background:#f8fafc;" onkeypress="if(event.key === 'Enter') mesajGonder()">
+            <button onclick="mesajGonder()" style="background: #3b82f6; color: white; border: none; padding: 15px 25px; border-radius: 15px; cursor: pointer; font-weight: 900; font-family: inherit;">Gönder</button>
+        </div>
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=18"></script>
+    <script src="app.js?v=20"></script>
 </body>
 </html>

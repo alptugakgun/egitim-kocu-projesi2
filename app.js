@@ -3,7 +3,6 @@ const aktifOgrenci = localStorage.getItem('ogrenciKimligi');
 const kocKodu = localStorage.getItem('kocKodu'); 
 const veliKodu = localStorage.getItem('veliKodu');
 
-// Odaya Bağlan
 socket.emit('join_room', kocKodu);
 
 if(document.getElementById('veliKoduGosterge')) { 
@@ -11,8 +10,10 @@ if(document.getElementById('veliKoduGosterge')) {
 }
 
 // ==========================================
-// 1. BİLDİRİM VE SIKIŞTIRMA MOTORLARI
+// 1. GLOBAL DEĞİŞKENLER VE YARDIMCILAR
 // ==========================================
+
+let benimTamamlananKaynaklar = [];
 
 if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") { 
     Notification.requestPermission(); 
@@ -24,7 +25,6 @@ function sistemBildirimi(baslik, mesaj) {
     } 
 }
 
-// 🚨 Görüntü Sıkıştırma Motoru (Veritabanının şişmesini engeller)
 function resimSikistir(file, callback) {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -33,7 +33,7 @@ function resimSikistir(file, callback) {
         img.src = event.target.result;
         img.onload = function () {
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 800; // Genişliği maksimum 800px'e sabitledik
+            const MAX_WIDTH = 800; 
             const scaleSize = MAX_WIDTH / img.width;
             canvas.width = MAX_WIDTH;
             canvas.height = img.height * scaleSize;
@@ -41,7 +41,6 @@ function resimSikistir(file, callback) {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             
-            // Kaliteyi 0.6 (Yüzde 60) yaparak boyutu inanılmaz küçültüyoruz
             const sıkistirilmisBase64 = canvas.toDataURL('image/jpeg', 0.6);
             callback(sıkistirilmisBase64);
         }
@@ -49,7 +48,7 @@ function resimSikistir(file, callback) {
 }
 
 // ==========================================
-// 2. DEVASA MÜFREDAT VERİTABANI
+// 2. MÜFREDAT VE PSİKOLOJİK TEST HAVUZU
 // ==========================================
 
 const MUFREDAT = { 
@@ -84,6 +83,27 @@ const MUFREDAT = {
     } 
 };
 
+const TEST_HAVUZU = {
+    "Sınav Kaygısı Envanteri": [
+        { q: "Sınav sırasında ellerim titrer ve terlerim.", puan: 5 },
+        { q: "Sınav sonuçlarını düşünmekten ders çalışamıyorum.", puan: 5 },
+        { q: "Sınav anında bildiğim her şeyi unutacakmış gibi hissediyorum.", puan: 5 },
+        { q: "Deneme sınavlarında mideme kramplar giriyor.", puan: 5 },
+        { q: "Çevremdekilerin benden beklentisi üzerimde büyük bir baskı oluşturuyor.", puan: 5 }
+    ],
+    "Motivasyon ve Odaklanma Testi": [
+        { q: "Masa başına oturduğumda ilk 10 dakika dikkatim sürekli dağılıyor.", puan: 5 },
+        { q: "Zorlandığım bir soruda hemen pes edip telefona bakıyorum.", puan: 5 },
+        { q: "Haftalık hedeflerimi tamamladığımda kendimi ödüllendirmeyi unutuyorum.", puan: 5 },
+        { q: "Neden ders çalıştığımı bazen tamamen unutmuş gibi hissediyorum.", puan: 5 }
+    ],
+    "Öğrenme Stili Belirleme": [
+        { q: "Bir konuyu dinlerken grafikler ve tablolar görmek işimi kolaylaştırır.", puan: 5 },
+        { q: "Anlatılanları birine sesli olarak tekrar ettiğimde daha iyi anlıyorum.", puan: 5 },
+        { q: "Not çıkarırken sürekli kalemle oynamak veya yürümek istiyorum.", puan: 5 }
+    ]
+};
+
 // ==========================================
 // 3. SAYAÇ, DERS SEÇİMİ VE AFK DENETİMİ
 // ==========================================
@@ -108,7 +128,6 @@ let oncekiGorevSayisi = -1;
 let sonZoomLinki = '';
 let bekleyenDuelloRakip = '';
 
-// 🚨 Masa Başı Denetim Değişkenleri
 let yoklamaTimer;
 let yoklamaGeriSayimInterval;
 
@@ -165,7 +184,6 @@ function dersDegisikliginiKaydet() {
         
         socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: aktifDersString, mesaj: 'Ders değiştirdi, durdurdu.', kocKodu: kocKodu }); 
         
-        // Dersi durdurduğumuz için AFK Yoklamasını iptal et
         clearTimeout(yoklamaTimer);
     } 
     
@@ -186,7 +204,6 @@ function dersDegisikliginiKaydet() {
     } 
 }
 
-// Seçim kutularını dinle
 if(sinavSecimi) sinavSecimi.addEventListener('change', () => mufredatYukle(false)); 
 if(dersSecimiUI) dersSecimiUI.addEventListener('change', () => konuYukle(false)); 
 if(konuSecimi) konuSecimi.addEventListener('change', dersDegisikliginiKaydet);
@@ -225,10 +242,8 @@ function sesCal() {
     s.play().catch(e=>{}); 
 }
 
-// 🚨 YENİ: Masa Başı Yoklama Mantığı
 function rastgeleYoklamaKur() {
     clearTimeout(yoklamaTimer);
-    // 15 ile 25 dakika arasında rastgele bir zaman seç
     let rastgeleDakika = Math.floor(Math.random() * (25 - 15 + 1)) + 15;
     let beklemeSuresi = rastgeleDakika * 60 * 1000;
     
@@ -251,17 +266,14 @@ function yoklamayiTetikle() {
             sayacEl.innerText = kalanSaniye;
             
             if(kalanSaniye <= 0) {
-                // SÜRE DOLDU: ÖĞRENCİ MASADA DEĞİL!
                 clearInterval(yoklamaGeriSayimInterval);
                 modal.style.display = 'none';
                 
-                // Sayacı durdur
                 window.pauseTimer(false); 
                 document.getElementById('statusText').innerHTML = "🚨 Masadan ayrıldığın için odaklanma durduruldu!";
                 document.getElementById('statusText').style.backgroundColor = "#fee2e2";
                 document.getElementById('statusText').style.color = "#dc2626";
                 
-                // Öğretmene haber ver
                 socket.emit('masa_basi_uyarisi', { ogrenciAd: aktifOgrenci, kocKodu: kocKodu });
             }
         }, 1000);
@@ -269,14 +281,11 @@ function yoklamayiTetikle() {
 }
 
 window.yoklamaBuradayim = function() {
-    // Öğrenci butona bastı, süreyi sıfırla ve yeni yoklama kur
     clearInterval(yoklamaGeriSayimInterval);
     let modal = document.getElementById('yoklamaModal');
     if(modal) modal.style.display = 'none';
-    
-    rastgeleYoklamaKur(); // Yeni bir tuzak kur :)
+    rastgeleYoklamaKur();
 };
-
 
 // ==========================================
 // 4. WINDOW'A BAĞLI (ONCLICK) FONKSİYONLAR
@@ -336,7 +345,6 @@ window.startTimer = function() {
             kocKodu: kocKodu 
         }); 
         
-        // 🚨 AFK Yoklamasını Başlat
         rastgeleYoklamaKur();
     } 
 };
@@ -371,7 +379,6 @@ window.pauseTimer = function(otomatikMi = false) {
             kocKodu: kocKodu 
         }); 
         
-        // 🚨 AFK Yoklamasını İptal Et (Mola verdiği için)
         clearTimeout(yoklamaTimer);
         clearInterval(yoklamaGeriSayimInterval);
         let modal = document.getElementById('yoklamaModal');
@@ -429,17 +436,13 @@ window.avatarSec = function(ikon) {
     socket.emit('avatar_guncelle', { ogrenciAd: aktifOgrenci, avatar: ikon, kocKodu: kocKodu }); 
 };
 
-// 🧠 YENİ: Akıllı Optik (Detaylı Net Gönderimi)
 window.netKaydet = function() { 
     let tur = document.getElementById('sinavTuru').value; 
-    
-    // Toplam veya Detaylı giriş kontrolü
     let detayKutusu = document.getElementById('detayliNetKutusu');
     let toplamNet = 0;
     let detayliObj = null;
 
     if(detayKutusu && detayKutusu.style.display !== 'none') {
-        // Detaylı giriş
         let turkce = Number(document.getElementById('netTurkce').value) || 0;
         let mat = Number(document.getElementById('netMatematik').value) || 0;
         let fen = Number(document.getElementById('netFen').value) || 0;
@@ -453,7 +456,6 @@ window.netKaydet = function() {
             "Sosyal Bilimler": sos
         };
     } else {
-        // Basit giriş
         let net = document.getElementById('netSkoru').value; 
         if(!net) return alert("Net girmelisiniz!");
         toplamNet = Number(net);
@@ -472,27 +474,69 @@ window.netKaydet = function() {
     alert("Netiniz iletildi! Koçunuz zayıf konuları analiz edecek. 🚀"); 
 };
 
-// 🧠 YENİ: Psikolojik Test Gönderimi
-window.psikolojikTestKaydet = function() {
-    let q1 = parseInt(document.getElementById('anketSoru1').value) || 0;
-    let q2 = parseInt(document.getElementById('anketSoru2').value) || 0;
-    let q3 = parseInt(document.getElementById('anketSoru3').value) || 0;
+window.testiYukle = function() {
+    const secilenTest = document.getElementById('testSecici').value;
+    const soruAlani = document.getElementById('dinamikSoruAlani');
+    const gonderBtn = document.getElementById('testGonderBtn');
     
-    let totalScore = q1 + q2 + q3;
-    let yorum = "Düşük Kaygı";
-    if (totalScore >= 10) yorum = "Orta Kaygı";
-    if (totalScore >= 13) yorum = "Yüksek Kaygı (Rehberlik Gerekli)";
+    if(!secilenTest) {
+        soruAlani.style.display = 'none';
+        gonderBtn.style.display = 'none';
+        return;
+    }
+
+    const sorular = TEST_HAVUZU[secilenTest];
+    soruAlani.innerHTML = '';
+    soruAlani.style.display = 'block';
+    gonderBtn.style.display = 'block';
+
+    sorular.forEach((s, index) => {
+        soruAlani.innerHTML += `
+            <div style="margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 15px; border: 1px solid #e2e8f0;">
+                <label style="font-weight: 800; color: #334155; font-size: 14px; display:block; margin-bottom:10px;">${index+1}. ${s.q}</label>
+                <select class="anket-cevap select-box" data-puan="${s.puan}" style="width:100%;">
+                    <option value="1">Hiç Katılmıyorum (1 Puan)</option>
+                    <option value="2">Az Katılıyorum (2 Puan)</option>
+                    <option value="3">Kararsızım (3 Puan)</option>
+                    <option value="4">Çok Katılıyorum (4 Puan)</option>
+                    <option value="5">Tamamen Katılıyorum (5 Puan)</option>
+                </select>
+            </div>
+        `;
+    });
+};
+
+window.psikolojikTestKaydet = function() {
+    const testAdi = document.getElementById('testSecici').value;
+    const cevaplar = document.querySelectorAll('.anket-cevap');
+    let toplamSkor = 0;
+    let maxSkor = cevaplar.length * 5;
+
+    cevaplar.forEach(c => {
+        toplamSkor += parseInt(c.value);
+    });
+
+    let yuzde = (toplamSkor / maxSkor) * 100;
+    let sonucYorum = "";
+
+    if (testAdi === "Sınav Kaygısı Envanteri") {
+        sonucYorum = yuzde > 70 ? "Kritik Kaygı Seviyesi" : yuzde > 40 ? "Orta Derece Stres" : "Sağlıklı Kaygı Seviyesi";
+    } else if (testAdi === "Motivasyon ve Odaklanma Testi") {
+        sonucYorum = yuzde > 70 ? "Yüksek Motivasyon" : yuzde > 40 ? "Dengeli Odaklanma" : "Acil Destek Gerekli";
+    } else {
+        sonucYorum = "Öğrenme Stili Testi Tamamlandı";
+    }
 
     socket.emit('rehberlik_testi_kaydet', {
         ogrenciAd: aktifOgrenci,
         kocKodu: kocKodu,
-        testAdi: "Sınav Kaygısı Envanteri",
-        skor: totalScore,
-        sonuc: yorum
+        testAdi: testAdi,
+        skor: toplamSkor,
+        sonuc: sonucYorum
     });
 
     document.getElementById('rehberlikModal').style.display = 'none';
-    alert("Test sonucun koçuna iletildi!");
+    alert(`Teşekkürler ${aktifOgrenci}! Analiz raporun koçuna "Özel Rapor" olarak iletildi. 🚀`);
 };
 
 window.odulAl = function(odulIsmi, bedel) { 
@@ -506,6 +550,20 @@ window.odulAl = function(odulIsmi, bedel) {
 window.goreviBitir = function(id) { 
     sesCal(); 
     socket.emit('gorev_tamamlandi', { ogrenciAd: aktifOgrenci, gorevId: id, durum: true, kocKodu: kocKodu }); 
+};
+
+// 📚 YENİ: Kaynak Bitirme Fonksiyonu
+window.kaynakBitir = function(id, baslik) {
+    if(confirm(`"${baslik}" kaynağını gerçekten bitirdin mi? Koçuna bildirim gidecek!`)) {
+        sesCal();
+        socket.emit('kaynak_cozuldu', { 
+            ogrenciAd: aktifOgrenci, 
+            kocKodu: kocKodu, 
+            kaynakId: id, 
+            kaynakBaslik: baslik 
+        });
+        alert("Süpersin! +5 XP hesabına eklendi.");
+    }
 };
 
 window.toggleChat = function() { 
@@ -598,6 +656,9 @@ socket.on('gorev_guncellendi', (tumVeriler) => {
     let benimVerim = tumVeriler.find(v => v.ogrenciAd === aktifOgrenci);
     if (benimVerim) {
         
+        // 📚 Kaynakları Kontrol Et
+        benimTamamlananKaynaklar = benimVerim.tamamlananKaynaklar || [];
+
         if (benimVerim.canliDersLink && benimVerim.canliDersLink.trim() !== '') {
             let zBtn = document.getElementById('zoomLinkBtn');
             if(zBtn) {
@@ -698,6 +759,13 @@ socket.on('gorev_guncellendi', (tumVeriler) => {
     }
 });
 
+socket.on('eski_verileri_yukle', (tumVeriler) => {
+    let benimVerim = tumVeriler.find(v => v.ogrenciAd === aktifOgrenci);
+    if(benimVerim) {
+        benimTamamlananKaynaklar = benimVerim.tamamlananKaynaklar || [];
+    }
+});
+
 socket.on('duello_istegi_geldi', (veri) => { 
     if(veri.hedef === aktifOgrenci) { 
         bekleyenDuelloRakip = veri.gonderen; 
@@ -726,16 +794,29 @@ socket.on('duello_sonucu', (veri) => {
     } 
 });
 
+// 📚 YENİ: KAYNAKLARI LİSTELE VE BİTİR BUTONU
 socket.on('kaynaklari_yukle', (liste) => { 
     let kutu = document.getElementById('kaynakListesi'); 
     if(!kutu) return; 
     kutu.innerHTML = ''; 
     if(liste.length === 0) { 
-        kutu.innerHTML = '<div style="color: #94a3b8; font-style: italic;">Henüz kaynak yok.</div>'; 
+        kutu.innerHTML = '<div style="color: #94a3b8; font-style: italic;">Koçun henüz kaynak eklememiş.</div>'; 
         return; 
     } 
     liste.forEach(k => { 
-        kutu.innerHTML += `<div class="kaynak-item" style="background:#f1f5f9; padding:15px; border-radius:12px; margin-bottom:10px; text-align:left; font-weight:bold; font-size:14px; border-left:5px solid #8b5cf6;">${k.baslik} <a href="${k.url}" target="_blank" style="color:#4f46e5; text-decoration:none; display:inline-block; margin-top:8px; font-size:13px; font-weight:900; background:#e0e7ff; padding:5px 10px; border-radius:8px;">🔗 Kaynağa Git</a></div>`; 
+        let bittiMi = benimTamamlananKaynaklar.includes(k.id);
+        let butonHtml = bittiMi 
+            ? `<span style="color:#10b981; font-weight:900; font-size:12px;">✅ Bitti</span>` 
+            : `<button onclick="kaynakBitir(${k.id}, '${k.baslik}')" style="background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:900; font-size:12px; box-shadow:0 4px 10px rgba(16, 185, 129, 0.2);">Bitirdim (+5 XP)</button>`;
+            
+        kutu.innerHTML += `
+        <div class="kaynak-item" style="background:#f1f5f9; padding:15px; border-radius:12px; margin-bottom:10px; text-align:left; border-left:5px solid #8b5cf6;">
+            <div style="font-weight:900; color:#1e293b; font-size:14px; margin-bottom:8px;">${k.baslik}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <a href="${k.url}" target="_blank" style="color:#4f46e5; text-decoration:none; font-size:13px; font-weight:900; background:#e0e7ff; padding:8px 12px; border-radius:10px;">🔗 İncele</a>
+                ${butonHtml}
+            </div>
+        </div>`; 
     }); 
 });
 
@@ -865,7 +946,6 @@ document.addEventListener("DOMContentLoaded", () => {
         
         socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: aktifDersString, mesaj: 'Derse geri döndü', kocKodu: kocKodu });
         
-        // Sayfa yenilense bile öğrenci dersteyse AFK Yoklamasını kur
         rastgeleYoklamaKur();
         
     } else { 

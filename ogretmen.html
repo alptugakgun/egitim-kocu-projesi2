@@ -6,7 +6,6 @@
     <title>KatalizApp - Öğretmen Paneli</title>
     
     <script>
-        // Yetki Kontrolü
         if (!localStorage.getItem('ogretmenKimligi')) {
             window.location.href = 'ogretmen-login.html';
         }
@@ -29,7 +28,6 @@
             overflow-x: hidden;
         }
 
-        /* Üst Menü ve Başlık */
         .header { 
             margin-bottom: 30px; 
             background: rgba(255, 255, 255, 0.85);
@@ -61,7 +59,6 @@
             margin-left: 15px;
         }
 
-        /* Finans Uyarı Kutusu */
         .finance-alert-box {
             background: #fff5f5;
             border: 3px dashed #ff7a7a;
@@ -91,7 +88,6 @@
             font-weight: 800;
         }
 
-        /* Butonlar */
         .btn-red, .btn-blue { 
             color: white; 
             border: none; 
@@ -124,7 +120,6 @@
             box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4); 
         }
         
-        /* Dashboard ve Grafikler */
         .top-dashboard { 
             display: grid; 
             grid-template-columns: 1fr 1fr 1fr 1fr; 
@@ -163,7 +158,6 @@
             width: 100%; 
         }
         
-        /* Lig Tablosu */
         .leaderboard-list { 
             list-style: none; 
             padding: 0; 
@@ -209,7 +203,6 @@
             margin: 15px 0 8px 0;
         }
         
-        /* Öğrenci Kartları (Canlı Takip) */
         .live-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); 
@@ -296,7 +289,6 @@
             color: #475569;
         }
         
-        /* Modallar (Açılır Pencereler) */
         .modal { 
             display: none; 
             position: fixed; 
@@ -339,7 +331,6 @@
             color: #1e293b; 
         }
 
-        /* Tablolar (Ajanda, Gizli Kasa) */
         table.ajanda-tablo { 
             width: 100%; 
             border-collapse: separate; 
@@ -393,7 +384,6 @@
             box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
         }
 
-        /* Mobil Uyumluluk */
         @media (max-width: 768px) {
             .container, .modal-content {
                 width: 90% !important;
@@ -425,6 +415,7 @@
     <div class="header">
         <h1 id="kocKarsilama">⚡ KatalizApp Paneli</h1>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn-blue" style="background: linear-gradient(135deg, #ec4899, #db2777);" onclick="document.getElementById('kutuphaneModal').style.display='flex'">📚 Kütüphane</button>
             <button class="btn-blue" style="background: linear-gradient(135deg, #14b8a6, #0d9488);" onclick="rehberlikDefteriAc()">🧠 Psikolojik Testler</button>
             <button class="btn-blue" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);" onclick="odulDefteriAc()">🎁 Bekleyen Ödüller</button>
             <button class="btn-blue" style="background: linear-gradient(135deg, #475569, #1e293b);" onclick="hataDefteriAc()">💣 Hata Defteri</button>
@@ -467,6 +458,30 @@
     </div>
 
     <div class="live-grid" id="liveGrid"></div>
+
+    <div class="modal" id="kutuphaneModal">
+        <div class="modal-content" style="width: 500px;">
+            <h2 style="margin-top:0; font-size:26px; color:#db2777;">📚 Eğitim Kütüphanesi</h2>
+            <p style="font-size:14px; color:#64748b; font-weight:bold; margin-bottom: 20px;">Sınıfına özel PDF, video veya not linklerini ekleyebilirsin.</p>
+            
+            <div style="background: #fdf2f8; padding: 20px; border-radius: 20px; border: 2px dashed #fbcfe8; margin-bottom: 20px; display:flex; flex-direction:column; gap:10px; align-items:stretch;">
+                <select id="kaynakKategori" style="padding:12px; border-radius:12px; border:2px solid #f9a8d4; outline:none; font-weight:800; font-family:inherit; color:#1e293b;">
+                    <option value="Soru Bankası / PDF">Soru Bankası / PDF</option>
+                    <option value="Konu Özeti / Not">Konu Özeti / Not</option>
+                    <option value="ÖSYM Çıkmış Sorular">ÖSYM Çıkmış Sorular</option>
+                    <option value="Video Ders Linki">Video Ders Linki</option>
+                </select>
+                <input type="text" id="kaynakBaslik" placeholder="Kaynak Başlığı (Örn: Türev PDF)" style="padding:12px; border-radius:12px; border:2px solid #f9a8d4; outline:none; font-weight:800; font-family:inherit; color:#1e293b;">
+                <input type="url" id="kaynakLink" placeholder="Drive / YouTube Linki" style="padding:12px; border-radius:12px; border:2px solid #f9a8d4; outline:none; font-weight:800; font-family:inherit; color:#1e293b;">
+                <button style="background:linear-gradient(135deg, #ec4899, #db2777); border:none; padding:15px; border-radius:12px; color:white; font-weight:900; cursor:pointer;" onclick="kaynakEkle()">🚀 Kaynağı Sınıfa Gönder</button>
+            </div>
+            
+            <div id="kaynakListesi" style="text-align:left; max-height:250px; overflow-y:auto; padding:20px; border:2px solid #e2e8f0; border-radius:20px; font-weight:800; line-height:2.2; background:#f8fafc;">
+                <span style="color:#94a3b8; font-weight:bold;">Yükleniyor...</span>
+            </div>
+            <button class="close-modal-btn" onclick="document.getElementById('kutuphaneModal').style.display='none'">Kapat</button>
+        </div>
+    </div>
 
     <div class="modal" id="rehberlikRaporModal">
         <div class="modal-content" style="width: 600px;">
@@ -613,7 +628,56 @@
         let aktifAiOgrenci = ""; 
         const AYLAR = ["Eyl", "Eki", "Kas", "Ara", "Oca", "Sub", "Mar", "Nis", "May", "Haz"];
 
+        // --- KÜTÜPHANE FONKSİYONLARI ---
+        window.kaynakEkle = function() { 
+            let baslik = document.getElementById('kaynakBaslik').value.trim(); 
+            let link = document.getElementById('kaynakLink').value.trim(); 
+            let kategori = document.getElementById('kaynakKategori').value;
+            
+            if(!baslik || !link) return alert("Başlık ve link boş bırakılamaz!"); 
+            if(!link.startsWith('http')) link = 'https://' + link; 
+            
+            socket.emit('yeni_kaynak_ekle', { 
+                kocKodu: kocKodu, 
+                baslik: `[${kategori}] ${baslik}`, 
+                url: link 
+            }); 
+            
+            document.getElementById('kaynakBaslik').value = ''; 
+            document.getElementById('kaynakLink').value = ''; 
+        };
+
+        window.kaynakSil = function(id) { 
+            if(confirm("Bu kaynağı silmek istediğinize emin misiniz?")) {
+                socket.emit('kaynak_sil', { id: id, kocKodu: kocKodu }); 
+            }
+        };
+
         // --- SOCKET DİNLEYİCİLERİ ---
+        socket.on('kaynaklari_yukle', (liste) => { 
+            let kutu = document.getElementById('kaynakListesi'); 
+            if(!kutu) return; 
+            kutu.innerHTML = ''; 
+            if(liste.length === 0) { 
+                kutu.innerHTML = '<div style="color: #94a3b8; font-style: italic; font-weight:bold;">Kütüphaneniz şu an boş.</div>'; 
+                return; 
+            } 
+            liste.forEach(k => { 
+                kutu.innerHTML += `
+                <div style="background: #fdf2f8; padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: left; font-weight: bold; font-size: 14px; border-left: 5px solid #db2777; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span style="color:#1e293b;">${k.baslik}</span> <span style="font-size:11px; color:#94a3b8; font-weight:normal;">(${k.tarih})</span>
+                        <br><a href="${k.url}" target="_blank" style="color: #db2777; text-decoration: none; display: inline-block; margin-top: 5px; font-size: 13px; font-weight: 900;">🔗 Linki Test Et</a>
+                    </div>
+                    <button style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 900;" onclick="kaynakSil(${k.id})">Sil</button>
+                </div>`; 
+            }); 
+        });
+
+        socket.on('yeni_kaynak_eklendi', (kaynak) => { 
+            socket.emit('join_room', kocKodu); 
+        });
+
         socket.on('finans_uyarisi', (veri) => {
             const box = document.getElementById('financeAlertBox');
             const list = document.getElementById('financeAlertList');
@@ -1082,7 +1146,6 @@
                 document.getElementById('liveGrid').prepend(yeniKart);
             }
             
-            // Görev listesini doldur
             let listeElementi = document.getElementById(`gorevListesi-${id}`); 
             if(listeElementi && gelenVeri.gorevler) { 
                 listeElementi.innerHTML = ''; 
@@ -1155,7 +1218,6 @@
         };
 
         function verileriGuncelle() { 
-            // Net Grafiği Menüsü
             let secici = document.getElementById('netOgrenciSecici'); 
             let mevcutSecim = secici.value; 
             secici.innerHTML = '<option value="">Öğrenci Seçin...</option>';
@@ -1169,7 +1231,6 @@
                 netGrafigiCiz(); 
             }
 
-            // Lig Tablosu
             let siraliSinif = [...sinifListesi].sort((a, b) => (b.xp || 0) - (a.xp || 0));
             let listeEl = document.getElementById('leaderboardList'); 
             listeEl.innerHTML = ''; 
@@ -1198,7 +1259,6 @@
                     <div><div class="lig-baslik" style="background:linear-gradient(135deg, #ffedd5, #fed7aa); color:#b45309;">🪵 AMATÖR LİG</div>${amatorLig}</div>`; 
             }
 
-            // XP Dağılım Grafiği (Bar)
             let isimler = siraliSinif.map(o => o.ogrenciAd.split(' ')[0]);
             let xpler = siraliSinif.map(o => o.xp || 0);
             
@@ -1226,21 +1286,21 @@
                 }); 
             }
 
-            // Odaklanma Dağılım Grafiği (Doughnut)
-            let derste = sinifListesi.filter(o => o.mesaj && !o.mesaj.includes('Mola')).length;
+            let derste = sinifListesi.filter(o => o.mesaj && !o.mesaj.includes('Mola') && o.ders !== 'MASA BAŞINDAN AYRILDI').length;
             let mola = sinifListesi.filter(o => o.mesaj && o.mesaj.includes('Mola')).length;
+            let afk = sinifListesi.filter(o => o.ders === 'MASA BAŞINDAN AYRILDI').length;
             
             if (odakGrafikObjesi) { 
-                odakGrafikObjesi.data.datasets[0].data = [derste, mola]; 
+                odakGrafikObjesi.data.datasets[0].data = [derste, mola, afk]; 
                 odakGrafikObjesi.update(); 
             } else { 
                 odakGrafikObjesi = new Chart(document.getElementById('odakGrafigi').getContext('2d'), { 
                     type: 'doughnut', 
                     data: { 
-                        labels: ['Derste 🔥', 'Molada ☕'], 
+                        labels: ['Derste 🔥', 'Molada ☕', 'AFK (Kaçak) 🚨'], 
                         datasets: [{ 
-                            data: [derste, mola], 
-                            backgroundColor: ['#10b981', '#f59e0b'], 
+                            data: [derste, mola, afk], 
+                            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], 
                             borderWidth: 0 
                         }] 
                     }, 
