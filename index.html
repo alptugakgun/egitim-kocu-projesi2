@@ -19,31 +19,31 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
         
-        /* 🌙 CSS DEĞİŞKENLERİ (Gece ve Gündüz Modu İçin) */
+        /* 🌙 TEMA DEĞİŞKENLERİ (Gece ve Gündüz Modu İçin) */
         :root {
             --bg-body: linear-gradient(135deg, #fffcf5 0%, #ffece0 100%);
             --bg-container: rgba(255, 255, 255, 0.85);
             --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --border-light: #f1f5f9;
-            --bg-input: #f8fafc;
-            --modal-bg: #ffffff;
-            --box-shadow: rgba(0,0,0,0.05);
+            --border-light: rgba(255, 255, 255, 0.5);
+            --bg-input: rgba(248, 250, 252, 0.8);
+            --modal-bg: rgba(255, 255, 255, 0.95);
+            --box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
             --border-container: #ffffff;
-            --display-bg: linear-gradient(to bottom, #ffffff, #f8fafc);
+            --display-bg: rgba(255, 255, 255, 0.9);
         }
 
         [data-theme="dark"] {
             --bg-body: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --bg-container: rgba(30, 41, 59, 0.85);
+            --bg-container: rgba(30, 41, 59, 0.75);
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
-            --border-light: #334155;
-            --bg-input: #0f172a;
-            --modal-bg: #1e293b;
-            --box-shadow: rgba(0,0,0,0.4);
+            --border-light: rgba(255, 255, 255, 0.1);
+            --bg-input: rgba(15, 23, 42, 0.6);
+            --modal-bg: rgba(30, 41, 59, 0.95);
+            --box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             --border-container: #334155;
-            --display-bg: linear-gradient(to bottom, #1e293b, #0f172a);
+            --display-bg: rgba(15, 23, 42, 0.8);
         }
 
         body { 
@@ -56,21 +56,27 @@
             margin: 0; 
             overflow-x: hidden;
             color: var(--text-primary);
-            transition: background 0.5s ease;
+            transition: background 0.5s ease, color 0.5s ease;
         }
+
+        /* 🎨 ORGANİK ARKA PLAN ŞEKİLLERİ */
+        .bg-shape-1 { position: fixed; top: -10%; left: -10%; width: 450px; height: 450px; background: #ff7a7a; border-radius: 50%; opacity: 0.12; filter: blur(60px); z-index: -1; animation: floatShape 12s infinite alternate;}
+        .bg-shape-2 { position: fixed; bottom: -10%; right: -10%; width: 500px; height: 500px; background: #a855f7; border-radius: 50%; opacity: 0.12; filter: blur(80px); z-index: -1; animation: floatShape 15s infinite alternate-reverse;}
+        @keyframes floatShape { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.1); } }
 
         .container { 
             background: var(--bg-container); 
-            backdrop-filter: blur(15px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 40px; 
             border-radius: 40px; 
-            box-shadow: 0 30px 60px var(--box-shadow); 
-            width: 420px; 
+            box-shadow: var(--box-shadow); 
+            width: 440px; 
             text-align: center; 
             position: relative;
             animation: floatContainer 6s ease-in-out infinite;
             border: 2px solid var(--border-container);
-            transition: all 0.5s ease;
+            transition: background 0.5s ease, border-color 0.5s ease;
         }
 
         @keyframes floatContainer {
@@ -78,23 +84,23 @@
             50% { transform: translateY(-8px); }
         }
 
-        /* 🌙 Tema Değiştirme Butonu */
+        /* 🌙 TEMA ŞALTERİ */
         .theme-toggle-btn {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 25px;
+            right: 25px;
             background: var(--bg-input);
             border: 2px solid var(--border-light);
             color: var(--text-primary);
             font-size: 20px;
-            width: 45px;
-            height: 45px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: 0.3s;
+            transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             z-index: 10;
         }
         .theme-toggle-btn:hover {
@@ -103,8 +109,8 @@
         
         .top-bar-btns { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); 
-            gap: 8px; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 12px; 
             margin-bottom: 30px; 
             margin-top: 15px;
         }
@@ -112,24 +118,24 @@
         .top-btn { 
             color: white; 
             border: none; 
-            padding: 12px 5px; 
+            padding: 15px 5px; 
             border-radius: 20px; 
             cursor: pointer; 
             font-weight: 900; 
-            font-size: 11px; 
+            font-size: 12px; 
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); 
             width: 100%; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            gap: 6px;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+            gap: 8px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
         }
         
         .top-btn:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 15px 25px rgba(0,0,0,0.15); }
-        .top-btn span { font-size: 20px; }
+        .top-btn span { font-size: 24px; }
 
-        .btn-hata     { background: linear-gradient(135deg, #ff7a7a, #ff5252); } 
+        .btn-hata     { background: linear-gradient(135deg, #ff7a7a, #f43f5e); } 
         .btn-lib      { background: linear-gradient(135deg, #a855f7, #8b5cf6); } 
         .btn-net      { background: linear-gradient(135deg, #60a5fa, #3b82f6); } 
         .btn-market   { background: linear-gradient(135deg, #fbbf24, #f59e0b); } 
@@ -137,17 +143,17 @@
         .btn-rehberlik{ background: linear-gradient(135deg, #14b8a6, #0d9488); } 
         
         .avatar-btn { 
-            font-size: 45px; 
+            font-size: 50px; 
             cursor: pointer; 
             background: var(--bg-input); 
             border-radius: 50%; 
-            width: 85px; 
-            height: 85px; 
+            width: 95px; 
+            height: 95px; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            box-shadow: 0 10px 25px var(--box-shadow); 
-            margin: 0 auto 20px auto; 
+            box-shadow: var(--box-shadow); 
+            margin: 0 auto 25px auto; 
             border: 4px solid var(--border-container); 
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -155,9 +161,9 @@
 
         .radyo-widget { 
             background: var(--bg-input); 
-            padding: 15px; 
+            padding: 12px; 
             border-radius: 25px; 
-            margin-bottom: 20px; 
+            margin-bottom: 25px; 
             display: flex; 
             justify-content: space-around; 
             align-items: center;
@@ -183,13 +189,13 @@
         .radyo-btn:hover { transform: scale(1.1); } 
         .radyo-btn.aktif { background: #10b981; color: white; transform: scale(1.1);}
         
-        h1 { color: var(--text-primary); margin-top: 0; font-size: 26px; font-weight: 900; letter-spacing: -0.5px;}
-        h2, h3 { color: var(--text-primary) !important; } /* Modallar için zorlama */
+        h1 { color: var(--text-primary); margin-top: 0; font-size: 28px; font-weight: 900; letter-spacing: -0.5px;}
+        h2, h3 { color: var(--text-primary) !important; }
         
         .select-row { display: flex; gap: 12px; margin-bottom: 12px; }
         .select-box { 
             flex: 1; 
-            padding: 15px; 
+            padding: 16px; 
             border-radius: 20px; 
             border: 2px solid var(--border-light); 
             font-family: inherit; 
@@ -207,28 +213,29 @@
         .mode-container { display: flex; gap: 12px; margin-bottom: 25px; align-items: center; margin-top: 25px;}
         .mode-btn { 
             flex: 1; 
-            padding: 14px; 
+            padding: 15px; 
             border-radius: 20px; 
             border: none; 
             font-weight: 900; 
             cursor: pointer; 
             transition: all 0.3s; 
-            font-size: 15px;
+            font-size: 16px;
         }
         .mode-active { background: #3b82f6; color: white; box-shadow: 0 6px 15px rgba(59, 130, 246, 0.3); transform: translateY(-2px);} 
         .mode-passive { background: var(--bg-input); color: var(--text-secondary); border: 2px solid var(--border-light); }
         
         #display { 
-            font-size: 64px; 
+            font-size: 70px; 
             font-weight: 900; 
             color: var(--text-primary); 
-            margin: 10px 0 30px 0; 
+            margin: 15px 0 35px 0; 
             font-variant-numeric: tabular-nums; 
             background: var(--display-bg); 
-            padding: 20px 40px; 
-            border-radius: 30px; 
+            padding: 25px 45px; 
+            border-radius: 35px; 
             display: inline-block; 
             border: 2px solid var(--border-light);
+            letter-spacing: -1px;
         }
         
         .buttons { display: flex; gap: 15px; justify-content: center; }
@@ -243,62 +250,41 @@
             color: white; 
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
         }
-        #startBtn { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); } 
-        #startBtn:hover { transform: translateY(-4px); box-shadow: 0 12px 25px rgba(16, 185, 129, 0.4); }
-        
-        #pauseBtn { background: linear-gradient(135deg, #f59e0b, #d97706); display: none; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3); } 
-        #pauseBtn:hover { transform: translateY(-4px); box-shadow: 0 12px 25px rgba(245, 158, 11, 0.4); }
+        #startBtn { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); } 
+        #pauseBtn { background: linear-gradient(135deg, #f59e0b, #d97706); display: none; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3); }
+        #startBtn:hover, #pauseBtn:hover { transform: translateY(-4px); box-shadow: 0 15px 25px rgba(0,0,0,0.15); }
         
         #statusText { margin-top: 20px; padding: 15px; border-radius: 18px; font-size: 15px; font-weight: 900; transition: 0.3s; }
         
-        .task-board { margin-top: 35px; padding-top: 25px; border-top: 3px dashed var(--border-light); text-align: left; display: none; }
+        .task-board { margin-top: 40px; padding-top: 25px; border-top: 3px dashed var(--border-light); text-align: left; display: none; }
         .task-board h3 { margin-top: 0; font-size: 18px; color: #4f46e5 !important; font-weight: 900; display: flex; align-items: center; gap: 8px;}
         .task-item { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: var(--bg-input); 
-            padding: 18px; 
-            border-radius: 20px; 
-            margin-bottom: 12px; 
-            border: 2px solid var(--border-light); 
-            transition: all 0.3s; 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: var(--bg-input); padding: 18px; border-radius: 20px; 
+            margin-bottom: 12px; border: 2px solid var(--border-light); transition: all 0.3s; 
             color: var(--text-primary);
         }
-        .finish-btn { background: #3b82f6; color: white; border: none; padding: 10px 18px; border-radius: 15px; cursor: pointer; font-weight: 900;}
+        .finish-btn { background: #3b82f6; color: white; border: none; padding: 10px 18px; border-radius: 15px; cursor: pointer; font-weight: 900; transition: 0.2s;}
+        .finish-btn:hover { background: #2563eb; transform: scale(1.05);}
         
         /* Modallar */
         .modal { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(15, 23, 42, 0.8); 
-            z-index: 2000; 
-            justify-content: center; 
-            align-items: center; 
-            backdrop-filter: blur(8px);
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(15, 23, 42, 0.7); z-index: 2000; justify-content: center; align-items: center; 
+            backdrop-filter: blur(10px); animation: fadeIn 0.3s ease;
         }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
         .modal-content { 
-            background: var(--modal-bg); 
-            padding: 35px; 
-            border-radius: 35px; 
-            text-align: center; 
-            width: 450px; 
-            max-height: 85vh; 
-            overflow-y: auto; 
-            border: 2px solid var(--border-light);
-            position: relative;
+            background: var(--modal-bg); padding: 35px; border-radius: 35px; text-align: center; 
+            width: 450px; max-height: 85vh; overflow-y: auto; box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+            border: 2px solid var(--border-light); position: relative;
         }
+
         .close-modal-btn {
-            margin-top: 20px; 
-            padding: 15px; 
-            background: var(--bg-input); 
-            color: var(--text-primary);
-            border: 2px solid var(--border-light); 
-            border-radius: 18px; 
-            font-weight: 900; 
-            width: 100%; 
-            cursor: pointer;
+            margin-top: 25px; padding: 15px; background: var(--bg-input); color: var(--text-primary);
+            border: 2px solid var(--border-light); border-radius: 18px; font-weight: 900; width: 100%; 
+            cursor: pointer; transition: 0.2s; font-size: 16px;
         }
 
         /* Zoom Butonu */
@@ -308,73 +294,33 @@
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } 
         }
         .zoom-btn { 
-            background: linear-gradient(135deg, #ef4444, #e11d48); 
-            color: white; 
-            padding: 18px; 
-            border-radius: 20px; 
-            text-decoration: none; 
-            font-weight: 900; 
-            display: block; 
-            margin-bottom: 25px; 
-            animation: zoomPulse 2s infinite; 
-            font-size: 16px; 
-            border: none; 
-            display: none;
+            background: linear-gradient(135deg, #ef4444, #e11d48); color: white; padding: 18px; 
+            border-radius: 20px; text-decoration: none; font-weight: 900; display: block; 
+            margin-bottom: 25px; animation: zoomPulse 2s infinite; font-size: 16px; border: none; display: none;
         }
 
         /* Alt Paneller (AI ve Sohbet) */
         .bottom-panel { 
-            position: fixed; 
-            bottom: 25px; 
-            width: 350px; 
-            background: var(--modal-bg); 
-            border-radius: 30px; 
-            box-shadow: 0 15px 45px var(--box-shadow); 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-            z-index: 1000; 
+            position: fixed; bottom: 25px; width: 350px; background: var(--modal-bg); 
+            border-radius: 30px; box-shadow: 0 15px 45px var(--box-shadow); 
+            display: flex; flex-direction: column; overflow: hidden; z-index: 1000; 
             border: 2px solid var(--border-light);
         }
-        .bottom-panel-header { 
-            padding: 18px 25px; 
-            font-weight: 900; 
-            cursor: pointer; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            color: white; 
-            font-size: 16px;
-        }
+        .bottom-panel-header { padding: 18px 25px; font-weight: 900; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: white; font-size: 16px; }
 
-        /* Arka Plan Şekilleri */
-        .bg-shape-1 { position: absolute; top: -10%; left: -10%; width: 300px; height: 300px; background: #ff7a7a; border-radius: 50%; opacity: 0.1; filter: blur(40px); z-index: -1; animation: floatShape 10s infinite alternate;}
-        .bg-shape-2 { position: absolute; bottom: -10%; right: -10%; width: 400px; height: 400px; background: #a855f7; border-radius: 50%; opacity: 0.1; filter: blur(50px); z-index: -1; animation: floatShape 12s infinite alternate-reverse;}
-
-        /* YOKLAMA EKRANI ÖZEL ANİMASYON */
         @keyframes emergencyFlash {
             0% { background-color: rgba(239, 68, 68, 0.2); }
             50% { background-color: rgba(239, 68, 68, 0.8); }
             100% { background-color: rgba(239, 68, 68, 0.2); }
         }
 
-        /* MOBİL UYUM (RESPONSIVE) */
+        /* MOBİL UYUM */
         @media (max-width: 768px) {
-            .container, .modal-content {
-                width: 90% !important;
-                max-width: 90% !important;
-                padding: 20px !important;
-                box-sizing: border-box;
-            }
-            .bottom-panel {
-                width: 90% !important;
-                left: 5% !important;
-                right: 5% !important;
-                bottom: 10px !important;
-            }
-            #display { font-size: 40px !important; padding: 15px !important; }
+            .container, .modal-content { width: 90% !important; max-width: 90% !important; padding: 25px !important; box-sizing: border-box; }
+            .bottom-panel { width: 90% !important; left: 5% !important; right: 5% !important; bottom: 10px !important; }
+            #display { font-size: 45px !important; padding: 15px !important; }
             .top-bar-btns { grid-template-columns: repeat(3, 1fr); }
-            .theme-toggle-btn { top: 10px; right: 10px; width: 35px; height: 35px; font-size: 16px; }
+            .theme-toggle-btn { top: 15px; right: 15px; width: 40px; height: 40px; font-size: 18px; }
         }
     </style>
 </head>
@@ -394,7 +340,7 @@
         <div class="top-bar-btns" data-intro="Burası cephaneliğin! Hata defterine soru yükle, kütüphaneni aç veya marketten ödül al." data-step="1">
             <button class="top-btn btn-hata" onclick="document.getElementById('hataModal').style.display='flex'"><span>💣</span> Hata</button>
             <button class="top-btn btn-lib" onclick="document.getElementById('kutuphaneModal').style.display='flex'"><span>📚</span> Kaynak</button>
-            <button class="top-btn btn-net" onclick="document.getElementById('netModal').style.display='flex'"><span>📈</span> Optik/Net</button>
+            <button class="top-btn btn-net" onclick="document.getElementById('netModal').style.display='flex'"><span>📈</span> Optik</button>
             <button class="top-btn btn-market" onclick="document.getElementById('marketModal').style.display='flex'"><span>🛒</span> Market</button>
             <button class="top-btn btn-duel" onclick="document.getElementById('duelloModal').style.display='flex'"><span>⚔️</span> Düello</button>
             <button class="top-btn btn-rehberlik" onclick="document.getElementById('rehberlikModal').style.display='flex'"><span>🧠</span> Test</button>
@@ -405,7 +351,6 @@
         <a href="#" id="zoomLinkBtn" target="_blank" class="zoom-btn">🔴 Koç Canlı Yayında! Katıl</a>
 
         <div class="radyo-widget" data-intro="Çalışırken Lofi, Yağmur veya Kafe sesleriyle odaklanmanı artır." data-step="3">
-            <span style="color:var(--text-secondary); font-weight:900; font-size:13px;">🎧 Odak:</span>
             <button class="radyo-btn" id="btnLofi" onclick="radyoCal('Lofi')" title="Lofi Beats">🎵</button>
             <button class="radyo-btn" id="btnYagmur" onclick="radyoCal('Yagmur')" title="Yağmur Sesi">🌧️</button>
             <button class="radyo-btn" id="btnKafe" onclick="radyoCal('Kafe')" title="Kafe Ortamı">☕</button>
@@ -413,6 +358,12 @@
         </div>
 
         <h1 id="mainTitle">⚡ KatalizApp</h1>
+
+        <div id="randevuKutusu" style="display:none; background: linear-gradient(135deg, #e0e7ff, #c7d2fe); border: 2px solid #818cf8; border-radius: 20px; padding: 15px; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.15);">
+            <div style="font-size: 14px; color: #4f46e5; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">📅 Yaklaşan Randevun</div>
+            <div style="font-size: 20px; font-weight: 900; color: #1e293b;" id="randevuTarihi"></div>
+            <div style="font-size: 14px; font-weight: 800; color: #475569; margin-top: 5px;" id="randevuKonusu"></div>
+        </div>
         
         <div class="select-row" data-intro="Hangi derse ve konuya çalışacağını buradan seçmelisin." data-step="4">
             <select id="sinavSecimi" class="select-box" style="flex: 0.35;"></select>
@@ -421,16 +372,16 @@
         <select id="konuSecimi" class="select-box" style="width: 100%;"></select>
         
         <div class="mode-container">
-            <button id="modeNormal" class="mode-btn mode-active" onclick="setMode('normal')">⏳ Kronometre</button>
-            <button id="modePomo" class="mode-btn mode-passive" onclick="setMode('pomodoro')">🍅 Pomodoro</button>
-            <input type="number" id="pomoInput" value="25" min="1" max="120" style="width: 75px; padding: 12px; border-radius: 15px; border: 2px solid var(--border-light); font-weight: 900; font-size: 18px; outline: none; text-align: center; display: none; color: #ef4444; background:var(--bg-input);">
+            <button id="modeNormal" class="mode-btn mode-active" onclick="setMode('normal')">⏳ Süre</button>
+            <button id="modePomo" class="mode-btn mode-passive" onclick="setMode('pomodoro')">🍅 Pomo</button>
+            <input type="number" id="pomoInput" value="25" class="select-box" style="width: 75px; padding: 12px; font-weight: 900; font-size: 18px; text-align: center; display: none; color: #ef4444; margin-bottom:0;">
         </div>
         
         <div id="display" data-intro="Buradan süreni takip edebilirsin." data-step="5">00:00:00</div>
         
         <div class="buttons" data-intro="Her şey hazırsa BAŞLA butonuna tıkla. Unutma, masadan kalkarsan radarımız seni tespit edip odaklanmanı durdurur! İyi çalışmalar." data-step="6">
             <button id="startBtn" class="action-btn" onclick="startTimer()">▶ Başla</button>
-            <button id="pauseBtn" class="action-btn" onclick="pauseTimer()">⏸ Mola Ver</button>
+            <button id="pauseBtn" class="action-btn" onclick="pauseTimer()">⏸ Mola</button>
         </div>
         
         <div id="statusText"></div>
@@ -459,7 +410,7 @@
     </div>
 
     <div class="modal" id="rehberlikModal">
-        <div class="modal-content" style="width: 450px;">
+        <div class="modal-content">
             <h2 style="color:#0d9488 !important; margin-top:0;">🧠 Rehberlik Merkezi</h2>
             <p style="font-size:14px; color:var(--text-secondary); font-weight:bold; margin-bottom: 20px;">Analiz edilmek istediğin alanı seç ve dürüstçe yanıtla.</p>
             
@@ -470,10 +421,9 @@
                 <option value="Öğrenme Stili Belirleme">Öğrenme Stili Belirleme</option>
             </select>
 
-            <div id="dinamikSoruAlani" style="text-align: left; max-height: 300px; overflow-y: auto; display:none;">
-            </div>
+            <div id="dinamikSoruAlani" style="text-align: left; max-height: 300px; overflow-y: auto; display:none;"></div>
 
-            <button id="testGonderBtn" onclick="psikolojikTestKaydet()" style="background: linear-gradient(135deg, #14b8a6, #0d9488); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 900; font-size:16px; width: 100%; cursor: pointer; display:none; margin-top:20px;">Analizi Koçuma Gönder</button>
+            <button id="testGonderBtn" onclick="psikolojikTestKaydet()" class="action-btn" style="background: linear-gradient(135deg, #14b8a6, #0d9488); display:none; margin-top:20px;">Analizi Koçuma Gönder</button>
             <button class="close-modal-btn" onclick="document.getElementById('rehberlikModal').style.display='none'">Kapat</button>
         </div>
     </div>
@@ -493,25 +443,25 @@
             </div>
 
             <div id="hizliNetKutusu">
-                <input type="number" id="netSkoru" placeholder="Toplam Net (Örn: 75.5)" step="0.25" style="width:100%; text-align:center; font-size:24px; padding:15px; border-radius:15px; border:2px solid var(--border-light); outline:none; font-weight:900; color:var(--text-primary); box-sizing:border-box;">
+                <input type="number" id="netSkoru" placeholder="Toplam Net (Örn: 75.5)" step="0.25" class="select-box" style="width:100%; text-align:center; font-size:24px; padding:15px; font-weight:900; box-sizing:border-box;">
             </div>
 
             <div id="detayliNetKutusu" style="display:none; background:var(--bg-input); padding:15px; border-radius:15px; border:2px solid var(--border-light);">
                 <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                     <span style="font-weight:800; color:var(--text-secondary); padding-top:10px;">Türkçe:</span>
-                    <input type="number" id="netTurkce" placeholder="Net" style="width:80px; padding:10px; border-radius:10px; border:2px solid var(--border-light); text-align:center; font-weight:bold; background:var(--modal-bg);">
+                    <input type="number" id="netTurkce" placeholder="Net" style="width:80px; padding:10px; border-radius:10px; border:2px solid var(--border-light); text-align:center; font-weight:bold; background:var(--modal-bg); color:var(--text-primary); outline:none;">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                     <span style="font-weight:800; color:var(--text-secondary); padding-top:10px;">Matematik:</span>
-                    <input type="number" id="netMatematik" placeholder="Net" style="width:80px; padding:10px; border-radius:10px; border:2px solid var(--border-light); text-align:center; font-weight:bold; background:var(--modal-bg);">
+                    <input type="number" id="netMatematik" placeholder="Net" style="width:80px; padding:10px; border-radius:10px; border:2px solid var(--border-light); text-align:center; font-weight:bold; background:var(--modal-bg); color:var(--text-primary); outline:none;">
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                     <span style="font-weight:800; color:var(--text-secondary); padding-top:10px;">Fen Bilimleri:</span>
-                    <input type="number" id="netFen" placeholder="Net" style="width:80px; padding:10px; border-radius:10px; border:2px solid var(--border-light); text-align:center; font-weight:bold; background:var(--modal-bg);">
+                    <input type="number" id="netFen" placeholder="Net" style="width:80px; padding:10px; border-radius:10px; border:2px solid var(--border-light); text-align:center; font-weight:bold; background:var(--modal-bg); color:var(--text-primary); outline:none;">
                 </div>
                 <div style="display:flex; justify-content:space-between;">
                     <span style="font-weight:800; color:var(--text-secondary); padding-top:10px;">Sosyal Bilimler:</span>
-                    <input type="number" id="netSosyal" placeholder="Net" style="width:80px; padding:10px; border-radius:10px; border:2px solid var(--border-light); text-align:center; font-weight:bold; background:var(--modal-bg);">
+                    <input type="number" id="netSosyal" placeholder="Net" style="width:80px; padding:10px; border-radius:10px; border:2px solid var(--border-light); text-align:center; font-weight:bold; background:var(--modal-bg); color:var(--text-primary); outline:none;">
                 </div>
                 <p style="font-size:11px; color:#ef4444; font-weight:bold; margin-top:10px;">* Sistemin ısı haritanı otomatik güncellemesi için detaylı girmen tavsiye edilir.</p>
             </div>
@@ -525,7 +475,7 @@
         <div class="modal-content">
             <h2 style="color:var(--text-primary) !important; margin-top:0;">💣 Hata Defteri</h2>
             <input type="file" id="hataResimInput" accept="image/*" style="display: none;" onchange="hataResmiSec(this)">
-            <button onclick="document.getElementById('hataResimInput').click()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 18px; border-radius: 20px; font-weight: 900; font-size:16px; width: 100%; cursor: pointer; margin-bottom: 20px;">📸 Soru Yükle</button>
+            <button onclick="document.getElementById('hataResimInput').click()" class="action-btn" style="background: linear-gradient(135deg, #10b981, #059669); margin-bottom: 20px;">📸 Soru Yükle</button>
             <div id="hataListem" style="text-align: left; max-height: 250px; overflow-y: auto; border: 2px solid var(--border-light); padding: 15px; border-radius: 20px; font-size: 14px; background: var(--bg-input);"></div>
             <button class="close-modal-btn" onclick="document.getElementById('hataModal').style.display='none'">Kapat</button>
         </div>
@@ -623,7 +573,7 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=21"></script>
+    <script src="app.js?v=26"></script>
     <script>
         // --- 🌙 TEMA YÖNETİMİ ---
         function temaDegistir() {
@@ -641,7 +591,6 @@
             }
         }
 
-        // Sayfa yüklendiğinde eski temayı hatırla
         document.addEventListener('DOMContentLoaded', () => {
             if(localStorage.getItem('katalizTema') === 'dark') {
                 document.body.setAttribute('data-theme', 'dark');
@@ -650,7 +599,6 @@
 
             // --- 🧭 ONBOARDING (HOŞ GELDİN TURU) ---
             if(!localStorage.getItem('rehberTurTamamlandi')) {
-                // Intro.js Başlat
                 setTimeout(() => {
                     introJs().setOptions({
                         nextLabel: 'İleri',
@@ -660,11 +608,10 @@
                         showBullets: false
                     }).start().oncomplete(function() {
                         localStorage.setItem('rehberTurTamamlandi', 'true');
-                        // Tur bitince tatlı bir havai fişek veya ses eklenebilir
                     }).onexit(function() {
                         localStorage.setItem('rehberTurTamamlandi', 'true');
                     });
-                }, 1000); // Sayfa açıldıktan 1 saniye sonra başlasın
+                }, 1000);
             }
         });
     </script>

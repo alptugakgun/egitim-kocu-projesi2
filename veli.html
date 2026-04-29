@@ -17,21 +17,20 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
         
-        /* 🎨 YENİ: Zihin Açıcı Soft Arka Plan (Öğretmen paneliyle uyumlu) */
         body { 
             font-family: 'Nunito', sans-serif; 
-            background: linear-gradient(135deg, #fffcf5 0%, #ffece0 100%); 
+            background: linear-gradient(135deg, #fdf2f8 0%, #f3e8ff 100%); 
             padding: 30px; 
-            color: #334155; 
+            color: #1e293b; 
             margin: 0; 
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
         }
 
-        /* Dekoratif Arka Plan Şekilleri */
-        .bg-shape-1 { position: fixed; top: -10%; left: -5%; width: 400px; height: 400px; background: #ff7a7a; border-radius: 50%; opacity: 0.1; filter: blur(50px); z-index: -1; animation: floatShape 10s infinite alternate;}
-        .bg-shape-2 { position: fixed; bottom: -10%; right: -5%; width: 500px; height: 500px; background: #a855f7; border-radius: 50%; opacity: 0.1; filter: blur(60px); z-index: -1; animation: floatShape 12s infinite alternate-reverse;}
+        /* 🎨 Organik Arka Plan Şekilleri */
+        .bg-shape-1 { position: fixed; top: -10%; left: -5%; width: 400px; height: 400px; background: #ec4899; border-radius: 50%; opacity: 0.08; filter: blur(50px); z-index: -1; animation: floatShape 10s infinite alternate;}
+        .bg-shape-2 { position: fixed; bottom: -10%; right: -5%; width: 500px; height: 500px; background: #a855f7; border-radius: 50%; opacity: 0.08; filter: blur(60px); z-index: -1; animation: floatShape 12s infinite alternate-reverse;}
         @keyframes floatShape { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(30px, 30px) scale(1.1); } }
 
         /* Üst Header */
@@ -55,13 +54,13 @@
             font-weight: 900;
         }
         
-        /* 🎨 YENİ: Cam Efektli Kutu Tasarımları */
+        /* 🎨 Cam Efektli Kutu Tasarımları */
         .box { 
-            background: rgba(255, 255, 255, 0.9); 
+            background: rgba(255, 255, 255, 0.85); 
             backdrop-filter: blur(15px);
             padding: 30px; 
-            border-radius: 25px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.04); 
+            border-radius: 30px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.03); 
             margin-bottom: 25px; 
             border: 2px solid #ffffff;
             transition: 0.3s;
@@ -69,12 +68,10 @@
         
         .box:hover {
             transform: translateY(-5px); 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06); 
         }
 
-        .box-top-border {
-            border-top: 6px solid #f59e0b;
-        }
+        .box-top-border { border-top: 6px solid #f59e0b; }
         
         .live-status { 
             font-size: 26px; 
@@ -100,27 +97,20 @@
             100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } 
         }
         
-        .chart-container { 
-            position: relative; 
-            height: 250px; 
-            width: 100%; 
-        }
+        .chart-container { position: relative; height: 250px; width: 100%; }
         
-        .stats-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 25px;
-        }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         
         .stat-card { 
             background: #f8fafc; 
             padding: 20px; 
-            border-radius: 18px; 
+            border-radius: 20px; 
             text-align: center; 
             font-weight: 900;
             border: 2px solid #f1f5f9;
         }
         
+        /* 📅 Randevu Kutusu */
         .ajanda-kutu { 
             background: linear-gradient(135deg, #fef3c7, #fffbeb); 
             color: #d97706; 
@@ -138,7 +128,7 @@
             color: white; 
             border: none; 
             padding: 12px 25px; 
-            border-radius: 15px; 
+            border-radius: 18px; 
             cursor: pointer; 
             font-weight: 900; 
             font-family: inherit;
@@ -146,10 +136,7 @@
             box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
             transition: 0.3s;
         }
-        .btn-red:hover {
-            transform: translateY(-3px); 
-            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4); 
-        }
+        .btn-red:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4); }
         
         @media (max-width: 768px) {
             body { padding: 15px; }
@@ -168,12 +155,20 @@
     </div>
 
     <div class="ajanda-kutu" id="ajandaKutu">
-        📅 Koç ile Sıradaki Özel Ders / Görüşme: <br>
-        <span id="siradakiDersTxt" style="font-size: 28px; color: #b45309; display:inline-block; margin-top:8px;">Planlanmadı</span>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+                <span style="font-size:14px; text-transform:uppercase; letter-spacing:1px; color:#b45309;">📅 Koç ile Yaklaşan Görüşme:</span><br>
+                <span id="siradakiDersTxt" style="font-size: 26px; color: #92400e; display:inline-block; margin-top:8px;">Planlanmadı</span>
+            </div>
+            <div style="text-align:right;">
+                <span style="font-size:14px; text-transform:uppercase; letter-spacing:1px; color:#b45309;">Görüşme Konusu:</span><br>
+                <span id="gorusmeKonusuTxt" style="font-size: 18px; color: #92400e; display:inline-block; margin-top:8px;">-</span>
+            </div>
+        </div>
     </div>
 
     <div class="box box-top-border">
-        <h2 style="margin-top:0; color:#1e293b; font-size:22px; font-weight:900;">Canlı Durum Radarı: <span id="ogrIsim" style="color:#4f46e5;">Öğrenci</span></h2>
+        <h2 style="margin-top:0; color:#1e293b; font-size:22px; font-weight:900;">Canlı Durum Radarı: <span id="ogrIsim" style="color:#db2777;">Öğrenci</span></h2>
         
         <div class="live-status" id="canliDurumKutusu">
             <div class="pulse-dot"></div> 
@@ -181,14 +176,14 @@
         </div>
         
         <p id="canliMesaj" style="color:#64748b; font-weight:800; font-size:16px; margin-top:20px; background:#f8fafc; padding:15px; border-radius:15px; display:inline-block; border: 2px solid #f1f5f9;"></p>
-        <div style="font-size: 55px; font-weight: 900; color: #4f46e5; margin-top: 15px; font-variant-numeric: tabular-nums;" id="sureGosterge">00:00:00</div>
+        <div style="font-size: 55px; font-weight: 900; color: #ec4899; margin-top: 15px; font-variant-numeric: tabular-nums;" id="sureGosterge">00:00:00</div>
     </div>
 
     <div class="stats-grid">
         <div class="box" style="margin:0;">
             <h3 style="margin-top:0; color:#1e293b; font-size:20px;">🌟 Kazanılan XP ve Lig</h3>
-            <div class="stat-card" style="background:linear-gradient(135deg, #fef3c7, #fde68a); color:#d97706; font-size:28px; border-color:#fcd34d;" id="veliXp">0 XP</div>
-            <div class="stat-card" style="margin-top:15px; background:linear-gradient(135deg, #e0e7ff, #c7d2fe); color:#4f46e5; font-size:20px; border-color:#c7d2fe;" id="veliLig">Hesaplanıyor...</div>
+            <div class="stat-card" style="background:linear-gradient(135deg, #fef3c7, #fde68a); color:#d97706; font-size:32px; border-color:#fcd34d;" id="veliXp">0 XP</div>
+            <div class="stat-card" style="margin-top:15px; background:linear-gradient(135deg, #fce7f3, #fbcfe8); color:#db2777; font-size:20px; border-color:#fbcfe8;" id="veliLig">Hesaplanıyor...</div>
         </div>
         <div class="box" style="margin:0;">
             <h3 style="margin-top:0; color:#1e293b; font-size:20px;">📈 Genel Net Gelişimi</h3>
@@ -221,12 +216,14 @@
             let benimVerim = tumVeriler.find(v => v.ogrenciAd === ogrAd);
             
             if(benimVerim) {
-                // 1. Ajanda Çek
+                // 1. 📅 Ajanda ve Görüşme Konusu Çek
                 if(benimVerim.sonrakiDers && benimVerim.sonrakiDers.trim() !== '') {
                     let d = new Date(benimVerim.sonrakiDers);
-                    document.getElementById('siradakiDersTxt').innerText = d.toLocaleString('tr-TR');
+                    document.getElementById('siradakiDersTxt').innerText = d.toLocaleString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+                    document.getElementById('gorusmeKonusuTxt').innerText = benimVerim.gorusmeKonusu || "Birebir Görüşme";
                 } else { 
                     document.getElementById('siradakiDersTxt').innerText = "Henüz Planlanmadı"; 
+                    document.getElementById('gorusmeKonusuTxt').innerText = "-";
                 }
 
                 // 2. Isı Haritası Çek
@@ -240,7 +237,7 @@
                         let borderRenk = benimVerim.isiHaritasi[konu].includes('Zayıf') ? '#ef4444' : benimVerim.isiHaritasi[konu].includes('Orta') ? '#f59e0b' : '#10b981';
                         
                         kutu.innerHTML += `
-                            <div style="border-left: 6px solid ${borderRenk}; padding: 10px 15px; margin-bottom: 12px; background: white; border-radius: 0 15px 15px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.03);">
+                            <div style="border-left: 6px solid ${borderRenk}; padding: 15px; margin-bottom: 12px; background: white; border-radius: 0 15px 15px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.03);">
                                 <span style="display:inline-block; min-width:80px; color:${borderRenk}; font-weight:900;">${benimVerim.isiHaritasi[konu]}</span> 
                                 <span style="color:#1e293b; font-weight:800;">${konu}</span>
                             </div>`; 
@@ -278,8 +275,8 @@
                                 datasets: [{ 
                                     label: 'Net Puanı', 
                                     data: veriler, 
-                                    borderColor: '#3b82f6', 
-                                    backgroundColor: 'rgba(59, 130, 246, 0.2)', 
+                                    borderColor: '#db2777', 
+                                    backgroundColor: 'rgba(236, 72, 153, 0.2)', 
                                     fill: true, 
                                     tension: 0.4,
                                     pointRadius: 6
@@ -292,14 +289,12 @@
             }
         });
 
-        // Canlı Süre Radarı
         socket.on('ogretmene_sure_guncelle', (veri) => { 
             if(veri.ogrenciAd === ogrAd) {
                 document.getElementById('sureGosterge').innerText = veri.sure; 
             }
         });
 
-        // Canlı Mesaj/Aktivite Radarı
         socket.on('ogretmene_canli_bildirim', (veri) => {
             if(veri.ogrenciAd === ogrAd) {
                 let afkMi = veri.ders === 'MASA BAŞINDAN AYRILDI';

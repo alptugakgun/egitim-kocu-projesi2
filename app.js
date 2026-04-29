@@ -179,8 +179,8 @@ function dersDegisikliginiKaydet() {
         startBtn.innerHTML = "▶ Başla"; 
         
         document.getElementById('statusText').innerHTML = "Ders değişti, sayaç durduruldu."; 
-        document.getElementById('statusText').style.backgroundColor = "#f1f5f9"; 
-        document.getElementById('statusText').style.color = "#64748b"; 
+        document.getElementById('statusText').style.backgroundColor = "var(--bg-input)"; 
+        document.getElementById('statusText').style.color = "var(--text-secondary)"; 
         
         socket.emit('ogrenci_derse_basladi', { ogrenciAd: aktifOgrenci, ders: aktifDersString, mesaj: 'Ders değiştirdi, durdurdu.', kocKodu: kocKodu }); 
         
@@ -335,8 +335,8 @@ window.startTimer = function() {
         pauseBtn.style.display = 'block'; 
         
         document.getElementById('statusText').innerHTML = "🟢 Odak modu aktif!"; 
-        document.getElementById('statusText').style.backgroundColor = "#d1fae5"; 
-        document.getElementById('statusText').style.color = "#059669"; 
+        document.getElementById('statusText').style.backgroundColor = "rgba(16, 185, 129, 0.1)"; 
+        document.getElementById('statusText').style.color = "#10b981"; 
         
         socket.emit('ogrenci_derse_basladi', { 
             ogrenciAd: aktifOgrenci, 
@@ -368,8 +368,8 @@ window.pauseTimer = function(otomatikMi = false) {
         
         if(document.getElementById('statusText').innerHTML !== "🚨 Masadan ayrıldığın için odaklanma durduruldu!") {
             document.getElementById('statusText').innerHTML = otomatikMi ? "🎉 Pomodoro Bitti!" : "⏸️ Mola Verildi."; 
-            document.getElementById('statusText').style.backgroundColor = "#fef3c7"; 
-            document.getElementById('statusText').style.color = "#d97706"; 
+            document.getElementById('statusText').style.backgroundColor = "rgba(245, 158, 11, 0.1)"; 
+            document.getElementById('statusText').style.color = "#f59e0b"; 
         }
         
         socket.emit('ogrenci_derse_basladi', { 
@@ -492,9 +492,9 @@ window.testiYukle = function() {
 
     sorular.forEach((s, index) => {
         soruAlani.innerHTML += `
-            <div style="margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 15px; border: 1px solid #e2e8f0;">
-                <label style="font-weight: 800; color: #334155; font-size: 14px; display:block; margin-bottom:10px;">${index+1}. ${s.q}</label>
-                <select class="anket-cevap select-box" data-puan="${s.puan}" style="width:100%;">
+            <div style="margin-bottom: 20px; background: var(--bg-input); padding: 15px; border-radius: 15px; border: 1px solid var(--border-light);">
+                <label style="font-weight: 800; color: var(--text-primary); font-size: 14px; display:block; margin-bottom:10px;">${index+1}. ${s.q}</label>
+                <select class="anket-cevap select-box" data-puan="${s.puan}" style="width:100%; margin:0;">
                     <option value="1">Hiç Katılmıyorum (1 Puan)</option>
                     <option value="2">Az Katılıyorum (2 Puan)</option>
                     <option value="3">Kararsızım (3 Puan)</option>
@@ -552,7 +552,7 @@ window.goreviBitir = function(id) {
     socket.emit('gorev_tamamlandi', { ogrenciAd: aktifOgrenci, gorevId: id, durum: true, kocKodu: kocKodu }); 
 };
 
-// 📚 YENİ: Kaynak Bitirme Fonksiyonu
+// 📚 KAYNAK BİTİRME
 window.kaynakBitir = function(id, baslik) {
     if(confirm(`"${baslik}" kaynağını gerçekten bitirdin mi? Koçuna bildirim gidecek!`)) {
         sesCal();
@@ -645,7 +645,7 @@ socket.on('gorev_guncellendi', (tumVeriler) => {
         tumVeriler.forEach(o => { 
             if(o.ogrenciAd !== aktifOgrenci) { 
                 duelloDiv.innerHTML += `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #cbd5e1;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid var(--border-light);">
                     <span>${o.avatar || '👤'} <b>${o.ogrenciAd}</b></span> 
                     <button class="duel-btn" style="background:#ef4444; color:white; border:none; padding:6px 10px; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="duelloAt('${o.ogrenciAd}')">Meydan Oku</button>
                 </div>`; 
@@ -658,6 +658,21 @@ socket.on('gorev_guncellendi', (tumVeriler) => {
         
         // 📚 Kaynakları Kontrol Et
         benimTamamlananKaynaklar = benimVerim.tamamlananKaynaklar || [];
+
+        // 📅 RANDEVU SİSTEMİ DİNLEYİCİSİ
+        if (benimVerim.sonrakiDers && benimVerim.sonrakiDers.trim() !== '') {
+            let d = new Date(benimVerim.sonrakiDers);
+            let tarihStr = d.toLocaleString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+
+            if(document.getElementById('randevuTarihi')) document.getElementById('randevuTarihi').innerText = tarihStr;
+            if(document.getElementById('randevuKonusu')) document.getElementById('randevuKonusu').innerText = benimVerim.gorusmeKonusu || "Birebir Görüşme";
+            
+            let kutu = document.getElementById('randevuKutusu');
+            if(kutu) kutu.style.display = 'block';
+        } else {
+            let kutu = document.getElementById('randevuKutusu');
+            if(kutu) kutu.style.display = 'none';
+        }
 
         if (benimVerim.canliDersLink && benimVerim.canliDersLink.trim() !== '') {
             let zBtn = document.getElementById('zoomLinkBtn');
@@ -680,16 +695,16 @@ socket.on('gorev_guncellendi', (tumVeriler) => {
             if(hataKutu) {
                 hataKutu.innerHTML = '';
                 if(benimVerim.hataDefteri.length === 0) {
-                    hataKutu.innerHTML = '<span style="color:#94a3b8; font-weight:bold;">Henüz eklenmiş soru yok.</span>';
+                    hataKutu.innerHTML = '<span style="color:var(--text-secondary); font-weight:bold;">Henüz eklenmiş soru yok.</span>';
                 }
                 benimVerim.hataDefteri.forEach(hata => {
                     let renk = hata.durum === 'Çözüldü' ? '#10b981' : '#f59e0b';
                     hataKutu.innerHTML += `
-                    <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 15px;">
+                    <div style="border-bottom: 2px solid var(--border-light); padding-bottom: 15px; margin-bottom: 15px;">
                         <span style="background:${renk}; color:white; padding:4px 8px; border-radius:6px; font-weight:bold; font-size:11px;">${hata.durum}</span> 
-                        <b style="color:#334155; margin-left:5px;">${hata.dersKonu}</b> <br>
-                        <span style="font-size:11px; color:#94a3b8;">Yüklenme: ${hata.tarih}</span>
-                        <br><img src="${hata.resim}" style="max-width:100%; max-height:150px; margin-top:10px; border-radius:8px; border:1px solid #cbd5e1; cursor:pointer;" onclick="window.open('${hata.resim}','_blank')">
+                        <b style="color:var(--text-primary); margin-left:5px;">${hata.dersKonu}</b> <br>
+                        <span style="font-size:11px; color:var(--text-secondary);">Yüklenme: ${hata.tarih}</span>
+                        <br><img src="${hata.resim}" style="max-width:100%; max-height:150px; margin-top:10px; border-radius:8px; border:1px solid var(--border-light); cursor:pointer;" onclick="window.open('${hata.resim}','_blank')">
                     </div>`;
                 });
             }
@@ -748,7 +763,7 @@ socket.on('gorev_guncellendi', (tumVeriler) => {
             if(taskList) { 
                 taskList.innerHTML = ''; 
                 benimVerim.gorevler.forEach(gorev => { 
-                    let textStil = gorev.tamamlandi ? "text-decoration: line-through; color: #94a3b8;" : "color: #334155; font-weight: 800;"; 
+                    let textStil = gorev.tamamlandi ? "text-decoration: line-through; color: var(--text-secondary);" : "color: var(--text-primary); font-weight: 800;"; 
                     let sagKisim = gorev.tamamlandi ? `<span style="color: #10b981; font-weight: 800;">✅ Bitti</span>` : `<button class="finish-btn" onclick="goreviBitir(${gorev.id})">Bitir (+10 XP)</button>`; 
                     taskList.innerHTML += `<div class="task-item"><span style="${textStil}">${gorev.metin}</span>${sagKisim}</div>`; 
                 }); 
@@ -794,13 +809,12 @@ socket.on('duello_sonucu', (veri) => {
     } 
 });
 
-// 📚 YENİ: KAYNAKLARI LİSTELE VE BİTİR BUTONU
 socket.on('kaynaklari_yukle', (liste) => { 
     let kutu = document.getElementById('kaynakListesi'); 
     if(!kutu) return; 
     kutu.innerHTML = ''; 
     if(liste.length === 0) { 
-        kutu.innerHTML = '<div style="color: #94a3b8; font-style: italic;">Koçun henüz kaynak eklememiş.</div>'; 
+        kutu.innerHTML = '<div style="color: var(--text-secondary); font-style: italic;">Koçun henüz kaynak eklememiş.</div>'; 
         return; 
     } 
     liste.forEach(k => { 
@@ -810,10 +824,10 @@ socket.on('kaynaklari_yukle', (liste) => {
             : `<button onclick="kaynakBitir(${k.id}, '${k.baslik}')" style="background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:900; font-size:12px; box-shadow:0 4px 10px rgba(16, 185, 129, 0.2);">Bitirdim (+5 XP)</button>`;
             
         kutu.innerHTML += `
-        <div class="kaynak-item" style="background:#f1f5f9; padding:15px; border-radius:12px; margin-bottom:10px; text-align:left; border-left:5px solid #8b5cf6;">
-            <div style="font-weight:900; color:#1e293b; font-size:14px; margin-bottom:8px;">${k.baslik}</div>
+        <div class="kaynak-item" style="background:var(--bg-input); padding:15px; border-radius:12px; margin-bottom:10px; text-align:left; border-left:5px solid #8b5cf6; border: 1px solid var(--border-light);">
+            <div style="font-weight:900; color:var(--text-primary); font-size:14px; margin-bottom:8px;">${k.baslik}</div>
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <a href="${k.url}" target="_blank" style="color:#4f46e5; text-decoration:none; font-size:13px; font-weight:900; background:#e0e7ff; padding:8px 12px; border-radius:10px;">🔗 İncele</a>
+                <a href="${k.url}" target="_blank" style="color:#4f46e5; text-decoration:none; font-size:13px; font-weight:900; background:rgba(99, 102, 241, 0.1); padding:8px 12px; border-radius:10px;">🔗 İncele</a>
                 ${butonHtml}
             </div>
         </div>`; 
@@ -829,13 +843,13 @@ socket.on('yeni_kaynak_eklendi', (kaynak) => {
 function chatEkranaBas(veri) { 
     const body = document.getElementById('chatBody'); 
     let benMiyim = (veri.gonderen === aktifOgrenci);
-    let renk = benMiyim ? '#3b82f6' : '#e2e8f0';
-    let yaziRengi = benMiyim ? 'white' : '#1e293b';
+    let renk = benMiyim ? '#3b82f6' : 'var(--bg-container)';
+    let yaziRengi = benMiyim ? 'white' : 'var(--text-primary)';
     let hizalama = benMiyim ? 'flex-end' : 'flex-start';
     let ikon = veri.rol === 'koc' ? '👨‍🏫' : '💬'; 
     let icerik = veri.tip === 'resim' ? `<img src="${veri.mesaj}" style="max-width: 100%; border-radius: 8px; margin-top: 5px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="window.open('${veri.mesaj}', '_blank')">` : veri.mesaj; 
     
-    body.innerHTML += `<div style="align-self: ${hizalama}; background: ${renk}; color: ${yaziRengi}; padding: 10px 14px; border-radius: 14px; font-size: 13px; max-width: 80%; line-height: 1.4; margin-bottom: 10px; font-weight: 700;"><div style="font-size: 10px; font-weight: 900; margin-bottom: 4px; opacity: 0.8;">${ikon} ${veri.gonderen} • ${veri.saat}</div>${icerik}</div>`; 
+    body.innerHTML += `<div style="align-self: ${hizalama}; background: ${renk}; color: ${yaziRengi}; padding: 10px 14px; border-radius: 14px; font-size: 13px; max-width: 80%; line-height: 1.4; margin-bottom: 10px; font-weight: 700; border: 1px solid var(--border-light);"><div style="font-size: 10px; font-weight: 900; margin-bottom: 4px; opacity: 0.8;">${ikon} ${veri.gonderen} • ${veri.saat}</div>${icerik}</div>`; 
     body.scrollTop = body.scrollHeight; 
 }
 
@@ -860,7 +874,7 @@ socket.on('yeni_chat_mesaji', (msg) => {
 socket.on('chatbot_cevabi', (cevapMetni) => { 
     sesCal(); 
     const body = document.getElementById('botBody'); 
-    body.innerHTML += `<div style="align-self: flex-start; background: #e2e8f0; color: #1e293b; padding: 10px 14px; border-radius: 14px; font-size: 13px; max-width: 80%; line-height: 1.4; margin-bottom: 10px; font-weight: 700;"><div style="font-size: 10px; font-weight: 900; margin-bottom: 4px; opacity: 0.8;">🤖 KatalizApp AI</div>${cevapMetni}</div>`; 
+    body.innerHTML += `<div style="align-self: flex-start; background: var(--bg-container); color: var(--text-primary); padding: 10px 14px; border-radius: 14px; font-size: 13px; max-width: 80%; line-height: 1.4; margin-bottom: 10px; font-weight: 700; border: 1px solid var(--border-light);"><div style="font-size: 10px; font-weight: 900; margin-bottom: 4px; opacity: 0.8;">🤖 KatalizApp AI</div>${cevapMetni}</div>`; 
     body.scrollTop = body.scrollHeight; 
 });
 
@@ -926,8 +940,8 @@ document.addEventListener("DOMContentLoaded", () => {
         let statusT = document.getElementById('statusText');
         if(statusT) {
             statusT.innerHTML = "🟢 Odak modu aktif!"; 
-            statusT.style.backgroundColor = "#d1fae5"; 
-            statusT.style.color = "#059669"; 
+            statusT.style.backgroundColor = "rgba(16, 185, 129, 0.1)"; 
+            statusT.style.color = "#10b981"; 
         }
         
         if(pInput) pInput.disabled = true;

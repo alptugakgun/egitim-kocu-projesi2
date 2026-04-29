@@ -53,6 +53,7 @@ const ogrenciSchema = new mongoose.Schema({
     aktifDuello: { type: Object, default: null }, 
     finans: { type: Object, default: {} }, 
     sonrakiDers: { type: String, default: '' }, 
+    gorusmeKonusu: { type: String, default: '' }, 
     canliDersLink: { type: String, default: '' }, 
     isiHaritasi: { type: Object, default: {} }, 
     hataDefteri: { type: Array, default: [] },
@@ -297,6 +298,7 @@ io.on('connection', (socket) => {
             let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu }); 
             if (ogrenci) { 
                 ogrenci.sonrakiDers = veri.sonrakiDers; 
+                ogrenci.gorusmeKonusu = veri.gorusmeKonusu;
                 ogrenci.canliDersLink = veri.canliDersLink; 
                 ogrenci.finans = veri.finans; 
                 ogrenci.markModified('finans'); 
@@ -343,7 +345,7 @@ io.on('connection', (socket) => {
                 if (veri.detay) {
                     let harita = ogrenci.isiHaritasi || {};
                     for (const [dersAdi, netSayisi] of Object.entries(veri.detay)) {
-                        if (netSayisi < 10) { 
+                        if (netSayisi < 10) {
                             harita[dersAdi + " (Genel)"] = "🟥 Zayıf (Oto-Analiz)";
                         } else if (netSayisi > 25) {
                             harita[dersAdi + " (Genel)"] = "🟩 İyi (Oto-Analiz)";
