@@ -1,7 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs'); 
 
 const app = express();
 app.use(express.json());
@@ -13,10 +15,10 @@ const io = new Server(server, {
     maxHttpBufferSize: 1e8 
 }); 
 
-const mongoURI = 'mongodb+srv://alptug:alptug123@cluster0.djt56xg.mongodb.net/EgitimKocuDB?retryWrites=true&w=majority';
+const mongoURI = process.env.MONGO_URI;
 mongoose.connect(mongoURI)
     .then(() => {
-        console.log('🫀 MongoDB Bağlantısı Başarılı!');
+        console.log('🫀 MongoDB Bağlantısı Başarılı! (Zırhlı Altyapı)');
     })
     .catch((err) => {
         console.log('❌ Veritabanı Hatası:', err);
@@ -39,14 +41,14 @@ const ogrenciSchema = new mongoose.Schema({
     sifre: String, 
     kocKodu: String, 
     veliKodu: String, 
-    ders: String, 
-    mesaj: String, 
+    ders: { type: String, default: 'Bekliyor...' }, 
+    mesaj: { type: String, default: '' }, 
     xp: { type: Number, default: 0 }, 
     avatar: { type: String, default: '👤' }, 
-    gorevler: Array, 
+    gorevler: { type: Array, default: [] }, 
     istatistik: { type: Object, default: {} }, 
-    netler: Array, 
-    alinanOduller: Array, 
+    netler: { type: Array, default: [] }, 
+    alinanOduller: { type: Array, default: [] }, 
     bekleyenOduller: { type: Array, default: [] }, 
     aktifDuello: { type: Object, default: null }, 
     finans: { type: Object, default: {} }, 
@@ -55,7 +57,7 @@ const ogrenciSchema = new mongoose.Schema({
     isiHaritasi: { type: Object, default: {} }, 
     hataDefteri: { type: Array, default: [] },
     rehberlikTestleri: { type: Array, default: [] },
-    tamamlananKaynaklar: { type: Array, default: [] } // 📚 YENİ: Bitirilen Kaynaklar
+    tamamlananKaynaklar: { type: Array, default: [] }
 });
 const Ogrenci = mongoose.model('Ogrenci', ogrenciSchema);
 
@@ -80,12 +82,12 @@ const kaynakSchema = new mongoose.Schema({
 const Kaynak = mongoose.model('Kaynak', kaynakSchema);
 
 // ==========================================
-// 2. HTTP API İŞLEMLERİ
+// 2. HTTP API İŞLEMLERİ (GÜVENLİ)
 // ==========================================
 
 app.post('/api/admin', async (req, res) => { 
     const { sifre } = req.body; 
-    if (sifre === 'sincap-boss-2026') { 
+    if (sifre === process.env.ADMIN_PASS) { 
         let koclar = await Ogretmen.find(); 
         let ogrler = await Ogrenci.find(); 
         res.json({ basari: true, data: { koclar, ogrler } }); 
@@ -96,12 +98,35 @@ app.post('/api/admin', async (req, res) => {
 
 app.post('/api/admin/finans_kaydet', async (req, res) => {
     const { sifre, kocKodu, finans } = req.body;
-    if (sifre === 'sincap-boss-2026') {
+    if (sifre === process.env.ADMIN_PASS) {
         await Ogretmen.updateOne({ kocKodu: kocKodu }, { finans: finans });
         res.json({ basari: true });
     } else { 
         res.json({ basari: false }); 
     }
+});
+
+app.post('/api/admin/sil', async (req, res) => { 
+    const { sifre, kod } = req.body; 
+    if (sifre === process.env.ADMIN_PASS) { 
+        await Ogretmen.deleteOne({ kocKodu: kod }); 
+        await Ogrenci.deleteMany({ kocKodu: kod }); 
+        await Chat.deleteMany({ kocKodu: kod }); 
+        await Kaynak.deleteMany({ kocKodu: kod }); 
+        res.json({ basari: true }); 
+    } else { 
+        res.json({ basari: false }); 
+    } 
+});
+
+app.post('/api/admin/sil_ogrenci', async (req, res) => { 
+    const { sifre, ogrenciId } = req.body; 
+    if (sifre === process.env.ADMIN_PASS) { 
+        await Ogrenci.findByIdAndDelete(ogrenciId); 
+        res.json({ basari: true }); 
+    } else { 
+        res.json({ basari: false }); 
+    } 
 });
 
 app.post('/api/koc/kayit', async (req, res) => { 
@@ -110,14 +135,17 @@ app.post('/api/koc/kayit', async (req, res) => {
         let varMi = await Ogretmen.findOne({ kocAd }); 
         
         if (varMi) {
-            return res.json({ basari: false, mesaj: "Bu öğretmen zaten var!" }); 
+            return res.json({ basari: false, mesaj: "Bu eğitmen ismi zaten alınmış!" }); 
         }
         
+        const tuz = await bcrypt.genSalt(10);
+        const hashliSifre = await bcrypt.hash(sifre, tuz);
+        
         let yeniKod = Math.random().toString(36).substr(2, 6).toUpperCase(); 
-        let yeniKoc = new Ogretmen({ kocAd, sifre, kocKodu: yeniKod, finans: {} }); 
+        let yeniKoc = new Ogretmen({ kocAd, sifre: hashliSifre, kocKodu: yeniKod, finans: {} }); 
         
         await yeniKoc.save(); 
-        res.json({ basari: true, mesaj: `Davet Kodunuz: ${yeniKod}`, kocKodu: yeniKod }); 
+        res.json({ basari: true, mesaj: `Kaydınız yapıldı. Davet Kodunuz: ${yeniKod}`, kocKodu: yeniKod }); 
     } catch (e) { 
         res.json({ basari: false }); 
     } 
@@ -126,13 +154,15 @@ app.post('/api/koc/kayit', async (req, res) => {
 app.post('/api/koc/giris', async (req, res) => { 
     try { 
         const { kocAd, sifre } = req.body; 
-        let koc = await Ogretmen.findOne({ kocAd, sifre }); 
+        let koc = await Ogretmen.findOne({ kocAd }); 
         
         if (koc) {
-            res.json({ basari: true, kocKodu: koc.kocKodu }); 
-        } else {
-            res.json({ basari: false, mesaj: "Hatalı giriş!" }); 
+            const uyusuyorMu = await bcrypt.compare(sifre, koc.sifre);
+            if(uyusuyorMu) {
+                return res.json({ basari: true, kocKodu: koc.kocKodu });
+            }
         }
+        res.json({ basari: false, mesaj: "Hatalı isim veya şifre!" }); 
     } catch (e) { 
         res.json({ basari: false }); 
     } 
@@ -144,23 +174,34 @@ app.post('/api/kayit', async (req, res) => {
         let kocVarMi = await Ogretmen.findOne({ kocKodu }); 
         
         if (!kocVarMi) {
-            return res.json({ basari: false, mesaj: "Davet Kodu bulunamadı!" }); 
+            return res.json({ basari: false, mesaj: "Davet Kodu geçersiz!" }); 
         }
         
         let varMi = await Ogrenci.findOne({ ogrenciAd, kocKodu }); 
         
         if (varMi) {
-            return res.json({ basari: false, mesaj: "Öğrenci zaten var!" }); 
+            return res.json({ basari: false, mesaj: "Bu öğrenci adı zaten kullanılıyor!" }); 
         }
+        
+        const tuz = await bcrypt.genSalt(10);
+        const hashliSifre = await bcrypt.hash(sifre, tuz);
         
         let vKodu = 'V-' + Math.floor(1000 + Math.random() * 9000); 
         let yeniOgrenci = new Ogrenci({ 
-            ogrenciAd, sifre, kocKodu, veliKodu: vKodu, 
-            xp: 0, avatar: '👤', finans: {}, hataDefteri: [], rehberlikTestleri: [], tamamlananKaynaklar: []
+            ogrenciAd, 
+            sifre: hashliSifre, 
+            kocKodu, 
+            veliKodu: vKodu,
+            xp: 0, 
+            avatar: '👤', 
+            finans: {}, 
+            hataDefteri: [], 
+            rehberlikTestleri: [], 
+            tamamlananKaynaklar: []
         }); 
         
         await yeniOgrenci.save(); 
-        res.json({ basari: true, mesaj: "Başarılı!" }); 
+        res.json({ basari: true, mesaj: "KatalizApp'e hoş geldin!" }); 
     } catch (e) { 
         res.json({ basari: false }); 
     } 
@@ -169,13 +210,15 @@ app.post('/api/kayit', async (req, res) => {
 app.post('/api/giris', async (req, res) => { 
     try { 
         const { ogrenciAd, sifre } = req.body; 
-        let ogrenci = await Ogrenci.findOne({ ogrenciAd, sifre }); 
+        let ogrenci = await Ogrenci.findOne({ ogrenciAd }); 
         
         if (ogrenci) { 
-            res.json({ basari: true, kocKodu: ogrenci.kocKodu, veliKodu: ogrenci.veliKodu }); 
-        } else { 
-            res.json({ basari: false, mesaj: "Hatalı!" }); 
+            const uyusuyorMu = await bcrypt.compare(sifre, ogrenci.sifre);
+            if(uyusuyorMu) {
+                return res.json({ basari: true, kocKodu: ogrenci.kocKodu, veliKodu: ogrenci.veliKodu }); 
+            }
         }
+        res.json({ basari: false, mesaj: "Kullanıcı adı veya şifre hatalı!" }); 
     } catch (e) { 
         res.json({ basari: false }); 
     } 
@@ -185,10 +228,10 @@ app.post('/api/veli/giris', async (req, res) => {
     try { 
         let ogrenci = await Ogrenci.findOne({ veliKodu: req.body.veliKodu }); 
         
-        if (ogrenci) { 
+        if (ogrenci) {
             res.json({ basari: true, ogrenciAd: ogrenci.ogrenciAd, kocKodu: ogrenci.kocKodu }); 
-        } else { 
-            res.json({ basari: false, mesaj: "Geçersiz Veli Kodu!" }); 
+        } else {
+            res.json({ basari: false, mesaj: "Veli Takip Kodu bulunamadı!" }); 
         }
     } catch (e) { 
         res.json({ basari: false }); 
@@ -197,7 +240,7 @@ app.post('/api/veli/giris', async (req, res) => {
 
 app.post('/api/sifreler', async (req, res) => { 
     try { 
-        let ogrenciler = await Ogrenci.find({ kocKodu: req.body.kocKodu }, 'ogrenciAd sifre veliKodu -_id'); 
+        let ogrenciler = await Ogrenci.find({ kocKodu: req.body.kocKodu }, 'ogrenciAd veliKodu -_id'); 
         res.json(ogrenciler); 
     } catch (e) { 
         res.json([]); 
@@ -300,7 +343,7 @@ io.on('connection', (socket) => {
                 if (veri.detay) {
                     let harita = ogrenci.isiHaritasi || {};
                     for (const [dersAdi, netSayisi] of Object.entries(veri.detay)) {
-                        if (netSayisi < 10) {
+                        if (netSayisi < 10) { 
                             harita[dersAdi + " (Genel)"] = "🟥 Zayıf (Oto-Analiz)";
                         } else if (netSayisi > 25) {
                             harita[dersAdi + " (Genel)"] = "🟩 İyi (Oto-Analiz)";
@@ -348,6 +391,7 @@ io.on('connection', (socket) => {
                 ogrenci.markModified('alinanOduller'); 
                 ogrenci.markModified('bekleyenOduller'); 
                 await ogrenci.save(); 
+                
                 let list = await Ogrenci.find({ kocKodu: veri.kocKodu });
                 io.to(veri.kocKodu).emit('gorev_guncellendi', list); 
                 io.to(veri.kocKodu).emit('ogretmene_market_bildirimi', { ogrenci: veri.ogrenciAd, odul: veri.odul }); 
@@ -362,6 +406,7 @@ io.on('connection', (socket) => {
                 ogrenci.bekleyenOduller = ogrenci.bekleyenOduller.filter(o => o.id !== veri.odulId); 
                 ogrenci.markModified('bekleyenOduller'); 
                 await ogrenci.save(); 
+                
                 let list = await Ogrenci.find({ kocKodu: veri.kocKodu });
                 io.to(veri.kocKodu).emit('gorev_guncellendi', list); 
             } 
@@ -376,6 +421,7 @@ io.on('connection', (socket) => {
                 ogrenci.hataDefteri.push(yeniSoru); 
                 ogrenci.markModified('hataDefteri'); 
                 await ogrenci.save(); 
+                
                 let list = await Ogrenci.find({ kocKodu: veri.kocKodu });
                 io.to(veri.kocKodu).emit('gorev_guncellendi', list); 
                 io.to(veri.kocKodu).emit('ogretmene_market_bildirimi', { ogrenci: veri.ogrenciAd, odul: "Hata Defterine Soru Yükledi" }); 
@@ -392,6 +438,7 @@ io.on('connection', (socket) => {
                     ogrenci.hataDefteri[idx].durum = 'Çözüldü'; 
                     ogrenci.markModified('hataDefteri'); 
                     await ogrenci.save(); 
+                    
                     let list = await Ogrenci.find({ kocKodu: veri.kocKodu });
                     io.to(veri.kocKodu).emit('gorev_guncellendi', list); 
                 } 
@@ -408,6 +455,7 @@ io.on('connection', (socket) => {
                 ogrenci.isiHaritasi = harita; 
                 ogrenci.markModified('isiHaritasi'); 
                 await ogrenci.save(); 
+                
                 let list = await Ogrenci.find({ kocKodu: veri.kocKodu });
                 io.to(veri.kocKodu).emit('gorev_guncellendi', list); 
             } 
@@ -421,6 +469,7 @@ io.on('connection', (socket) => {
                 ogrenci.gorevler.push({ id: Date.now(), metin: veri.gorevMetni, tamamlandi: false }); 
                 ogrenci.markModified('gorevler'); 
                 await ogrenci.save(); 
+                
                 let list = await Ogrenci.find({ kocKodu: veri.kocKodu });
                 io.to(veri.kocKodu).emit('gorev_guncellendi', list); 
             } 
@@ -445,6 +494,7 @@ io.on('connection', (socket) => {
                             if (rakipOgrenci.xp < 0) { rakipOgrenci.xp = 0; }
                             rakipOgrenci.aktifDuello = null; 
                             await rakipOgrenci.save(); 
+                            
                             io.to(veri.kocKodu).emit('duello_sonucu', { kazanan: ogrenci.ogrenciAd, kaybeden: rakipOgrenci.ogrenciAd, miktar: kazanilanXP }); 
                         } 
                         ogrenci.aktifDuello = null; 
@@ -452,6 +502,7 @@ io.on('connection', (socket) => {
                     
                     ogrenci.markModified('gorevler'); 
                     await ogrenci.save(); 
+                    
                     let list = await Ogrenci.find({ kocKodu: veri.kocKodu });
                     io.to(veri.kocKodu).emit('gorev_guncellendi', list); 
                 } 
@@ -459,7 +510,10 @@ io.on('connection', (socket) => {
         } catch(e) {} 
     });
 
-    socket.on('duello_teklif_et', (veri) => { io.to(veri.kocKodu).emit('duello_istegi_geldi', veri); });
+    socket.on('duello_teklif_et', (veri) => { 
+        io.to(veri.kocKodu).emit('duello_istegi_geldi', veri); 
+    });
+
     socket.on('duello_kabul_edildi', async (veri) => { 
         try { 
             let o1 = await Ogrenci.findOne({ ogrenciAd: veri.gonderen, kocKodu: veri.kocKodu }); 
@@ -467,7 +521,9 @@ io.on('connection', (socket) => {
             if (o1 && o2) { 
                 o1.aktifDuello = { rakip: veri.hedef, miktar: veri.miktar }; 
                 o2.aktifDuello = { rakip: veri.gonderen, miktar: veri.miktar }; 
-                await o1.save(); await o2.save(); 
+                await o1.save(); 
+                await o2.save(); 
+                
                 let list = await Ogrenci.find({ kocKodu: veri.kocKodu });
                 io.to(veri.kocKodu).emit('gorev_guncellendi', list); 
                 io.to(veri.kocKodu).emit('duello_basladi', { o1: veri.gonderen, o2: veri.hedef }); 
@@ -491,7 +547,6 @@ io.on('connection', (socket) => {
         } catch(e) {} 
     });
 
-    // 📚 YENİ: KAYNAK BİTİRME MOTORU
     socket.on('kaynak_cozuldu', async (veri) => {
         try {
             let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu });
@@ -500,14 +555,13 @@ io.on('connection', (socket) => {
                 
                 if(!ogrenci.tamamlananKaynaklar.includes(veri.kaynakId)) {
                     ogrenci.tamamlananKaynaklar.push(veri.kaynakId);
-                    ogrenci.xp += 5; // 5 XP Ödül
+                    ogrenci.xp += 5;
                     ogrenci.markModified('tamamlananKaynaklar');
                     await ogrenci.save();
 
                     let list = await Ogrenci.find({ kocKodu: veri.kocKodu });
                     io.to(veri.kocKodu).emit('gorev_guncellendi', list);
                     
-                    // Öğretmene Bildirim
                     io.to(veri.kocKodu).emit('ogretmene_market_bildirimi', { 
                         ogrenci: veri.ogrenciAd, 
                         odul: `📚 "${veri.kaynakBaslik}" kaynağını bitirdi! (+5 XP)` 
@@ -535,6 +589,7 @@ io.on('connection', (socket) => {
             if (ogrenci) { 
                 ogrenci.avatar = veri.avatar; 
                 await ogrenci.save(); 
+                
                 let list = await Ogrenci.find({ kocKodu: veri.kocKodu });
                 io.to(veri.kocKodu).emit('gorev_guncellendi', list); 
             } 
@@ -550,6 +605,7 @@ io.on('connection', (socket) => {
                 ogrenci.istatistik = stats; 
                 ogrenci.markModified('istatistik'); 
                 await ogrenci.save(); 
+                
                 let list = await Ogrenci.find({ kocKodu: veri.kocKodu });
                 io.to(veri.kocKodu).emit('gorev_guncellendi', list); 
             } 
@@ -558,7 +614,15 @@ io.on('connection', (socket) => {
 
     socket.on('chat_mesaji_gonder', async (data) => { 
         try { 
-            const n = new Chat({ id: Date.now(), gonderen: data.gonderen, mesaj: data.mesaj, rol: data.rol, saat: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), tip: data.tip || 'metin', kocKodu: data.kocKodu }); 
+            const n = new Chat({ 
+                id: Date.now(), 
+                gonderen: data.gonderen, 
+                mesaj: data.mesaj, 
+                rol: data.rol, 
+                saat: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), 
+                tip: data.tip || 'metin', 
+                kocKodu: data.kocKodu 
+            }); 
             await n.save(); 
             io.to(data.kocKodu).emit('yeni_chat_mesaji', n); 
         } catch(e) {} 
@@ -618,6 +682,7 @@ io.on('connection', (socket) => {
             let rütbe = xp >= 300 ? 'Efsane' : xp >= 150 ? 'Odak Ustası' : 'Çaylak'; 
             let msg = veri.mesaj.toLowerCase(); 
             let c = (msg.includes('xp') || msg.includes('market')) ? `Market'ten ödüller alabilirsin! ${xp} XP'n var! 🌟` : `Merhaba ${rütbe}! Yorulduğunda bana yaz! ⚡`;
+            
             socket.emit('chatbot_cevabi', c); 
         } catch(e) {} 
     });
