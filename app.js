@@ -238,8 +238,7 @@ function gostergeyiGuncelle(sureMs) {
 
 function sesCal() { 
     const s = document.getElementById('bildirimSesi'); 
-    s.currentTime = 0; 
-    s.play().catch(e=>{}); 
+    if(s) { s.currentTime = 0; s.play().catch(e=>{}); }
 }
 
 function rastgeleYoklamaKur() {
@@ -387,18 +386,18 @@ window.pauseTimer = function(otomatikMi = false) {
 };
 
 window.radyoKapat = function() { 
-    document.getElementById('radyoLofi').pause(); 
-    document.getElementById('radyoYagmur').pause(); 
-    document.getElementById('radyoKafe').pause(); 
+    if(document.getElementById('radyoLofi')) document.getElementById('radyoLofi').pause(); 
+    if(document.getElementById('radyoYagmur')) document.getElementById('radyoYagmur').pause(); 
+    if(document.getElementById('radyoKafe')) document.getElementById('radyoKafe').pause(); 
     document.querySelectorAll('.radyo-btn').forEach(b => b.classList.remove('aktif')); 
 };
 
 window.radyoCal = function(tur) { 
     window.radyoKapat(); 
-    document.getElementById('btn' + tur).classList.add('aktif'); 
+    let btn = document.getElementById('btn' + tur);
+    if(btn) btn.classList.add('aktif'); 
     let audio = document.getElementById('radyo' + tur); 
-    audio.volume = 0.5; 
-    audio.play().catch(e=>{}); 
+    if(audio) { audio.volume = 0.5; audio.play().catch(e=>{}); }
 };
 
 window.hataResmiSec = function(input) {

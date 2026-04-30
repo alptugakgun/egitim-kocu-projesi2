@@ -332,9 +332,10 @@
         
         const AYLAR = ["Eyl", "Eki", "Kas", "Ara", "Oca", "Sub", "Mar", "Nis", "May", "Haz"];
 
-        // Sayfa yenilendiğinde kontrol
+       // Sayfa yenilendiğinde kontrol (DÜZELTİLMİŞ HALİ)
         window.onload = function() {
             let kayitliSifre = localStorage.getItem('adminPass');
+            // process.env ibaresi kaldırıldı, sadece lokal şifre kontrolü yapılıyor.
             if(kayitliSifre === 'sincap-boss-2026') {
                 document.getElementById('adminPass').value = kayitliSifre;
                 giris();
@@ -479,7 +480,7 @@
                 kTablo.innerHTML += `
                     <tr>
                         <td>👨‍🏫 ${k.kocAd}</td>
-                        <td style="color:#10b981; font-family:monospace; font-size:16px;">${k.sifre}</td>
+                        <td style="color:#10b981; font-family:monospace; font-size:16px;">***** (Kriptolu)</td>
                         <td><span class="badge" style="background:#fef3c7; color:#d97706;">${k.kocKodu}</span></td>
                         <td>${bagliOgrenciSayisi}</td>
                         <td>
@@ -500,7 +501,7 @@
                 oTablo.innerHTML += `
                     <tr>
                         <td>🎓 ${o.ogrenciAd}</td>
-                        <td style="color:#ef4444; font-family:monospace;">${o.sifre}</td>
+                        <td style="color:#ef4444; font-family:monospace;">***** (Kriptolu)</td>
                         <td><span class="badge" style="background:#e0e7ff; color:#4f46e5;">${o.kocKodu}</span></td>
                         <td><span class="badge" style="background:#d1fae5; color:#059669;">${o.veliKodu || 'Yok'}</span></td>
                         <td style="color:#f59e0b;">${o.xp || 0} XP</td>
