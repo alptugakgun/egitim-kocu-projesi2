@@ -194,7 +194,7 @@
         <h1 id="kocKarsilama">⚡ Komuta Merkezi <span class="davet-kodu" id="kocKoduSpan"></span></h1>
         <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content: center;">
             <button class="btn-blue" style="background: linear-gradient(135deg, #ec4899, #db2777);" onclick="modalAc('kutuphaneModal')">📚 Kütüphane</button>
-            <button class="btn-blue" style="background: linear-gradient(135deg, #14b8a6, #0d9488);" onclick="modalAc('rehberlikRaporModal')">🧠 Psikoloji</button>
+            <button class="btn-blue" style="background: linear-gradient(135deg, #14b8a6, #0d9488);" onclick="rehberlikDefteriAc()">🧠 Psikoloji</button>
             <button class="btn-blue" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);" onclick="odulDefteriAc()">🎁 Ödüller</button>
             <button class="btn-blue" style="background: linear-gradient(135deg, #475569, #1e293b);" onclick="hataDefteriAc()">💣 Hata Defteri</button>
             <button class="btn-blue" style="background: linear-gradient(135deg, #a855f7, #7e22ce);" onclick="sifreleriGor()">🔐 Veliler</button>
@@ -231,7 +231,6 @@
 
     <div class="live-grid" id="liveGrid"></div>
 
-    <!-- MODALLAR -->
     <div class="modal" id="kutuphaneModal">
         <div class="modal-content">
             <h2 style="margin-top:0; font-size:26px; color:#db2777;">📚 Eğitim Kütüphanesi</h2>
@@ -369,11 +368,14 @@
         const aktifKocIsmi = localStorage.getItem('ogretmenKimligi'); 
         const kocKodu = localStorage.getItem('kocKodu');
         
-        document.getElementById('kocKarsilama').innerHTML = `⚡ Komuta Merkezi`;
-        document.getElementById('kocKoduSpan').innerText = `Kayıt Kodun: ${kocKodu}`;
-        
         const socket = io(); 
         socket.emit('join_room', kocKodu);
+
+        // HATA BURADAYDI! İçeriği ezen 'innerHTML' komutunu güvenli hale getirdim.
+        const kodKutusu = document.getElementById('kocKoduSpan');
+        if(kodKutusu) {
+            kodKutusu.innerText = `Kayıt Kodun: ${kocKodu}`;
+        }
 
         // --- BİLDİRİM VE WHATSAPP ---
         window.izinIste = function() { 
@@ -384,11 +386,11 @@
             }
         };
 
-        window.sistemBildirimi = function(baslik, mesaj) { 
+        function sistemBildirimi(baslik, mesaj) { 
             if ("Notification" in window && Notification.permission === "granted") { 
                 new Notification(baslik, { body: mesaj, icon: "https://cdn-icons-png.flaticon.com/512/616/616430.png" }); 
             } 
-        };
+        }
 
         window.whatsappRaporGonder = function(ad, xp) {
             let msg = encodeURIComponent(`KatalizApp Veli Raporu 📊\nSayın Veli, \nÖğrencimiz ${ad} sistemde toplam ${xp} XP kazandı. Detaylı durum analizi, odaklanma süresi ve gelişim grafikleri için veli portalına giriş yapabilirsiniz.\nİyi çalışmalar dilerim.\n- Koç ${aktifKocIsmi}`);
@@ -402,8 +404,8 @@
         const AYLAR = ["Eyl", "Eki", "Kas", "Ara", "Oca", "Sub", "Mar", "Nis", "May", "Haz"];
 
         // Modal Yardımcıları
-        window.modalAc = function(id) { document.getElementById(id).style.display = 'flex'; };
-        window.modalKapat = function(id) { document.getElementById(id).style.display = 'none'; };
+        function modalAc(id) { document.getElementById(id).style.display = 'flex'; }
+        function modalKapat(id) { document.getElementById(id).style.display = 'none'; }
 
         // --- KÜTÜPHANE FONKSİYONLARI ---
         window.kaynakEkle = function() { 
@@ -457,11 +459,11 @@
             li.style.color = veri.tip === 'lisans' ? '#b91c1c' : '#4b5563';
             li.innerHTML = veri.mesaj;
             list.appendChild(li);
-            if(veri.tip === 'lisans') window.sistemBildirimi("💸 Ödeme Hatırlatması", veri.mesaj);
+            if(veri.tip === 'lisans') sistemBildirimi("💸 Ödeme Hatırlatması", veri.mesaj);
         });
 
         socket.on('afk_kacak_ogrenci', (veri) => {
-            window.sistemBildirimi("🚨 Kacak Öğrenci!", `${veri.ogrenciAd} masadan ayrıldı!`);
+            sistemBildirimi("🚨 Kacak Öğrenci!", `${veri.ogrenciAd} masadan ayrıldı!`);
             alert(`🚨 UYARI: ${veri.ogrenciAd} masadan ayrıldı ve odaklanma süresi sistem tarafından kesildi!`);
         });
 
@@ -477,7 +479,7 @@
             kartiEkranaCiz(gelenVeri); 
             let index = sinifListesi.findIndex(o => o.ogrenciAd === gelenVeri.ogrenciAd); 
             if(gelenVeri.mesaj.includes("Mola") || gelenVeri.mesaj.includes("Başlattı")) { 
-                window.sistemBildirimi("🔄 Aktivite", `${gelenVeri.ogrenciAd} ${gelenVeri.mesaj.toLowerCase()}`); 
+                sistemBildirimi("🔄 Aktivite", `${gelenVeri.ogrenciAd} ${gelenVeri.mesaj.toLowerCase()}`); 
             } 
             if(index !== -1) sinifListesi[index] = gelenVeri; 
             else sinifListesi.push(gelenVeri); 
@@ -485,7 +487,7 @@
         });
 
         // --- GİZLİ KASA (VELİ KODLARI) ---
-        window.sifreleriGor = async function() { 
+        async function sifreleriGor() { 
             try { 
                 const response = await fetch('/api/sifreler', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kocKodu: kocKodu }) }); 
                 const ogrenciler = await response.json(); 
@@ -501,7 +503,7 @@
                 } 
                 modalAc('sifreModal');
             } catch (e) { alert("Veriler çekilirken hata oluştu!"); } 
-        };
+        }
 
         // --- EXCEL AJANDA VE RANDEVU SİSTEMİ ---
         window.ayDegistir = function(el) { el.classList.toggle('odendi'); };
