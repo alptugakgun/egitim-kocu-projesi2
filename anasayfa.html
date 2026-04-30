@@ -23,7 +23,7 @@
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; transition: opacity 0.5s ease;}
         .loader-brand { font-size: 32px; font-weight: 900; margin-bottom: 20px; letter-spacing: 2px;}
         #loader-bar { width: 200px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
-        #loader-progress { width: 0%; height: 100%; background: var(--brand-color); transition: width 0.1s; }
+        #loader-progress { width: 0%; height: 100%; background: var(--brand-color); transition: width 0.3s; }
         #loader-percent { margin-top: 15px; font-weight: 900; font-size: 14px; color: #94a3b8;}
 
         /* 2. MENÜ (HEADER) */
@@ -45,12 +45,12 @@
         #canvas { width: 100%; height: 100%; object-fit: cover; }
 
         /* 5. KARANLIK OVERLAY VE MARQUEE */
-        #dark-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; opacity: 0; z-index: 2; pointer-events: none; }
+        #dark-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.85); opacity: 0; z-index: 2; pointer-events: none; }
         .marquee-wrap { position: fixed; top: 50%; left: 0; width: 100vw; transform: translateY(-50%); z-index: 3; pointer-events: none; overflow: hidden; opacity: 0; white-space: nowrap;}
         .marquee-text { font-size: 15vw; font-weight: 900; color: rgba(255,255,255,0.05); text-transform: uppercase; letter-spacing: -5px; }
 
-        /* 6. KAYDIRMA ALANI VE İÇERİK KESİTLERİ */
-        #scroll-container { height: 900vh; position: relative; z-index: 4; }
+        /* 6. KAYDIRMA ALANI VE İÇERİK KESİTLERİ (Kısaltıldı) */
+        #scroll-container { height: 450vh; position: relative; z-index: 4; }
         
         .scroll-section { position: absolute; left: 0; width: 100%; top: 0; transform: translateY(-50%); padding: 0 5vw; display: flex; flex-direction: column; justify-content: center; }
         
@@ -76,7 +76,7 @@
             .hero-heading { font-size: 4rem; }
             .section-heading { font-size: 2.5rem; }
             .align-left, .align-right { padding: 0 10vw; text-align: center; }
-            #scroll-container { height: 600vh; }
+            #scroll-container { height: 350vh; }
             .stats-grid { flex-direction: column; gap: 40px; }
             .stat-number { font-size: 5rem; }
             .marquee-text { font-size: 20vw; }
@@ -122,7 +122,7 @@
     <!-- 6. Aşağı Kaydırma ve İçerik -->
     <div id="scroll-container">
         
-        <section class="scroll-section align-left" data-enter="15" data-leave="28" data-animation="slide-left">
+        <section class="scroll-section align-left" data-enter="10" data-leave="28" data-animation="slide-left">
             <div class="section-inner">
                 <span class="section-label">001 / Motivasyon</span>
                 <h2 class="section-heading">Oyunlaştırılmış Sistem</h2>
@@ -130,7 +130,7 @@
             </div>
         </section>
 
-        <section class="scroll-section align-right" data-enter="32" data-leave="45" data-animation="fade-up">
+        <section class="scroll-section align-right" data-enter="30" data-leave="48" data-animation="fade-up">
             <div class="section-inner">
                 <span class="section-label">002 / Teknoloji</span>
                 <h2 class="section-heading">Yapay Zeka Analizi</h2>
@@ -138,7 +138,7 @@
             </div>
         </section>
 
-        <section class="scroll-section align-left" data-enter="48" data-leave="62" data-animation="scale-up">
+        <section class="scroll-section align-left" data-enter="50" data-leave="68" data-animation="scale-up">
             <div class="section-inner">
                 <span class="section-label">003 / Denetim</span>
                 <h2 class="section-heading">Canlı AFK Radarı</h2>
@@ -147,7 +147,7 @@
         </section>
 
         <!-- İstatistik Bölümü -->
-        <section class="scroll-section align-center" data-enter="68" data-leave="85" data-animation="stagger-up">
+        <section class="scroll-section align-center" data-enter="70" data-leave="85" data-animation="stagger-up">
             <div class="stats-grid">
                 <div class="stat">
                     <span class="stat-number" data-value="150" data-decimals="0">0</span>
@@ -192,65 +192,55 @@
         gsap.ticker.add((time) => lenis.raf(time * 1000));
         gsap.ticker.lagSmoothing(0);
 
-        // 2. Video Karelerini (Frames) Hazırlama
+        // 2. Parallax Arka Plan Hazırlığı (Kulaklıklar Gitti, Yapay Zeka Ağı Geldi!)
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
-        const FRAME_COUNT = 147; 
-        const frames = [];
-        let currentFrame = -1;
-        let loadedFrames = 0;
+        const bgImage = new Image();
         
-        // Apple AirPods Render Kareleri (Geçici Yüksek Kalite Görseller)
-        const getFrameUrl = (index) => `https://www.apple.com/105/media/us/airpods-pro/2019/1299e2f5_9206_4470_b28e_08307a42f19b/anim/sequence/large/01-hero-lightpass/${(index + 1).toString().padStart(4, '0')}.jpg`;
+        // KatalizApp ruhuna uygun: Soyut Teknoloji, Yapay Zeka Ağı ve Eğitim Temalı Görsel
+        bgImage.src = "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1920&auto=format&fit=crop";
 
-        // 3. Yükleme Ekranı Mantığı
-        function loadFrames() {
-            for (let i = 0; i < FRAME_COUNT; i++) {
-                const img = new Image();
-                img.src = getFrameUrl(i);
-                img.onload = () => {
-                    loadedFrames++;
-                    const percent = Math.floor((loadedFrames / FRAME_COUNT) * 100);
-                    document.getElementById('loader-progress').style.width = percent + '%';
-                    document.getElementById('loader-percent').innerText = `Sistem Başlatılıyor %${percent}`;
-                    
-                    if (loadedFrames === FRAME_COUNT) {
-                        setTimeout(() => {
-                            document.getElementById('loader').style.opacity = '0';
-                            setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
-                            drawFrame(0);
-                        }, 500);
-                    }
-                };
-                frames.push(img);
-            }
-        }
+        // 3. Yükleme Ekranı (Artık 147 fotoğraf beklemediği için anında açılacak)
+        bgImage.onload = () => {
+            document.getElementById('loader-progress').style.width = '100%';
+            document.getElementById('loader-percent').innerText = `Sistem Hazır %100`;
+            
+            setTimeout(() => {
+                document.getElementById('loader').style.opacity = '0';
+                setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+                drawFrame(0);
+            }, 300);
+        };
 
-        // 4. Canvas Çizimi (Padded Cover Modu)
-        const IMAGE_SCALE = 0.85; 
-        function drawFrame(index) {
-            const img = frames[index];
-            if (!img || !img.complete) return;
+        // 4. Canvas Çizimi (Scroll ile Yakınlaşan Parallax Efekti)
+        function drawFrame(progress) {
+            if (!bgImage.complete) return;
             
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             
             const cw = canvas.width, ch = canvas.height;
-            const iw = img.naturalWidth, ih = img.naturalHeight;
-            const scale = Math.max(cw / iw, ch / ih) * IMAGE_SCALE;
-            const dw = iw * scale, dh = ih * scale;
-            const dx = (cw - dw) / 2, dy = (ch - dh) / 2;
+            const iw = bgImage.naturalWidth, ih = bgImage.naturalHeight;
             
-            ctx.fillStyle = "#000000"; 
+            // Temel ölçek ve scroll'a bağlı zoom (%30 yakınlaşma efekti)
+            const baseScale = Math.max(cw / iw, ch / ih);
+            const scale = baseScale * (1 + (progress * 0.3)); 
+            
+            const dw = iw * scale, dh = ih * scale;
+            
+            // Scroll ettikçe resmi hafifçe kaydır (Parallax)
+            const dx = (cw - dw) / 2;
+            const dy = ((ch - dh) / 2) + (progress * 150); 
+            
+            ctx.fillStyle = "#0f172a"; 
             ctx.fillRect(0, 0, cw, ch);
-            ctx.drawImage(img, dx, dy, dw, dh);
+            ctx.drawImage(bgImage, dx, dy, dw, dh);
         }
 
-        // 5. Scroll ile Video Senkronizasyonu
+        // 5. Scroll ile Arka Plan Senkronizasyonu
         const scrollContainer = document.getElementById("scroll-container");
         const canvasWrap = document.getElementById("canvas-wrap");
         const heroSection = document.querySelector(".hero-standalone");
-        const FRAME_SPEED = 2.0; 
 
         ScrollTrigger.create({
             trigger: scrollContainer,
@@ -258,26 +248,21 @@
             end: "bottom bottom",
             scrub: true,
             onUpdate: (self) => {
-                // Video Akışı
-                const accelerated = Math.min(self.progress * FRAME_SPEED, 1);
-                const index = Math.min(Math.floor(accelerated * FRAME_COUNT), FRAME_COUNT - 1);
-                if (index !== currentFrame) {
-                    currentFrame = index;
-                    requestAnimationFrame(() => drawFrame(currentFrame));
-                }
-
-                // Hero Çember Kesme (Circle-Wipe) Efekti
                 const p = self.progress;
-                heroSection.style.opacity = Math.max(0, 1 - p * 20); 
-                const wipeProgress = Math.min(1, Math.max(0, (p - 0.02) / 0.05));
+                
+                // Arka planı çiz (Zoom ve Parallax)
+                requestAnimationFrame(() => drawFrame(p));
+
+                // Hero Çember Kesme (Circle-Wipe) Efekti - Kısaltılmış mesafeye uyarlandı
+                heroSection.style.opacity = Math.max(0, 1 - p * 12); 
+                const wipeProgress = Math.min(1, Math.max(0, (p - 0.02) / 0.10));
                 const radius = wipeProgress * 100; 
                 canvasWrap.style.clipPath = `circle(${radius}% at 50% 50%)`;
             }
         });
 
-        // Ekran boyutu değiştiğinde canvas'ı güncelle
         window.addEventListener("resize", () => {
-            if(currentFrame >= 0) drawFrame(currentFrame);
+            drawFrame(0);
         });
 
         // 6. Animasyon Kareografisi Sistemi
@@ -293,7 +278,6 @@
                 const children = section.querySelectorAll(".section-label, .section-heading, .section-body, .stat, .cta-button");
                 const tl = gsap.timeline({ paused: true });
 
-                // Farklı animasyon tipleri
                 if (type === "fade-up") {
                     tl.fromTo(children, { y: 60, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.15, duration: 0.8, ease: "power3.out" });
                 } else if (type === "slide-left") {
@@ -306,7 +290,6 @@
                     tl.fromTo(children, { clipPath: "inset(100% 0 0 0)", opacity: 0 }, { clipPath: "inset(0% 0 0 0)", opacity: 1, stagger: 0.15, duration: 1.2, ease: "power4.inOut" });
                 }
 
-                // ScrollTrigger Bağlantısı
                 ScrollTrigger.create({
                     trigger: scrollContainer,
                     start: "top top",
@@ -315,12 +298,10 @@
                     onUpdate: (self) => {
                         const p = self.progress;
                         
-                        // Pozisyonu sabitle (Ekranın ortasına)
                         const containerHeight = scrollContainer.offsetHeight;
                         const targetY = (enterPercent + (leavePercent - enterPercent) / 2) * containerHeight;
                         gsap.set(section, { top: targetY });
 
-                        // Animasyon Oynat/Geri Al
                         if (p >= enterPercent && p <= leavePercent) {
                             tl.play();
                             gsap.to(section, {opacity: 1, duration: 0.3});
@@ -348,7 +329,7 @@
             onUpdate: (self) => {
                 const p = self.progress;
                 
-                // Karartma (İstatistikler için %68 ile %85 arası koyulaşır)
+                // Karartma (İstatistikler için kısaltılmış menzilde çalışır)
                 if(p > 0.65 && p < 0.88) {
                     gsap.to(darkOverlay, {opacity: 0.9, duration: 0.5});
                     gsap.to(marqueeWrap, {opacity: 1, duration: 0.5});
@@ -371,7 +352,6 @@
             const target = parseFloat(el.dataset.value);
             const decimals = parseInt(el.dataset.decimals || "0");
             
-            // Başlangıçta sıfırla
             el.textContent = "0";
 
             ScrollTrigger.create({
@@ -395,12 +375,8 @@
             });
         });
 
-        // Sistemi Başlat
         window.onload = () => {
-            loadFrames();
             setupSectionAnimations();
-            
-            // Tüm sekmeleri başlangıçta görünmez yap
             gsap.set(".scroll-section:not(.hero-standalone)", {opacity: 0});
         };
 
