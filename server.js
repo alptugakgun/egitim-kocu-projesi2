@@ -1,5 +1,6 @@
 require('dotenv').config();
-const express = require('express');
+const express = require('express');require('dotenv').config();
+console.log("TELSİZ TESTİ - OKUNAN ANAHTAR: ", process.env.GEMINI_API_KEY); // BU SATIRI EKLE
 const http = require('http');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
@@ -670,7 +671,7 @@ io.on('connection', (socket) => {
             `;
 
             // Modeli çağırıyoruz
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
             const result = await model.generateContent(prompt);
             const response = await result.response;
             let aiMetni = response.text();
@@ -694,16 +695,47 @@ io.on('connection', (socket) => {
         } 
     });
 
+// --- 🤖 ÖĞRENCİ PANELİ: GERÇEK YAPAY ZEKA SOHBET BOTU ---
     socket.on('ogrenci_chatbot_mesaji', async (veri) => { 
         try { 
             let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu }); 
-            let xp = ogrenci ? ogrenci.xp || 0 : 0; 
+            if (!ogrenci) return;
+
+            // Öğrencinin güncel durumunu yapay zekaya veriyoruz
+            let xp = ogrenci.xp || 0; 
             let rütbe = xp >= 300 ? 'Efsane' : xp >= 150 ? 'Odak Ustası' : 'Çaylak'; 
-            let msg = veri.mesaj.toLowerCase(); 
-            let c = (msg.includes('xp') || msg.includes('market')) ? `Market'ten ödüller alabilirsin! ${xp} XP'n var! 🌟` : `Merhaba ${rütbe}! Yorulduğunda bana yaz! ⚡`;
+            let bekleyenGorev = ogrenci.gorevler ? ogrenci.gorevler.filter(g => !g.tamamlandi).length : 0;
+
+            // Yapay zekaya kim olduğunu ve öğrenciyi nasıl motive edeceğini söylüyoruz
+            let prompt = `
+            Sen KatalizApp eğitim sisteminin sevimli, motive edici ve zeki asistanısın.
+            Şu an konuştuğun öğrencinin adı: ${veri.ogrenciAd}
+            Öğrencinin Mevcut XP'si: ${xp} (Sistemdeki Rütbesi: ${rütbe})
+            Öğrencinin Bekleyen/Yapılmamış Görev Sayısı: ${bekleyenGorev}
+
+            Öğrencinin sana yazdığı mesaj: "${veri.mesaj}"
+
+            Görevlerin:
+            1. Öğrenciye ismiyle veya rütbesiyle (Örn: Çaylak, Efsane) hitap et.
+            2. Mesajına samimi, hafif esprili ve kısa bir cevap ver (Maksimum 2-3 cümle olsun, sohbeti uzatma).
+            3. Eğitim koçu gibi onu motive et, gerekirse bekleyen görevlerini hatırlat veya daha fazla XP kazanması için cesaretlendir.
+            4. Markdown (* veya # gibi) özel etiketler kullanma, düz ve doğal bir mesaj yaz.
+            `;
+
+            // Senin bulduğun o hızlı ve cömert limiti olan modeli kullanıyoruz!
+            const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            let aiCevabi = response.text();
             
-            socket.emit('chatbot_cevabi', c); 
-        } catch(e) {} 
+            // Yapay zekadan gelen cevabı öğrencinin ekranına gönderiyoruz
+            socket.emit('chatbot_cevabi', aiCevabi.trim()); 
+
+        } catch(err) { 
+            console.error("Öğrenci Chatbot Hatası:", err);
+            // Eğer Google'da anlık bir yoğunluk olursa öğrenciye çaktırmadan tatlı bir hata mesajı veriyoruz
+            socket.emit('chatbot_cevabi', "Şu an sunucu odasında ufak bir tozlanma var, Kaptan'ın kabloları temizlemesini bekliyorum. Birazdan tekrar yaz! 🛠️"); 
+        } 
     });
     
 });
