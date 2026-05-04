@@ -6,8 +6,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs'); 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// BURAYA AZ ÖNCE KOPYALADIĞIN KENDİ API ANAHTARINI YAPIŞTIR
-const genAI = new GoogleGenerativeAI("AIzaSyBnOTByCKDRVsMq4-cfcR4vu5-4ErffHTA");
+// Güvenlik ayarı: API Anahtarın artık .env dosyasından güvenli bir şekilde çekiliyor
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const app = express();
 app.use(express.json());
@@ -675,9 +675,8 @@ io.on('connection', (socket) => {
             const response = await result.response;
             let aiMetni = response.text();
             
-            // Gelen JSON metnini temizleyip objeye çeviriyoruz
-            aiMetni = aiMetni.replace(/```json/gi, '').replace(/
-```/g, '').trim();
+            // DİKKAT: HATA BURADAYDI! VS Code parser'ı çökmesin diye ters tırnakları Makine (Hex) koduyla (\x60) değiştirdim.
+            aiMetni = aiMetni.replace(/\x60\x60\x60json/gi, '').replace(/\x60\x60\x60/g, '').trim();
             let aiData = JSON.parse(aiMetni);
 
             io.to(veri.kocKodu).emit('yapay_zeka_raporu', { 
