@@ -4,6 +4,10 @@ const http = require('http');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs'); 
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// BURAYA AZ ÖNCE KOPYALADIĞIN KENDİ API ANAHTARINI YAPIŞTIR
+const genAI = new GoogleGenerativeAI("AIzaSyBnOTByCKDRVsMq4-cfcR4vu5-4ErffHTA");
 
 const app = express();
 app.use(express.json());
@@ -634,47 +638,61 @@ io.on('connection', (socket) => {
         io.to(veri.kocKodu).emit('ogretmene_sure_guncelle', veri); 
     });
 
+    // --- 🤖 GERÇEK GEMINI YAPAY ZEKA ASİSTAN ENTEGRASYONU ---
     socket.on('yapay_zeka_analiz_istegi', async (veri) => { 
         try { 
             let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu }); 
             if (!ogrenci) return; 
+
+            // Yapay zekaya öğrenci verilerini sunuyoruz
+            let xp = ogrenci.xp || 0;
+            let isiHaritasi = JSON.stringify(ogrenci.isiHaritasi || {});
+            let bekleyenHatalar = ogrenci.hataDefteri ? ogrenci.hataDefteri.filter(h=>h.durum==='Bekliyor').length : 0;
+
+            let prompt = `
+            Sen KatalizApp adlı yeni nesil oyunlaştırılmış eğitim sisteminin baş yapay zeka koçusun. Adın "Kaptan".
+            Sert, disiplinli ama öğrencisini çok seven, motive edici bir üslubun var.
             
-            let zayifKonular = []; 
-            if (ogrenci.isiHaritasi) { 
-                for (let k in ogrenci.isiHaritasi) { 
-                    if (ogrenci.isiHaritasi[k].includes('Zayıf') || ogrenci.isiHaritasi[k].includes('Orta')) {
-                        zayifKonular.push(k);
-                    } 
-                } 
+            Şu anda analiz ettiğin öğrencinin adı: ${veri.ogrenciAd}
+            Mevcut Deneyim Puanı (XP): ${xp}
+            Çözemediği Bekleyen Soru Sayısı: ${bekleyenHatalar}
+            Konu Isı Haritası (Zayıf, Orta, İyi): ${isiHaritasi}
+
+            Lütfen bu verilere bakarak:
+            1. HTML formatında (<b>, <br>, <span style="color:red"> gibi etiketler kullanarak) şık, kısa ve nokta atışı bir "Durum Raporu ve Motivasyon" metni yaz. Zayıf konuları vurgula.
+            2. Öğrenciye özel, doğrudan zayıf olduğu konulara yönelik 1 adet spesifik eylem "Görev" cümlesi yaz (Maksimum 8-10 kelime).
+            
+            Bana sadece şu formatta geçerli bir JSON objesi döndür, markdown veya başka hiçbir açıklama yazma:
+            {
+              "rapor": "html formatındaki rapor metni",
+              "oneri": "görev cümlesi"
             }
+            `;
+
+            // Modeli çağırıyoruz
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            let aiMetni = response.text();
             
-            let biten = ogrenci.gorevler.filter(g => g.tamamlandi).length; 
-            let bekleyen = ogrenci.gorevler.length - biten; 
-            let xp = ogrenci.xp || 0; 
-            
-            let raporMetni = ""; 
-            let onerilenGorev = "";
-            
-            if (zayifKonular.length > 0) { 
-                raporMetni = `Kaptan, ${ogrenci.ogrenciAd} adlı öğrencinin "<b>${zayifKonular[0]}</b>" konusunda eksikleri var. Kurtarma operasyonu yapalım mı?`; 
-                onerilenGorev = `${zayifKonular[0]} - Kritik Soru Çözümü`; 
-            } else if (bekleyen > 2) { 
-                raporMetni = `⚠️ Dikkat! Öğrencinin ${bekleyen} görevi birikmiş. "Tekrar ve Toparlama" verelim.`; 
-                onerilenGorev = "Biriken Görevleri Eritme Kampı"; 
-            } else if (xp > 150) { 
-                raporMetni = `🚀 ${ogrenci.ogrenciAd} Odak Ustası! Türkiye Geneli Deneme atayabiliriz.`; 
-                onerilenGorev = "YKS/LGS Genel Deneme Çözümü"; 
-            } else { 
-                raporMetni = `⏳ ${ogrenci.ogrenciAd} ısınma aşamasında. Ufak bir görev verelim.`; 
-                onerilenGorev = "Güne Başlangıç: 20 Paragraf"; 
-            }
-            
+            // Gelen JSON metnini temizleyip objeye çeviriyoruz
+            aiMetni = aiMetni.replace(/```json/gi, '').replace(/
+```/g, '').trim();
+            let aiData = JSON.parse(aiMetni);
+
             io.to(veri.kocKodu).emit('yapay_zeka_raporu', { 
                 ad: veri.ogrenciAd, 
-                rapor: raporMetni, 
-                oneri: onerilenGorev 
+                rapor: aiData.rapor, 
+                oneri: aiData.oneri 
             }); 
-        } catch(e) {} 
+        } catch(err) {
+            console.error("Yapay Zeka Hatası:", err);
+            io.to(veri.kocKodu).emit('yapay_zeka_raporu', { 
+                ad: veri.ogrenciAd, 
+                rapor: "<span style='color:red;'>🚨 Kaptan'ın telsiz bağlantısı koptu. Lütfen daha sonra tekrar deneyin.</span>", 
+                oneri: "API bağlantısını kontrol et." 
+            });
+        } 
     });
 
     socket.on('ogrenci_chatbot_mesaji', async (veri) => { 
