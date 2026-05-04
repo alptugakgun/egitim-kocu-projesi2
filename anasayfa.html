@@ -3,383 +3,365 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KatalizApp - Eğitimde Yeni Nesil</title>
+    <title>KatalizApp - Eğitimde Yeni Nesil Koçluk ve Oyunlaştırma</title>
     <style>
-        /* TEMEL AYARLAR VE TİPOGRAFİ */
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
         
         :root {
-            --bg-light: #f5f3f0;
-            --bg-dark: #0f172a;
-            --text-on-light: #1e293b;
-            --text-on-dark: #f8fafc;
-            --brand-color: #3b82f6;
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --secondary-dark: #059669;
+            --accent: #a855f7;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-gradient: linear-gradient(135deg, #fffcf5 0%, #ffece0 100%);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Nunito', sans-serif; background: var(--bg-dark); color: var(--text-on-dark); overflow-x: hidden; }
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: var(--bg-gradient); 
+            margin: 0; 
+            padding: 0;
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Arka Plan Şekilleri */
+        .bg-shape-1 { position: absolute; top: -10%; left: -5%; width: 500px; height: 500px; background: #ff7a7a; border-radius: 50%; opacity: 0.08; filter: blur(60px); z-index: -1; animation: floatShape 10s infinite alternate;}
+        .bg-shape-2 { position: absolute; top: 30%; right: -10%; width: 600px; height: 600px; background: var(--accent); border-radius: 50%; opacity: 0.08; filter: blur(80px); z-index: -1; animation: floatShape 12s infinite alternate-reverse;}
+        .bg-shape-3 { position: absolute; bottom: 10%; left: 10%; width: 400px; height: 400px; background: var(--secondary); border-radius: 50%; opacity: 0.08; filter: blur(70px); z-index: -1; animation: floatShape 15s infinite alternate;}
+        @keyframes floatShape { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(40px, 40px) scale(1.1); } }
+
+        /* Navbar */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5vw;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: 900;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
         
-        /* 1. YÜKLEYİCİ (LOADER) */
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; transition: opacity 0.5s ease;}
-        .loader-brand { font-size: 32px; font-weight: 900; margin-bottom: 20px; letter-spacing: 2px;}
-        #loader-bar { width: 200px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
-        #loader-progress { width: 0%; height: 100%; background: var(--brand-color); transition: width 0.3s; }
-        #loader-percent { margin-top: 15px; font-weight: 900; font-size: 14px; color: #94a3b8;}
+        .logo span { animation: bounce 2s infinite; display: inline-block; color: #f59e0b;}
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-        /* 2. MENÜ (HEADER) */
-        .site-header { position: fixed; top: 0; width: 100%; padding: 25px 50px; z-index: 100; display: flex; justify-content: space-between; align-items: center; mix-blend-mode: difference;}
-        .site-header .logo { font-size: 24px; font-weight: 900; color: white; text-decoration: none; }
-        .nav-links a { color: white; text-decoration: none; font-weight: 800; margin-left: 30px; font-size: 16px; border: 2px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 20px; transition: 0.3s;}
-        .nav-links a:hover { background: white; color: black; }
+        .nav-links { display: flex; gap: 15px; align-items: center; }
 
-        /* 3. HERO (GİRİŞ ALANI) */
-        .hero-standalone { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; z-index: 10; background: var(--bg-dark); }
-        .section-label { color: var(--brand-color); font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px; display: block; }
-        .hero-heading { font-size: 8rem; font-weight: 900; line-height: 1; margin-bottom: 20px; letter-spacing: -3px; }
-        .hero-tagline { font-size: 1.5rem; font-weight: 700; color: #94a3b8; max-width: 600px; }
-        .scroll-indicator { position: absolute; bottom: 40px; font-size: 24px; animation: bounce 2s infinite; }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(15px); } }
+        .btn {
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 15px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-        /* 4. VİDEO/CANVAS ALANI */
-        .canvas-wrap { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none; clip-path: circle(0% at 50% 50%); }
-        #canvas { width: 100%; height: 100%; object-fit: cover; }
+        .btn-outline { background: white; color: var(--text-muted); border: 2px solid #e2e8f0; }
+        .btn-outline:hover { background: #f1f5f9; color: var(--text-main); transform: translateY(-2px); }
 
-        /* 5. KARANLIK OVERLAY VE MARQUEE */
-        #dark-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.85); opacity: 0; z-index: 2; pointer-events: none; }
-        .marquee-wrap { position: fixed; top: 50%; left: 0; width: 100vw; transform: translateY(-50%); z-index: 3; pointer-events: none; overflow: hidden; opacity: 0; white-space: nowrap;}
-        .marquee-text { font-size: 15vw; font-weight: 900; color: rgba(255,255,255,0.05); text-transform: uppercase; letter-spacing: -5px; }
+        .btn-primary { background: linear-gradient(135deg, var(--secondary), var(--secondary-dark)); color: white; box-shadow: 0 8px 15px rgba(16, 185, 129, 0.2); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 20px rgba(16, 185, 129, 0.3); }
 
-        /* 6. KAYDIRMA ALANI VE İÇERİK KESİTLERİ (Kısaltıldı) */
-        #scroll-container { height: 450vh; position: relative; z-index: 4; }
+        .btn-koc { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: 0 8px 15px rgba(59, 130, 246, 0.2); }
+        .btn-koc:hover { transform: translateY(-3px); box-shadow: 0 12px 20px rgba(59, 130, 246, 0.3); }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 120px 20px 80px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .badge {
+            background: #e0e7ff;
+            color: var(--primary-dark);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 14px;
+            display: inline-block;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        .hero h1 {
+            font-size: 55px;
+            font-weight: 900;
+            color: var(--dark);
+            margin: 0 0 25px 0;
+            line-height: 1.15;
+            letter-spacing: -1px;
+        }
         
-        .scroll-section { position: absolute; left: 0; width: 100%; top: 0; transform: translateY(-50%); padding: 0 5vw; display: flex; flex-direction: column; justify-content: center; }
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent), #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text; 
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin: 0 auto 40px auto;
+            max-width: 750px;
+        }
+
+        .hero-actions { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        .hero-actions .btn { padding: 18px 40px; font-size: 16px; border-radius: 25px; }
+
+        /* Tanıtım / Detay Bölümleri */
+        .section-title { text-align: center; margin: 80px 0 50px; }
+        .section-title h2 { font-size: 36px; font-weight: 900; color: var(--dark); margin-bottom: 15px; }
+        .section-title p { color: var(--text-muted); font-size: 18px; max-width: 600px; margin: 0 auto; font-weight: 600;}
+
+        /* Özellikler Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 35px;
+            padding: 0 5vw 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 40px 30px;
+            border-radius: 30px;
+            border: 2px solid #ffffff;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.03);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px rgba(0,0,0,0.06); background: #ffffff; }
         
-        .align-left { padding-right: 55vw; }
-        .align-right { padding-left: 55vw; text-align: right;}
-        .align-center { text-align: center; display: flex; align-items: center;}
+        .f-icon { font-size: 45px; margin-bottom: 20px; background: var(--light); width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 25px; }
+        .feature-card h3 { font-size: 22px; font-weight: 900; color: var(--dark); margin-bottom: 15px; }
+        .feature-card p { color: var(--text-muted); font-size: 15px; font-weight: 600; margin: 0; }
+
+        /* Nasıl Çalışır (Detaylı Bilgi) */
+        .info-section { background: rgba(255, 255, 255, 0.6); padding: 80px 5vw; margin: 50px 0; border-top: 1px solid rgba(255,255,255,0.5); border-bottom: 1px solid rgba(255,255,255,0.5); }
+        .info-container { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
         
-        .section-heading { font-size: 4rem; font-weight: 900; margin-bottom: 20px; line-height: 1.1; letter-spacing: -1px; }
-        .section-body { font-size: 1.25rem; font-weight: 700; color: #cbd5e1; line-height: 1.6; }
+        .info-text h3 { font-size: 32px; font-weight: 900; margin-bottom: 20px; color: var(--dark); }
+        .info-text p { font-size: 17px; color: var(--text-muted); margin-bottom: 20px; font-weight: 600; }
+        .info-list { list-style: none; padding: 0; margin-top: 30px; }
+        .info-list li { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-start; }
+        .info-list li span { background: #e0e7ff; color: var(--primary); width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: 900; flex-shrink: 0; }
+        .info-list li div { font-size: 16px; color: var(--text-main); font-weight: 700; }
+        .info-list li div small { display: block; color: var(--text-muted); font-weight: 600; font-size: 14px; margin-top: 5px; }
 
-        /* STATS (SAYAÇLAR) */
-        .stats-grid { display: flex; justify-content: center; gap: 80px; width: 100%; }
-        .stat { text-align: center; }
-        .stat-number { font-size: 8rem; font-weight: 900; color: white; line-height: 1; display: inline-block; font-variant-numeric: tabular-nums;}
-        .stat-suffix { font-size: 4rem; font-weight: 900; color: var(--brand-color); }
-        .stat-label { display: block; font-size: 1.2rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-top: 10px; }
+        .info-image { background: linear-gradient(135deg, #e0e7ff, #f3e8ff); border-radius: 40px; height: 450px; display: flex; align-items: center; justify-content: center; font-size: 100px; border: 4px dashed white; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
 
-        .cta-button { display: inline-block; margin-top: 30px; padding: 20px 40px; background: white; color: black; font-weight: 900; font-size: 1.2rem; border-radius: 40px; text-decoration: none; transition: 0.3s; }
-        .cta-button:hover { transform: scale(1.05); background: var(--brand-color); color: white; }
+        /* İstatistikler / Alt Banner */
+        .stats-banner { background: var(--dark); color: white; padding: 80px 20px; text-align: center; margin-top: 80px; }
+        .stats-grid { display: flex; justify-content: center; gap: 80px; flex-wrap: wrap; max-width: 1000px; margin: 0 auto; }
+        .stat-item h4 { font-size: 50px; font-weight: 900; margin: 0; color: var(--secondary); }
+        .stat-item p { font-size: 16px; font-weight: 700; color: #94a3b8; margin: 5px 0 0 0; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* KÜÇÜK EKRAN UYUMU */
-        @media (max-width: 768px) {
-            .hero-heading { font-size: 4rem; }
-            .section-heading { font-size: 2.5rem; }
-            .align-left, .align-right { padding: 0 10vw; text-align: center; }
-            #scroll-container { height: 350vh; }
-            .stats-grid { flex-direction: column; gap: 40px; }
-            .stat-number { font-size: 5rem; }
-            .marquee-text { font-size: 20vw; }
+        /* SSS (Sıkça Sorulan Sorular) */
+        .faq-section { max-width: 800px; margin: 80px auto; padding: 0 20px; }
+        .faq-item { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 2px solid #f1f5f9; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
+        .faq-item h4 { margin: 0 0 10px 0; font-size: 18px; font-weight: 800; color: var(--dark); display: flex; align-items: center; gap: 10px; }
+        .faq-item p { margin: 0; color: var(--text-muted); font-size: 15px; font-weight: 600; }
+
+        /* Footer */
+        footer { padding: 40px 20px; text-align: center; background: rgba(255,255,255,0.5); border-top: 1px solid rgba(255,255,255,0.8); margin-top: 50px; }
+        .footer-logo { font-size: 20px; font-weight: 900; color: var(--dark); margin-bottom: 15px; }
+        footer p { color: var(--text-muted); font-size: 14px; font-weight: 600; }
+        .footer-links { margin-top: 20px; display: flex; justify-content: center; gap: 20px; }
+        .footer-links a { color: var(--primary); text-decoration: none; font-weight: 700; font-size: 14px; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            header { flex-direction: column; gap: 20px; padding: 20px; }
+            .nav-links { flex-wrap: wrap; justify-content: center; }
+            .hero h1 { font-size: 40px; }
+            .info-container { grid-template-columns: 1fr; }
+            .stats-grid { gap: 40px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. Yükleyici -->
-    <div id="loader">
-        <div class="loader-brand">⚡ KATALİZAPP</div>
-        <div id="loader-bar"><div id="loader-progress"></div></div>
-        <div id="loader-percent">Sistem Başlatılıyor %0</div>
-    </div>
+    <div class="bg-shape-1"></div>
+    <div class="bg-shape-2"></div>
+    <div class="bg-shape-3"></div>
 
-    <!-- 2. Menü -->
-    <header class="site-header">
-        <a href="#" class="logo">⚡ KatalizApp</a>
-        <nav class="nav-links">
-            <a href="login.html">Giriş Yap</a>
-        </nav>
+    <!-- NAVBAR -->
+    <header>
+        <a href="anasayfa.html" class="logo"><span>⚡</span> KatalizApp</a>
+        <div class="nav-links">
+            <a href="veli-login.html" class="btn btn-outline">👨‍👩‍👧‍👦 Veli Girişi</a>
+            <a href="login.html" class="btn btn-primary">🎓 Öğrenci Girişi</a>
+            <a href="ogretmen-login.html" class="btn btn-koc">👨‍🏫 Eğitmen Paneli</a>
+        </div>
     </header>
 
-    <!-- 3. Ana Giriş (Hero) -->
-    <section class="hero-standalone">
-        <span class="section-label">V2.0 Yayında</span>
-        <h1 class="hero-heading">Eğitimde <br>Oyunlaştırma.</h1>
-        <p class="hero-tagline">Excel tablolarını çöpe at. Öğrencilerini yarıştıran ve yapay zeka ile analiz eden yeni nesil koçluk platformu.</p>
-        <div class="scroll-indicator">↓</div>
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="badge">V2.0 Aktif</div>
+        <h1>Eğitimde <br><span>Oyunlaştırma</span> ve Yapay Zeka Devrimi</h1>
+        <p>Klasik takip tablolarını ve sıkıcı çalışma rutinlerini unutun. Öğrencilerinizi XP (Deneyim Puanı) kazanarak yarıştıran, eksiklerini yapay zeka ile analiz eden ve velileri anlık olarak bilgilendiren yeni nesil koçluk platformuyla tanışın.</p>
+        
+        <div class="hero-actions">
+            <a href="kayit.html" class="btn btn-primary">🎓 Öğrenci Olarak Başla</a>
+            <a href="ogretmen-kayit.html" class="btn btn-koc">👨‍🏫 Eğitim Koçu Olarak Katıl</a>
+        </div>
     </section>
 
-    <!-- 4. Video Render Alanı (Canvas) -->
-    <div class="canvas-wrap" id="canvas-wrap">
-        <canvas id="canvas"></canvas>
+    <!-- ÖZELLİKLER (FEATURES) -->
+    <div class="section-title">
+        <h2>Sistemin Temel Taşları</h2>
+        <p>Öğrencilerin motivasyonunu zirveye taşıyan, koçların iş yükünü hafifleten araçlar.</p>
     </div>
 
-    <!-- 5. Karartma ve Kayan Yazı -->
-    <div id="dark-overlay"></div>
-    <div class="marquee-wrap" data-scroll-speed="-15">
-        <div class="marquee-text">YENİ NESİL EĞİTİM • YAPAY ZEKA KOÇLUĞU • KATALİZAPP • DÜELLO SİSTEMİ •</div>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="f-icon">🎮</div>
+            <h3>Oyunlaştırılmış Sistem</h3>
+            <p>Öğrenciler masa başında durdukça ve görevleri bitirdikçe XP kazanır. Sınıf içi liderlik tabloları ve düellolarla çalışma motivasyonu organik olarak artar.</p>
+        </div>
+        <div class="feature-card">
+            <div class="f-icon">🤖</div>
+            <h3>AI Strateji Asistanı</h3>
+            <p>Girilen netler anında konu ısı haritasına dönüşür. Yapay zeka koçu, öğrencinin zayıf noktalarını tespit eder ve eğitmene "Kurtarma Operasyonları" önerir.</p>
+        </div>
+        <div class="feature-card">
+            <div class="f-icon">📡</div>
+            <h3>Canlı Odak Radarı</h3>
+            <p>Öğrenci kronometreyi açıp masadan kalkamaz. "Gözüm Üzerinde" AFK denetmeni, rastgele anlarda yoklama yapar. Masada yoksan kronometren durur.</p>
+        </div>
+        <div class="feature-card">
+            <div class="f-icon">📱</div>
+            <h3>Şeffaf Veli Portalı</h3>
+            <p>Veliler kendilerine özel şifrelerle sisteme girer. Çocuklarının canlı olarak derste olup olmadığını, haftalık net gelişimlerini ve koç randevularını takip ederler.</p>
+        </div>
+        <div class="feature-card">
+            <div class="f-icon">🛒</div>
+            <h3>XP Market ve Ödüller</h3>
+            <p>Kazanılan XP'ler sadece puandan ibaret değildir. Öğrenciler biriktirdikleri puanlarla koçun belirlediği mağazadan "Ekstra Mola" veya "Özel Soru Çözümü" satın alabilir.</p>
+        </div>
+        <div class="feature-card">
+            <div class="f-icon">🧠</div>
+            <h3>Psikolojik Rehberlik</h3>
+            <p>Sınav kaygısı ve öğrenme stilleri testleriyle öğrencilerin sadece akademik değil, psikolojik durumları da analiz edilip koçun raporuna düşer.</p>
+        </div>
     </div>
 
-    <!-- 6. Aşağı Kaydırma ve İçerik -->
-    <div id="scroll-container">
-        
-        <section class="scroll-section align-left" data-enter="10" data-leave="28" data-animation="slide-left">
-            <div class="section-inner">
-                <span class="section-label">001 / Motivasyon</span>
-                <h2 class="section-heading">Oyunlaştırılmış Sistem</h2>
-                <p class="section-body">Öğrenciler görevleri bitirdikçe XP kazanır. Sıkıcı PDF'ler yerine, kendi aralarında düellolara girdikleri heyecanlı bir arenaya adım atarlar.</p>
+    <!-- NASIL ÇALIŞIR BÖLÜMÜ -->
+    <section class="info-section">
+        <div class="info-container">
+            <div class="info-image">🚀</div>
+            <div class="info-text">
+                <h3>Süreç Nasıl İşliyor?</h3>
+                <p>Eğitmenler dakikalar içinde dijital sınıflarını oluşturur ve öğrencilerini davet eder. Herkes kendi rolüne uygun paneli kullanır.</p>
+                
+                <ul class="info-list">
+                    <li>
+                        <span>1</span>
+                        <div>
+                            Eğitmen Sınıfı Kurar
+                            <small>Sisteme kayıt olan eğitmen, benzersiz bir davet kodu elde eder. Bu kodu öğrencileriyle paylaşarak onları sınıfına dahil eder.</small>
+                        </div>
+                    </li>
+                    <li>
+                        <span>2</span>
+                        <div>
+                            Öğrenci Çalışmaya Başlar
+                            <small>Öğrenci panele girer, Pomodoro veya normal sayacını açar. Çalıştıkça XP kazanır, deneme netlerini girer ve hatalı sorularının fotoğrafını sisteme yükler.</small>
+                        </div>
+                    </li>
+                    <li>
+                        <span>3</span>
+                        <div>
+                            Koç ve Veli Takip Eder
+                            <small>Koç, komuta merkezinden sınıfın ısı haritasını ve canlı durumunu görür. Veli ise portal üzerinden çocuğunun o an masada olup olmadığını izler.</small>
+                        </div>
+                    </li>
+                </ul>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="scroll-section align-right" data-enter="30" data-leave="48" data-animation="fade-up">
-            <div class="section-inner">
-                <span class="section-label">002 / Teknoloji</span>
-                <h2 class="section-heading">Yapay Zeka Analizi</h2>
-                <p class="section-body">Sisteme girilen her net, anında konu ısı haritasına dönüşür. Yapay zeka koçu "Kaptan", öğrencinin eksiklerini bularak sana kurtarma operasyonları önerir.</p>
-            </div>
-        </section>
-
-        <section class="scroll-section align-left" data-enter="50" data-leave="68" data-animation="scale-up">
-            <div class="section-inner">
-                <span class="section-label">003 / Denetim</span>
-                <h2 class="section-heading">Canlı AFK Radarı</h2>
-                <p class="section-body">Süreyi başlatıp masadan kalkmak yok. Gözüm Üzerinde sistemi, öğrenciyi rastgele anlarda yoklar. Cevap vermezse kronometre kesilir ve sana bildirim gelir.</p>
-            </div>
-        </section>
-
-        <!-- İstatistik Bölümü -->
-        <section class="scroll-section align-center" data-enter="70" data-leave="85" data-animation="stagger-up">
-            <div class="stats-grid">
-                <div class="stat">
-                    <span class="stat-number" data-value="150" data-decimals="0">0</span>
-                    <span class="stat-suffix">K+</span>
-                    <span class="stat-label">Üretilen XP</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-number" data-value="98" data-decimals="0">0</span>
-                    <span class="stat-suffix">%</span>
-                    <span class="stat-label">Odaklanma Artışı</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Final / Kapanış (Ekranda Kalıcı Olacak) -->
-        <section class="scroll-section align-center" data-enter="88" data-leave="100" data-animation="clip-reveal" data-persist="true">
-            <div class="section-inner" style="max-width: 800px; margin: 0 auto;">
-                <h2 class="section-heading" style="font-size: 5rem;">Şantiyeye Katıl.</h2>
-                <p class="section-body" style="font-size: 1.5rem;">Sistem hazır, kaskını tak ve öğrencilerin için komuta merkezini hemen kur.</p>
-                <a href="ogretmen-kayit.html" class="cta-button">Ücretsiz Eğitmen Hesabı Aç</a>
-            </div>
-        </section>
-
+    <!-- SIKÇA SORULAN SORULAR -->
+    <div class="section-title">
+        <h2>Sıkça Sorulan Sorular</h2>
+        <p>Aklınıza takılan soruların cevapları burada.</p>
     </div>
 
-    <!-- GEREKLİ KÜTÜPHANELER -->
-    <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+    <div class="faq-section">
+        <div class="faq-item">
+            <h4>❓ Öğrenciler sistemi manipüle edebilir mi?</h4>
+            <p>Hayır. Sistemin içinde entegre çalışan "Canlı Yoklama" radarı bulunmaktadır. Öğrenci süreyi başlatıp masadan kalkarsa, sistem rastgele bir zamanda ekrana onay butonu çıkarır. 60 saniye içinde basılmazsa süre durdurulur ve öğretmene uyarı gider.</p>
+        </div>
+        <div class="faq-item">
+            <h4>❓ Veli takibi nasıl çalışıyor?</h4>
+            <p>Öğrenci sisteme kayıt olduğunda, ona özel bir "Veli Takip Kodu" üretilir. Veli, bu kod ile sadece kendi çocuğunun istatistiklerini, net grafiklerini ve koçla yapılacak randevu tarihlerini görebilir. KVKK gereği diğer öğrencilerin verilerine erişemez.</p>
+        </div>
+        <div class="faq-item">
+            <h4>❓ Hata defteri modülü ne işe yarar?</h4>
+            <p>Öğrenci çözemediği sorunun fotoğrafını çekip anında kendi paneline yükler. Bu soru öğretmenin komuta merkezine düşer. Öğretmen soruyu çözdüğünde sistem üzerinden işaretler ve öğrencinin telefonuna "Sorun Çözüldü" bildirimi gider.</p>
+        </div>
+    </div>
 
-    <!-- ANA MOTOR KODLARI -->
-    <script>
-        gsap.registerPlugin(ScrollTrigger);
+    <!-- İSTATİSTİKLER -->
+    <div class="stats-banner">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <h4>%98</h4>
+                <p>Odaklanma Artışı</p>
+            </div>
+            <div class="stat-item">
+                <h4>20K+</h4>
+                <p>Kazanılan XP</p>
+            </div>
+            <div class="stat-item">
+                <h4>7/24</h4>
+                <p>Canlı Denetim</p>
+            </div>
+        </div>
+    </div>
 
-        // 1. Lenis ile Akıcı Scroll Kurulumu
-        const lenis = new Lenis({
-            duration: 1.2,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            smoothWheel: true
-        });
-        lenis.on("scroll", ScrollTrigger.update);
-        gsap.ticker.add((time) => lenis.raf(time * 1000));
-        gsap.ticker.lagSmoothing(0);
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-logo">⚡ KatalizApp</div>
+        <p>Eğitimde Yeni Nesil Dönüşüm ve Dijital Koçluk Platformu © 2026. Tüm Hakları Saklıdır.</p>
+        <div class="footer-links">
+            <a href="login.html">Öğrenci Girişi</a>
+            <a href="ogretmen-login.html">Koç Paneli</a>
+            <a href="veli-login.html">Veli Portalı</a>
+        </div>
+    </footer>
 
-        // 2. Parallax Arka Plan Hazırlığı (Kulaklıklar Gitti, Yapay Zeka Ağı Geldi!)
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
-        const bgImage = new Image();
-        
-        // KatalizApp ruhuna uygun: Soyut Teknoloji, Yapay Zeka Ağı ve Eğitim Temalı Görsel
-        bgImage.src = "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1920&auto=format&fit=crop";
-
-        // 3. Yükleme Ekranı (Artık 147 fotoğraf beklemediği için anında açılacak)
-        bgImage.onload = () => {
-            document.getElementById('loader-progress').style.width = '100%';
-            document.getElementById('loader-percent').innerText = `Sistem Hazır %100`;
-            
-            setTimeout(() => {
-                document.getElementById('loader').style.opacity = '0';
-                setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
-                drawFrame(0);
-            }, 300);
-        };
-
-        // 4. Canvas Çizimi (Scroll ile Yakınlaşan Parallax Efekti)
-        function drawFrame(progress) {
-            if (!bgImage.complete) return;
-            
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            
-            const cw = canvas.width, ch = canvas.height;
-            const iw = bgImage.naturalWidth, ih = bgImage.naturalHeight;
-            
-            // Temel ölçek ve scroll'a bağlı zoom (%30 yakınlaşma efekti)
-            const baseScale = Math.max(cw / iw, ch / ih);
-            const scale = baseScale * (1 + (progress * 0.3)); 
-            
-            const dw = iw * scale, dh = ih * scale;
-            
-            // Scroll ettikçe resmi hafifçe kaydır (Parallax)
-            const dx = (cw - dw) / 2;
-            const dy = ((ch - dh) / 2) + (progress * 150); 
-            
-            ctx.fillStyle = "#0f172a"; 
-            ctx.fillRect(0, 0, cw, ch);
-            ctx.drawImage(bgImage, dx, dy, dw, dh);
-        }
-
-        // 5. Scroll ile Arka Plan Senkronizasyonu
-        const scrollContainer = document.getElementById("scroll-container");
-        const canvasWrap = document.getElementById("canvas-wrap");
-        const heroSection = document.querySelector(".hero-standalone");
-
-        ScrollTrigger.create({
-            trigger: scrollContainer,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: true,
-            onUpdate: (self) => {
-                const p = self.progress;
-                
-                // Arka planı çiz (Zoom ve Parallax)
-                requestAnimationFrame(() => drawFrame(p));
-
-                // Hero Çember Kesme (Circle-Wipe) Efekti - Kısaltılmış mesafeye uyarlandı
-                heroSection.style.opacity = Math.max(0, 1 - p * 12); 
-                const wipeProgress = Math.min(1, Math.max(0, (p - 0.02) / 0.10));
-                const radius = wipeProgress * 100; 
-                canvasWrap.style.clipPath = `circle(${radius}% at 50% 50%)`;
-            }
-        });
-
-        window.addEventListener("resize", () => {
-            drawFrame(0);
-        });
-
-        // 6. Animasyon Kareografisi Sistemi
-        function setupSectionAnimations() {
-            document.querySelectorAll(".scroll-section").forEach(section => {
-                if(section.classList.contains('hero-standalone')) return;
-
-                const type = section.dataset.animation;
-                const enterPercent = parseFloat(section.dataset.enter) / 100;
-                const leavePercent = parseFloat(section.dataset.leave) / 100;
-                const persist = section.dataset.persist === "true";
-                
-                const children = section.querySelectorAll(".section-label, .section-heading, .section-body, .stat, .cta-button");
-                const tl = gsap.timeline({ paused: true });
-
-                if (type === "fade-up") {
-                    tl.fromTo(children, { y: 60, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.15, duration: 0.8, ease: "power3.out" });
-                } else if (type === "slide-left") {
-                    tl.fromTo(children, { x: -100, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.15, duration: 0.8, ease: "power3.out" });
-                } else if (type === "scale-up") {
-                    tl.fromTo(children, { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, stagger: 0.15, duration: 0.8, ease: "power2.out" });
-                } else if (type === "stagger-up") {
-                    tl.fromTo(children, { y: 80, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.2, duration: 0.8, ease: "power3.out" });
-                } else if (type === "clip-reveal") {
-                    tl.fromTo(children, { clipPath: "inset(100% 0 0 0)", opacity: 0 }, { clipPath: "inset(0% 0 0 0)", opacity: 1, stagger: 0.15, duration: 1.2, ease: "power4.inOut" });
-                }
-
-                ScrollTrigger.create({
-                    trigger: scrollContainer,
-                    start: "top top",
-                    end: "bottom bottom",
-                    scrub: false,
-                    onUpdate: (self) => {
-                        const p = self.progress;
-                        
-                        const containerHeight = scrollContainer.offsetHeight;
-                        const targetY = (enterPercent + (leavePercent - enterPercent) / 2) * containerHeight;
-                        gsap.set(section, { top: targetY });
-
-                        if (p >= enterPercent && p <= leavePercent) {
-                            tl.play();
-                            gsap.to(section, {opacity: 1, duration: 0.3});
-                        } else if (p > leavePercent && !persist) {
-                            tl.reverse();
-                            gsap.to(section, {opacity: 0, duration: 0.3});
-                        } else if (p < enterPercent) {
-                            tl.progress(0).pause();
-                            gsap.set(section, {opacity: 0});
-                        }
-                    }
-                });
-            });
-        }
-
-        // 7. Karartma (Dark Overlay)
-        const darkOverlay = document.getElementById("dark-overlay");
-        const marqueeWrap = document.querySelector(".marquee-wrap");
-        
-        ScrollTrigger.create({
-            trigger: scrollContainer,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: true,
-            onUpdate: (self) => {
-                const p = self.progress;
-                
-                // Karartma (İstatistikler için kısaltılmış menzilde çalışır)
-                if(p > 0.65 && p < 0.88) {
-                    gsap.to(darkOverlay, {opacity: 0.9, duration: 0.5});
-                    gsap.to(marqueeWrap, {opacity: 1, duration: 0.5});
-                } else {
-                    gsap.to(darkOverlay, {opacity: 0, duration: 0.5});
-                    gsap.to(marqueeWrap, {opacity: 0, duration: 0.5});
-                }
-            }
-        });
-
-        // 8. Marquee (Kayan Yazı) Efekti
-        gsap.to(".marquee-text", {
-            xPercent: -25,
-            ease: "none",
-            scrollTrigger: { trigger: scrollContainer, start: "top top", end: "bottom bottom", scrub: true }
-        });
-
-        // 9. Sayaçlar (Counters)
-        document.querySelectorAll(".stat-number").forEach(el => {
-            const target = parseFloat(el.dataset.value);
-            const decimals = parseInt(el.dataset.decimals || "0");
-            
-            el.textContent = "0";
-
-            ScrollTrigger.create({
-                trigger: scrollContainer,
-                start: "top top",
-                end: "bottom bottom",
-                onUpdate: (self) => {
-                    const p = self.progress;
-                    if(p > 0.68 && el.textContent === "0") {
-                        gsap.to(el, {
-                            textContent: target,
-                            duration: 2.5,
-                            ease: "power2.out",
-                            snap: { textContent: decimals === 0 ? 1 : 0.01 },
-                            onUpdate: function() {
-                                el.innerHTML = Math.round(this.targets()[0].textContent);
-                            }
-                        });
-                    }
-                }
-            });
-        });
-
-        window.onload = () => {
-            setupSectionAnimations();
-            gsap.set(".scroll-section:not(.hero-standalone)", {opacity: 0});
-        };
-
-    </script>
 </body>
 </html>
