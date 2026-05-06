@@ -492,8 +492,19 @@
     <div class="modal" id="kutuphaneModal">
         <div class="modal-content">
             <h2 style="color:#8b5cf6 !important; margin-top:0;">📚 Kütüphanem</h2>
-            <p style="font-size:13px; color:var(--text-secondary); font-weight:bold; margin-bottom: 15px;">Koçunun gönderdiği kaynakları çöz ve bitir tuşuna basarak XP kazan!</p>
-            <div id="kaynakListesi" style="margin-bottom: 20px; max-height: 300px; overflow-y: auto;"></div>
+            <p style="font-size:13px; color:var(--text-secondary); font-weight:bold; margin-bottom: 15px;">Koçunun gönderdiği kaynakları çöz ve XP kazan!</p>
+            
+            <!-- YENİ EKLENDİ: MEB ARŞİVİ BUTONLARI -->
+            <div style="background: var(--bg-input); padding: 15px; border-radius: 20px; border: 2px dashed var(--border-light); margin-bottom: 20px;">
+                <h3 style="margin-top:0; font-size:16px; color:var(--text-primary);">🏛️ MEB Resmi Kaynakları</h3>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                    <a href="https://ogmmateryal.eba.gov.tr/" target="_blank" style="background:#ef4444; color:white; padding:8px 12px; border-radius:12px; font-weight:900; font-size:12px; text-decoration:none; box-shadow:0 4px 6px rgba(239,68,68,0.2);">OGM Materyal</a>
+                    <a href="https://odsgm.meb.gov.tr/" target="_blank" style="background:#3b82f6; color:white; padding:8px 12px; border-radius:12px; font-weight:900; font-size:12px; text-decoration:none; box-shadow:0 4px 6px rgba(59,130,246,0.2);">Kazanım Testleri</a>
+                    <a href="https://akademikdestek.eba.gov.tr/" target="_blank" style="background:#f59e0b; color:white; padding:8px 12px; border-radius:12px; font-weight:900; font-size:12px; text-decoration:none; box-shadow:0 4px 6px rgba(245,158,11,0.2);">EBA Akademik</a>
+                </div>
+            </div>
+
+            <div id="kaynakListesi" style="margin-bottom: 20px; max-height: 250px; overflow-y: auto;"></div>
             <button class="close-modal-btn" onclick="document.getElementById('kutuphaneModal').style.display='none'">Kapat</button>
         </div>
     </div>

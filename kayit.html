@@ -87,7 +87,8 @@
         
         <input type="text" id="ogrAd" placeholder="Kullanıcı Adı Belirle">
         <input type="password" id="ogrSifre" placeholder="Bir Şifre Belirle">
-        <input type="text" id="kocKodu" placeholder="Koçunun Davet Kodu" onkeypress="if(event.key === 'Enter') kayitOl()">
+        <!-- BÜYÜK HARF UYARLAMASI EKLENDİ -->
+        <input type="text" id="kocKodu" placeholder="Koçunun Davet Kodu" onkeypress="if(event.key === 'Enter') kayitOl()" oninput="this.value = this.value.toUpperCase()">
         
         <button onclick="kayitOl()">Hesabımı Oluştur</button>
         
@@ -101,7 +102,8 @@
         async function kayitOl() {
             const ad = document.getElementById('ogrAd').value.trim();
             const sifre = document.getElementById('ogrSifre').value.trim();
-            const kod = document.getElementById('kocKodu').value.trim();
+            // GÜVENLİK: Arka planda da mecburi büyük harfe çevriliyor
+            const kod = document.getElementById('kocKodu').value.trim().toUpperCase();
             
             if(!ad || !sifre || !kod) return alert("Lütfen tüm alanları doldur!");
             

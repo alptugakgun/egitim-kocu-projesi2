@@ -231,11 +231,22 @@
 
     <div class="live-grid" id="liveGrid"></div>
 
+    <!-- Modallar -->
     <div class="modal" id="kutuphaneModal">
         <div class="modal-content">
             <h2 style="margin-top:0; font-size:26px; color:#db2777;">📚 Eğitim Kütüphanesi</h2>
             <p style="font-size:14px; color:#64748b; font-weight:bold; margin-bottom: 20px;">Sınıfına özel PDF, video veya not linklerini ekleyebilirsin.</p>
             
+            <!-- YENİ EKLENDİ: MEB ARŞİVİ BUTONLARI -->
+            <div style="background: #f8fafc; padding: 15px; border-radius: 20px; border: 2px dashed #cbd5e1; margin-bottom: 20px;">
+                <h3 style="margin-top:0; font-size:16px; color:#1e293b;">🏛️ MEB Resmi Kaynakları</h3>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                    <a href="https://ogmmateryal.eba.gov.tr/" target="_blank" style="background:#ef4444; color:white; padding:8px 12px; border-radius:12px; font-weight:900; font-size:12px; text-decoration:none; box-shadow:0 4px 6px rgba(239,68,68,0.2);">OGM Materyal</a>
+                    <a href="https://odsgm.meb.gov.tr/" target="_blank" style="background:#3b82f6; color:white; padding:8px 12px; border-radius:12px; font-weight:900; font-size:12px; text-decoration:none; box-shadow:0 4px 6px rgba(59,130,246,0.2);">Kazanım Testleri</a>
+                    <a href="https://akademikdestek.eba.gov.tr/" target="_blank" style="background:#f59e0b; color:white; padding:8px 12px; border-radius:12px; font-weight:900; font-size:12px; text-decoration:none; box-shadow:0 4px 6px rgba(245,158,11,0.2);">EBA Akademik</a>
+                </div>
+            </div>
+
             <div style="background: #fdf2f8; padding: 25px; border-radius: 25px; border: 2px dashed #fbcfe8; margin-bottom: 20px;">
                 <select id="kaynakKategori" class="modal-input">
                     <option value="Soru Bankası / PDF">Soru Bankası / PDF</option>
@@ -364,6 +375,17 @@
         </div>
     </div>
 
+    <div class="modal" id="aktiviteModal">
+        <div class="modal-content" style="width: 750px;">
+            <h2 style="margin-top:0; font-size:26px; color:#3b82f6;">📋 Öğrenci Aktivite Günlüğü</h2>
+            <p style="font-size: 14px; color: #64748b; font-weight:800;">Öğrencinin kronometreyi her durdurduğunda sisteme kaydolan net çalışma seansları (En az 1 dk).</p>
+            <div id="aktiviteListesi" style="max-height: 400px; overflow-y:auto; border:2px dashed #cbd5e1; border-radius:20px; background:#f8fafc; text-align:left;">
+                <span style="color:#94a3b8; padding: 20px; display:block; font-weight:800;">Yükleniyor...</span>
+            </div>
+            <button class="close-modal-btn" onclick="modalKapat('aktiviteModal')">Kapat</button>
+        </div>
+    </div>
+
     <script>
         const aktifKocIsmi = localStorage.getItem('ogretmenKimligi'); 
         const kocKodu = localStorage.getItem('kocKodu');
@@ -371,7 +393,6 @@
         const socket = io(); 
         socket.emit('join_room', kocKodu);
 
-        // HATA BURADAYDI! İçeriği ezen 'innerHTML' komutunu güvenli hale getirdim.
         const kodKutusu = document.getElementById('kocKoduSpan');
         if(kodKutusu) {
             kodKutusu.innerText = `Kayıt Kodun: ${kocKodu}`;
@@ -396,6 +417,20 @@
             let msg = encodeURIComponent(`KatalizApp Veli Raporu 📊\nSayın Veli, \nÖğrencimiz ${ad} sistemde toplam ${xp} XP kazandı. Detaylı durum analizi, odaklanma süresi ve gelişim grafikleri için veli portalına giriş yapabilirsiniz.\nİyi çalışmalar dilerim.\n- Koç ${aktifKocIsmi}`);
             window.open("https://wa.me/?text=" + msg, "_blank");
         };
+
+        // --- YARDIMCI FONKSİYON: MİLİSANİYEYİ SAAT FORMATINA ÇEVİRİR ---
+        function msToTime(duration) {
+            if(!duration || isNaN(duration)) return "0 dk 0 sn";
+            let seconds = Math.floor((duration / 1000) % 60),
+                minutes = Math.floor((duration / (1000 * 60)) % 60),
+                hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+
+            hours = (hours < 10) ? "0" + hours : hours;
+            minutes = (minutes < 10) ? "0" + minutes : minutes;
+            seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+            return (hours !== "00" ? hours + " sa " : "") + minutes + " dk " + seconds + " sn";
+        }
 
         // --- GLOBAL DEĞİŞKENLER ---
         let sinifListesi = []; 
@@ -478,7 +513,7 @@
         socket.on('ogretmene_canli_bildirim', (gelenVeri) => { 
             kartiEkranaCiz(gelenVeri); 
             let index = sinifListesi.findIndex(o => o.ogrenciAd === gelenVeri.ogrenciAd); 
-            if(gelenVeri.mesaj.includes("Mola") || gelenVeri.mesaj.includes("Başlattı")) { 
+            if(gelenVeri.mesaj && (gelenVeri.mesaj.includes("Mola") || gelenVeri.mesaj.includes("Başlattı") || gelenVeri.mesaj.includes("giriş yaptı"))) { 
                 sistemBildirimi("🔄 Aktivite", `${gelenVeri.ogrenciAd} ${gelenVeri.mesaj.toLowerCase()}`); 
             } 
             if(index !== -1) sinifListesi[index] = gelenVeri; 
@@ -811,14 +846,43 @@
             setTimeout(window.isiHaritasiGoster, 500); 
         };
 
+        // YENİ EKLENDİ: ÖĞRENCİ GÜNLÜK AKTİVİTE GÖSTERİCİ
+        window.aktiviteGoster = function(ad) {
+            let ogr = sinifListesi.find(o => o.ogrenciAd === ad);
+            let kutu = document.getElementById('aktiviteListesi');
+            kutu.innerHTML = '';
+            
+            if(!ogr || !ogr.aktiviteGecmisi || ogr.aktiviteGecmisi.length === 0) {
+                kutu.innerHTML = '<div style="padding:20px; color:#94a3b8; font-weight:800; text-align:center;">Öğrenciye ait herhangi bir kronometre/pomodoro log kaydı bulunamadı.</div>';
+            } else {
+                let html = '<table class="ajanda-tablo" style="margin-top:0; width:100%;"><thead><tr><th>Tarih / Saat</th><th>Ders / Konu</th><th>Çalışma Süresi</th><th>Seans Tipi</th></tr></thead><tbody>';
+                
+                ogr.aktiviteGecmisi.forEach(a => {
+                    let sureMetni = msToTime(a.sureMs);
+                    let tipRengi = a.tip === 'Pomodoro' ? '#ef4444' : '#3b82f6';
+                    html += `<tr>
+                        <td style="font-size:13px;">${a.tarih}<br><b style="color:#64748b;">${a.saat}</b></td>
+                        <td style="font-size:14px; color:#1e293b;">${a.ders}</td>
+                        <td style="color:#10b981; font-weight:900; font-size:15px;">${sureMetni}</td>
+                        <td style="font-size:12px;"><span style="background:${tipRengi}20; color:${tipRengi}; padding:5px 10px; border-radius:8px; font-weight:900;">${a.tip}</span></td>
+                    </tr>`;
+                });
+                
+                html += '</tbody></table>';
+                kutu.innerHTML = html;
+            }
+            modalAc('aktiviteModal');
+        };
+
         // --- KART ÇİZME VE LİSTELERİ GÜNCELLEME ---
         function kartiEkranaCiz(gelenVeri) {
             let id = "card-" + gelenVeri.ogrenciAd.replace(/\s+/g, '-'); 
             let mevcut = document.getElementById(id);
             
             let btnHtml = `
-                <div style="display:flex; gap:8px; margin-top:20px;">
+                <div style="display:flex; gap:8px; margin-top:20px; flex-wrap:wrap;">
                     <button class="btn-blue" style="background:linear-gradient(135deg, #a855f7, #7e22ce); flex:1; font-size:12px; padding:12px; border-radius:10px;" onclick="yapayZekaAnaliz('${gelenVeri.ogrenciAd}')">🤖 AI Analiz</button>
+                    <button class="btn-blue" style="background:linear-gradient(135deg, #3b82f6, #1d4ed8); flex:1; font-size:12px; padding:12px; border-radius:10px;" onclick="aktiviteGoster('${gelenVeri.ogrenciAd}')">📋 Günlük</button>
                     <button class="btn-blue" style="background:linear-gradient(135deg, #f59e0b, #d97706); flex:1; font-size:12px; padding:12px; border-radius:10px;" onclick="pdfKarneAl('${gelenVeri.ogrenciAd}')">📄 Karne</button>
                     <button class="btn-blue" style="background:linear-gradient(135deg, #25D366, #128C7E); flex:1; font-size:12px; padding:12px; border-radius:10px;" onclick="whatsappRaporGonder('${gelenVeri.ogrenciAd}', ${gelenVeri.xp || 0})">💬 Veli</button>
                 </div>`;
@@ -833,13 +897,15 @@
                 </div>
                 <ul class="task-list" id="gorevListesi-${id}"></ul>`;
 
+            let gosterilecekDers = afkMi ? `<span style="color:#ef4444;">🚨 MASA BAŞINDAN AYRILDI!</span>` : (gelenVeri.ders || 'Ders Seçimi Bekleniyor') + ' ➔ ' + (gelenVeri.mesaj || 'Sistemde Aktif');
+
             if (mevcut) {
                 mevcut.className = kartSinif;
                 mevcut.querySelector('.student-name').innerHTML = `
                     <span style="font-size:32px;">${gelenVeri.avatar || '👤'}</span> 
                     ${gelenVeri.ogrenciAd} 
                     <span style="font-size:13px; color:#3b82f6; background:#e0e7ff; padding:6px 12px; border-radius:12px; margin-left:10px;">${gelenVeri.xp || 0} XP</span>`;
-                mevcut.querySelector('.student-task').innerHTML = afkMi ? `<span style="color:#ef4444;">🚨 MASA BAŞINDAN AYRILDI!</span>` : `${gelenVeri.ders} ➔ ${gelenVeri.mesaj}`;
+                mevcut.querySelector('.student-task').innerHTML = gosterilecekDers;
             } else {
                 const yeniKart = document.createElement('div'); 
                 yeniKart.className = kartSinif; 
@@ -854,7 +920,7 @@
                                 <span style="font-size:13px; color:#3b82f6; background:#e0e7ff; padding:6px 12px; border-radius:12px;">${gelenVeri.xp || 0} XP</span>
                             </div>
                             <div class="student-task" style="color:#64748b; font-weight:800; margin-top:8px; font-size:15px;">
-                                ${afkMi ? `<span style="color:#ef4444;">🚨 MASA BAŞINDAN AYRILDI!</span>` : gelenVeri.ders + ' ➔ ' + gelenVeri.mesaj}
+                                ${gosterilecekDers}
                             </div>
                         </div>
                         <div id="timer-card-${id}" style="font-size:24px; font-weight:900; color:#4f46e5; background:#f1f5f9; padding:8px 12px; border-radius:15px;">00:00:00</div>
@@ -1005,8 +1071,8 @@
                 }); 
             }
 
-            let derste = sinifListesi.filter(o => o.mesaj && !o.mesaj.includes('Mola') && o.ders !== 'MASA BAŞINDAN AYRILDI').length;
-            let mola = sinifListesi.filter(o => o.mesaj && o.mesaj.includes('Mola')).length;
+            let derste = sinifListesi.filter(o => o.mesaj && !o.mesaj.includes('Mola') && o.ders !== 'MASA BAŞINDAN AYRILDI' && !o.mesaj.includes('giriş yaptı')).length;
+            let mola = sinifListesi.filter(o => o.mesaj && (o.mesaj.includes('Mola') || o.mesaj.includes('giriş yaptı'))).length;
             let afk = sinifListesi.filter(o => o.ders === 'MASA BAŞINDAN AYRILDI').length;
             
             if (odakGrafikObjesi) { 

@@ -1,6 +1,5 @@
 require('dotenv').config();
-const express = require('express');require('dotenv').config();
-console.log("TELSİZ TESTİ - OKUNAN ANAHTAR: ", process.env.GEMINI_API_KEY); // BU SATIRI EKLE
+const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
@@ -63,7 +62,8 @@ const ogrenciSchema = new mongoose.Schema({
     isiHaritasi: { type: Object, default: {} }, 
     hataDefteri: { type: Array, default: [] },
     rehberlikTestleri: { type: Array, default: [] },
-    tamamlananKaynaklar: { type: Array, default: [] }
+    tamamlananKaynaklar: { type: Array, default: [] },
+    aktiviteGecmisi: { type: Array, default: [] }
 });
 const Ogrenci = mongoose.model('Ogrenci', ogrenciSchema);
 
@@ -129,6 +129,32 @@ app.post('/api/admin/sil_ogrenci', async (req, res) => {
     const { sifre, ogrenciId } = req.body; 
     if (sifre === process.env.ADMIN_PASS) { 
         await Ogrenci.findByIdAndDelete(ogrenciId); 
+        res.json({ basari: true }); 
+    } else { 
+        res.json({ basari: false }); 
+    } 
+});
+
+// YENİ EKLENDİ: ÖĞRENCİ ŞİFRE SIFIRLAMA
+app.post('/api/admin/sifre_sifirla_ogrenci', async (req, res) => { 
+    const { sifre, ogrenciId } = req.body; 
+    if (sifre === process.env.ADMIN_PASS) { 
+        const tuz = await bcrypt.genSalt(10);
+        const hashliSifre = await bcrypt.hash("123456", tuz);
+        await Ogrenci.findByIdAndUpdate(ogrenciId, { sifre: hashliSifre }); 
+        res.json({ basari: true }); 
+    } else { 
+        res.json({ basari: false }); 
+    } 
+});
+
+// YENİ EKLENDİ: EĞİTMEN ŞİFRE SIFIRLAMA
+app.post('/api/admin/sifre_sifirla_koc', async (req, res) => { 
+    const { sifre, kocKodu } = req.body; 
+    if (sifre === process.env.ADMIN_PASS) { 
+        const tuz = await bcrypt.genSalt(10);
+        const hashliSifre = await bcrypt.hash("123456", tuz);
+        await Ogretmen.findOneAndUpdate({ kocKodu: kocKodu }, { sifre: hashliSifre }); 
         res.json({ basari: true }); 
     } else { 
         res.json({ basari: false }); 
@@ -203,7 +229,8 @@ app.post('/api/kayit', async (req, res) => {
             finans: {}, 
             hataDefteri: [], 
             rehberlikTestleri: [], 
-            tamamlananKaynaklar: []
+            tamamlananKaynaklar: [],
+            aktiviteGecmisi: []
         }); 
         
         await yeniOgrenci.save(); 
@@ -469,6 +496,36 @@ io.on('connection', (socket) => {
         } catch(e) {} 
     });
 
+    socket.on('aktivite_kaydet', async (veri) => {
+        try {
+            let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu });
+            if (ogrenci) {
+                if(!ogrenci.aktiviteGecmisi) ogrenci.aktiviteGecmisi = [];
+                
+                if(veri.sure >= 60000) {
+                    ogrenci.aktiviteGecmisi.unshift({
+                        id: Date.now(),
+                        tarih: new Date().toLocaleDateString('tr-TR'),
+                        saat: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}),
+                        ders: veri.ders,
+                        sureMs: veri.sure,
+                        tip: veri.tip || 'Çalışma'
+                    });
+
+                    if(ogrenci.aktiviteGecmisi.length > 50) {
+                        ogrenci.aktiviteGecmisi.pop();
+                    }
+
+                    ogrenci.markModified('aktiviteGecmisi');
+                    await ogrenci.save();
+
+                    let list = await Ogrenci.find({ kocKodu: veri.kocKodu });
+                    io.to(veri.kocKodu).emit('gorev_guncellendi', list);
+                }
+            }
+        } catch(e) {}
+    });
+
     socket.on('yeni_gorev_ekle', async (veri) => { 
         try { 
             let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu }); 
@@ -640,12 +697,22 @@ io.on('connection', (socket) => {
     });
 
     // --- 🤖 GERÇEK GEMINI YAPAY ZEKA ASİSTAN ENTEGRASYONU ---
+    
+    // MEB VERİTABANI: Yapay zekaya yedirilecek gizli prompt parçası
+    const MEB_VERITABANI_PROMPT = `
+    Öğrenciye görev veya kaynak önerirken mutlaka MEB'in tamamen telifsiz, resmi ve ücretsiz eğitim kaynaklarını kullanmalısın. 
+    İşte tavsiye edebileceğin MEB Arşivi:
+    1. Konu Anlatımı ve Özetler için: "MEB OGM Materyal (ogmmateryal.eba.gov.tr)"
+    2. Soru Bankası ve Testler için: "MEB Kazanım Kavrama Testleri (odsgm.meb.gov.tr)"
+    3. YKS Hazırlığı için: "EBA Akademik Destek ve 3 Adım Soru Bankası Modülleri"
+    Raporlarında bu resmi kaynak isimlerini mutlaka geçir. Öğrenci bir konu anlamadıysa doğrudan bu platformlardan döküman veya test incelemesini iste.
+    `;
+
     socket.on('yapay_zeka_analiz_istegi', async (veri) => { 
         try { 
             let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu }); 
             if (!ogrenci) return; 
 
-            // Yapay zekaya öğrenci verilerini sunuyoruz
             let xp = ogrenci.xp || 0;
             let isiHaritasi = JSON.stringify(ogrenci.isiHaritasi || {});
             let bekleyenHatalar = ogrenci.hataDefteri ? ogrenci.hataDefteri.filter(h=>h.durum==='Bekliyor').length : 0;
@@ -659,9 +726,11 @@ io.on('connection', (socket) => {
             Çözemediği Bekleyen Soru Sayısı: ${bekleyenHatalar}
             Konu Isı Haritası (Zayıf, Orta, İyi): ${isiHaritasi}
 
+            ${MEB_VERITABANI_PROMPT}
+
             Lütfen bu verilere bakarak:
-            1. HTML formatında (<b>, <br>, <span style="color:red"> gibi etiketler kullanarak) şık, kısa ve nokta atışı bir "Durum Raporu ve Motivasyon" metni yaz. Zayıf konuları vurgula.
-            2. Öğrenciye özel, doğrudan zayıf olduğu konulara yönelik 1 adet spesifik eylem "Görev" cümlesi yaz (Maksimum 8-10 kelime).
+            1. HTML formatında (<b>, <br>, <span style="color:red"> gibi etiketler kullanarak) şık, kısa ve nokta atışı bir "Durum Raporu ve Motivasyon" metni yaz. Zayıf konuları vurgularken MEB kaynaklarını tavsiye et.
+            2. Öğrenciye özel, MEB OGM Materyal veya Kazanım Testlerinden birini içeren 1 adet spesifik eylem "Görev" cümlesi yaz (Maksimum 8-10 kelime).
             
             Bana sadece şu formatta geçerli bir JSON objesi döndür, markdown veya başka hiçbir açıklama yazma:
             {
@@ -670,13 +739,11 @@ io.on('connection', (socket) => {
             }
             `;
 
-            // Modeli çağırıyoruz
             const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
             const result = await model.generateContent(prompt);
             const response = await result.response;
             let aiMetni = response.text();
             
-            // DİKKAT: HATA BURADAYDI! VS Code parser'ı çökmesin diye ters tırnakları Makine (Hex) koduyla (\x60) değiştirdim.
             aiMetni = aiMetni.replace(/\x60\x60\x60json/gi, '').replace(/\x60\x60\x60/g, '').trim();
             let aiData = JSON.parse(aiMetni);
 
@@ -701,39 +768,36 @@ io.on('connection', (socket) => {
             let ogrenci = await Ogrenci.findOne({ ogrenciAd: veri.ogrenciAd, kocKodu: veri.kocKodu }); 
             if (!ogrenci) return;
 
-            // Öğrencinin güncel durumunu yapay zekaya veriyoruz
             let xp = ogrenci.xp || 0; 
             let rütbe = xp >= 300 ? 'Efsane' : xp >= 150 ? 'Odak Ustası' : 'Çaylak'; 
             let bekleyenGorev = ogrenci.gorevler ? ogrenci.gorevler.filter(g => !g.tamamlandi).length : 0;
 
-            // Yapay zekaya kim olduğunu ve öğrenciyi nasıl motive edeceğini söylüyoruz
             let prompt = `
             Sen KatalizApp eğitim sisteminin sevimli, motive edici ve zeki asistanısın.
             Şu an konuştuğun öğrencinin adı: ${veri.ogrenciAd}
             Öğrencinin Mevcut XP'si: ${xp} (Sistemdeki Rütbesi: ${rütbe})
             Öğrencinin Bekleyen/Yapılmamış Görev Sayısı: ${bekleyenGorev}
 
+            ${MEB_VERITABANI_PROMPT}
+
             Öğrencinin sana yazdığı mesaj: "${veri.mesaj}"
 
             Görevlerin:
             1. Öğrenciye ismiyle veya rütbesiyle (Örn: Çaylak, Efsane) hitap et.
-            2. Mesajına samimi, hafif esprili ve kısa bir cevap ver (Maksimum 2-3 cümle olsun, sohbeti uzatma).
-            3. Eğitim koçu gibi onu motive et, gerekirse bekleyen görevlerini hatırlat veya daha fazla XP kazanması için cesaretlendir.
+            2. Eğer öğrenci kaynak, soru, döküman veya konu eksiği sorarsa ona anında MEB OGM Materyal veya Kazanım Testlerini kullanmasını tavsiye et. Aksi takdirde normal sohbete devam et.
+            3. Mesajına samimi, hafif esprili ve kısa bir cevap ver (Maksimum 2-3 cümle olsun).
             4. Markdown (* veya # gibi) özel etiketler kullanma, düz ve doğal bir mesaj yaz.
             `;
 
-            // Senin bulduğun o hızlı ve cömert limiti olan modeli kullanıyoruz!
             const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
             const result = await model.generateContent(prompt);
             const response = await result.response;
             let aiCevabi = response.text();
             
-            // Yapay zekadan gelen cevabı öğrencinin ekranına gönderiyoruz
             socket.emit('chatbot_cevabi', aiCevabi.trim()); 
 
         } catch(err) { 
             console.error("Öğrenci Chatbot Hatası:", err);
-            // Eğer Google'da anlık bir yoğunluk olursa öğrenciye çaktırmadan tatlı bir hata mesajı veriyoruz
             socket.emit('chatbot_cevabi', "Şu an sunucu odasında ufak bir tozlanma var, Kaptan'ın kabloları temizlemesini bekliyorum. Birazdan tekrar yaz! 🛠️"); 
         } 
     });

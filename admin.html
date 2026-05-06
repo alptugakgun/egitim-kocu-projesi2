@@ -209,6 +209,23 @@
             transform: scale(1.05); 
         }
 
+        /* YENİ: Sarı Şifre Sıfırlama Butonu */
+        .btn-yellow { 
+            background: #f59e0b; 
+            color: white; 
+            border: none; 
+            padding: 8px 12px; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+        
+        .btn-yellow:hover { 
+            transform: scale(1.05); 
+            background: #d97706;
+        }
+
         h2 { 
             border-bottom: 2px solid #334155; 
             padding-bottom: 15px; 
@@ -298,7 +315,7 @@
                         <th>Sistem Şifresi</th>
                         <th>Davet Kodu</th>
                         <th>Öğrenci Sy.</th>
-                        <th>Aksiyon</th>
+                        <th>Aksiyonlar</th>
                     </tr>
                 </thead>
                 <tbody id="tablo_koc"></tbody>
@@ -313,11 +330,10 @@
                 <thead>
                     <tr>
                         <th>Öğrenci İsmi</th>
-                        <th>Şifre</th>
                         <th>Eğitmeni (Kod)</th>
                         <th>Veli Kodu</th>
                         <th>Deneyim Puanı</th>
-                        <th>Aksiyon</th>
+                        <th>Aksiyonlar</th>
                     </tr>
                 </thead>
                 <tbody id="tablo_ogr"></tbody>
@@ -332,10 +348,8 @@
         
         const AYLAR = ["Eyl", "Eki", "Kas", "Ara", "Oca", "Sub", "Mar", "Nis", "May", "Haz"];
 
-       // Sayfa yenilendiğinde kontrol (DÜZELTİLMİŞ HALİ)
         window.onload = function() {
             let kayitliSifre = localStorage.getItem('adminPass');
-            // process.env ibaresi kaldırıldı, sadece lokal şifre kontrolü yapılıyor.
             if(kayitliSifre === 'sincap-boss-2026') {
                 document.getElementById('adminPass').value = kayitliSifre;
                 giris();
@@ -484,7 +498,10 @@
                         <td><span class="badge" style="background:#fef3c7; color:#d97706;">${k.kocKodu}</span></td>
                         <td>${bagliOgrenciSayisi}</td>
                         <td>
-                            <button class="btn-red" onclick="kocSil('${k.kocKodu}', '${k.kocAd}')">Sil (Banla)</button>
+                            <div style="display:flex; gap:5px;">
+                                <button class="btn-yellow" onclick="sifreSifirlaKoc('${k.kocKodu}', '${k.kocAd}')" title="Şifreyi '123456' Yapar">🔑 Sıfırla</button>
+                                <button class="btn-red" onclick="kocSil('${k.kocKodu}', '${k.kocAd}')">🗑️ Sil (Banla)</button>
+                            </div>
                         </td>
                     </tr>`;
             });
@@ -494,27 +511,76 @@
             oTablo.innerHTML = '';
             
             if (tumOgrler.length === 0) {
-                oTablo.innerHTML = '<tr><td colspan="6" style="text-align:center;">Sistemde kayıtlı öğrenci yok.</td></tr>';
+                oTablo.innerHTML = '<tr><td colspan="5" style="text-align:center;">Sistemde kayıtlı öğrenci yok.</td></tr>';
             }
             
             tumOgrler.forEach(o => { 
                 oTablo.innerHTML += `
                     <tr>
                         <td>🎓 ${o.ogrenciAd}</td>
-                        <td style="color:#ef4444; font-family:monospace;">***** (Kriptolu)</td>
                         <td><span class="badge" style="background:#e0e7ff; color:#4f46e5;">${o.kocKodu}</span></td>
                         <td><span class="badge" style="background:#d1fae5; color:#059669;">${o.veliKodu || 'Yok'}</span></td>
                         <td style="color:#f59e0b;">${o.xp || 0} XP</td>
                         <td>
-                            <button class="btn-red" onclick="ogrenciSil('${o._id}', '${o.ogrenciAd}')">Kov</button>
+                            <div style="display:flex; gap:5px;">
+                                <button class="btn-yellow" onclick="sifreSifirlaOgrenci('${o._id}', '${o.ogrenciAd}')" title="Şifreyi '123456' Yapar">🔑 Sıfırla</button>
+                                <button class="btn-red" onclick="ogrenciSil('${o._id}', '${o.ogrenciAd}')">🗑️ Kov</button>
+                            </div>
                         </td>
                     </tr>`; 
             });
         }
 
-        // Veritabanı Silme İşlemleri
+        // =====================================
+        // VERİTABANI: ŞİFRE SIFIRLAMA İŞLEMLERİ
+        // =====================================
+
+        async function sifreSifirlaKoc(kod, isim) {
+            if (confirm(`DİKKAT: ${isim} isimli eğitmenin şifresini '123456' olarak değiştirmek istediğinize emin misiniz?`)) {
+                try {
+                    const res = await fetch('/api/admin/sifre_sifirla_koc', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ sifre: aktifSifre, kocKodu: kod })
+                    });
+                    const data = await res.json();
+                    if (data.basari) {
+                        alert("✅ İşlem başarılı! Eğitmenin yeni şifresi: 123456");
+                    } else {
+                        alert("Sıfırlama başarısız! Sistem şifrenizi kontrol edin.");
+                    }
+                } catch (err) {
+                    console.error("Sıfırlama hatası:", err);
+                }
+            }
+        }
+
+        async function sifreSifirlaOgrenci(id, isim) {
+            if (confirm(`DİKKAT: ${isim} isimli öğrencinin şifresini '123456' olarak değiştirmek istediğinize emin misiniz?`)) {
+                try {
+                    const res = await fetch('/api/admin/sifre_sifirla_ogrenci', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ sifre: aktifSifre, ogrenciId: id })
+                    });
+                    const data = await res.json();
+                    if (data.basari) {
+                        alert("✅ İşlem başarılı! Öğrencinin yeni şifresi: 123456");
+                    } else {
+                        alert("Sıfırlama başarısız! Sistem şifrenizi kontrol edin.");
+                    }
+                } catch (err) {
+                    console.error("Sıfırlama hatası:", err);
+                }
+            }
+        }
+
+        // =====================================
+        // VERİTABANI: SİLME (BANLAMA) İŞLEMLERİ
+        // =====================================
+
         async function kocSil(kod, isim) { 
-            if (confirm(`Eğitmeni ve bağlı tüm öğrencileri silmek istediğinize emin misiniz?`)) { 
+            if (confirm(`Eğitmeni ve bağlı tüm öğrencileri tamamen SİLMEK istediğinize emin misiniz? Bu işlem geri alınamaz!`)) { 
                 try {
                     const res = await fetch('/api/admin/sil', { 
                         method: 'POST', 
@@ -525,7 +591,7 @@
                     const data = await res.json(); 
                     
                     if (data.basari) { 
-                        alert("Eğitmen silindi!"); 
+                        alert("Eğitmen ve sınıfı silindi!"); 
                         giris(); 
                     } 
                 } catch (err) {
@@ -535,7 +601,7 @@
         }
 
         async function ogrenciSil(id, isim) { 
-            if (confirm(`Bu öğrenciyi sistemden atmak istediğinize emin misiniz?`)) { 
+            if (confirm(`Bu öğrenciyi sistemden tamamen ATMAK istediğinize emin misiniz?`)) { 
                 try {
                     const res = await fetch('/api/admin/sil_ogrenci', { 
                         method: 'POST', 

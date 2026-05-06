@@ -163,13 +163,22 @@ function dersDegisikliginiKaydet() {
     if(yeniDers === aktifDersString) return; 
     
     if (running) { 
-        let st = parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)); 
+        let sessionElapsed = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`));
         let oldSaved = parseInt(localStorage.getItem(`${aktifOgrenci}_${aktifDersString}_savedTime`)) || 0; 
-        let diff = new Date().getTime() - st + oldSaved; 
+        let diff = sessionElapsed + oldSaved; 
         
         localStorage.setItem(`${aktifOgrenci}_${aktifDersString}_savedTime`, diff); 
         socket.emit('istatistik_guncelle', { ogrenciAd: aktifOgrenci, ders: aktifDersString, ms: diff, kocKodu: kocKodu }); 
         
+        // GÜNLÜK AKTİVİTE LOG KAYDI
+        socket.emit('aktivite_kaydet', {
+            ogrenciAd: aktifOgrenci,
+            kocKodu: kocKodu,
+            ders: aktifDersString,
+            sure: sessionElapsed,
+            tip: mode === 'pomodoro' ? 'Pomodoro' : 'Normal Çalışma'
+        });
+
         clearInterval(tInterval); 
         running = false; 
         localStorage.setItem(`${aktifOgrenci}_running`, 'false'); 
@@ -197,7 +206,7 @@ function dersDegisikliginiKaydet() {
     gostergeyiGuncelle(currentSaved); 
     socket.emit('sure_guncelle', { ogrenciAd: aktifOgrenci, sure: display.innerHTML, kocKodu: kocKodu }); 
     
-    if(currentSaved > 0) { 
+    if(currentSaved > 0 && mode === 'normal') { 
         startBtn.innerHTML = "▶ Devam Et"; 
     } else { 
         startBtn.innerHTML = "▶ Başla"; 
@@ -308,6 +317,18 @@ window.setMode = function(m) {
     if(pInput) {
         pInput.style.display = m === 'pomodoro' ? 'block' : 'none'; 
     }
+
+    if (m === 'pomodoro') {
+        let val = parseInt(document.getElementById('pomoInput').value) || 25;
+        display.innerHTML = (val < 10 ? "0"+val : val) + ":00";
+        startBtn.innerHTML = "▶ Başla";
+    } else {
+        let gercekDers = getDers();
+        let sTime = parseInt(localStorage.getItem(`${aktifOgrenci}_${gercekDers}_savedTime`)) || 0;
+        gostergeyiGuncelle(sTime);
+        if(sTime > 0) startBtn.innerHTML = "▶ Devam Et";
+        else startBtn.innerHTML = "▶ Başla";
+    }
 };
 
 window.startTimer = function() { 
@@ -318,9 +339,17 @@ window.startTimer = function() {
         localStorage.setItem(`${aktifOgrenci}_running`, 'true'); 
         
         tInterval = setInterval(() => { 
-            let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${gercekDers}_savedTime`)) || 0); 
+            let sessionElapsed = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`));
+            let totalDiff = sessionElapsed + (parseInt(localStorage.getItem(`${aktifOgrenci}_${gercekDers}_savedTime`)) || 0); 
             
-            if (gostergeyiGuncelle(diff) && mode === 'pomodoro') { 
+            let bittiMi = false;
+            if (mode === 'pomodoro') {
+                bittiMi = gostergeyiGuncelle(sessionElapsed); 
+            } else {
+                bittiMi = gostergeyiGuncelle(totalDiff); 
+            }
+            
+            if (bittiMi && mode === 'pomodoro') { 
                 sesCal(); 
                 window.pauseTimer(true); 
                 sistemBildirimi("🍅 Pomodoro Bitti!", "Harika odaklandın, şimdi mola vakti."); 
@@ -353,11 +382,22 @@ window.pauseTimer = function(otomatikMi = false) {
         let gercekDers = getDers();
 
         clearInterval(tInterval); 
-        let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${gercekDers}_savedTime`)) || 0); 
         
-        localStorage.setItem(`${aktifOgrenci}_${gercekDers}_savedTime`, otomatikMi && mode === 'pomodoro' ? 0 : diff); 
+        let sessionElapsed = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`));
+        let diff = sessionElapsed + (parseInt(localStorage.getItem(`${aktifOgrenci}_${gercekDers}_savedTime`)) || 0);
+        
+        localStorage.setItem(`${aktifOgrenci}_${gercekDers}_savedTime`, diff); 
         
         socket.emit('istatistik_guncelle', { ogrenciAd: aktifOgrenci, ders: gercekDers, ms: diff, kocKodu: kocKodu }); 
+
+        // GÜNLÜK AKTİVİTE LOG KAYDI
+        socket.emit('aktivite_kaydet', {
+            ogrenciAd: aktifOgrenci,
+            kocKodu: kocKodu,
+            ders: gercekDers,
+            sure: sessionElapsed,
+            tip: mode === 'pomodoro' ? 'Pomodoro' : 'Normal Çalışma'
+        });
         
         localStorage.setItem(`${aktifOgrenci}_running`, 'false'); 
         running = false; 
@@ -382,6 +422,11 @@ window.pauseTimer = function(otomatikMi = false) {
         clearInterval(yoklamaGeriSayimInterval);
         let modal = document.getElementById('yoklamaModal');
         if(modal) modal.style.display = 'none';
+
+        if (otomatikMi && mode === 'pomodoro') {
+            let val = parseInt(document.getElementById('pomoInput').value) || 25;
+            display.innerHTML = (val < 10 ? "0"+val : val) + ":00";
+        }
     } 
 };
 
@@ -655,10 +700,8 @@ socket.on('gorev_guncellendi', (tumVeriler) => {
     let benimVerim = tumVeriler.find(v => v.ogrenciAd === aktifOgrenci);
     if (benimVerim) {
         
-        // 📚 Kaynakları Kontrol Et
         benimTamamlananKaynaklar = benimVerim.tamamlananKaynaklar || [];
 
-        // 📅 RANDEVU SİSTEMİ DİNLEYİCİSİ
         if (benimVerim.sonrakiDers && benimVerim.sonrakiDers.trim() !== '') {
             let d = new Date(benimVerim.sonrakiDers);
             let tarihStr = d.toLocaleString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
@@ -946,9 +989,17 @@ document.addEventListener("DOMContentLoaded", () => {
         if(pInput) pInput.disabled = true;
         
         tInterval = setInterval(() => { 
-            let diff = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`)) + (parseInt(localStorage.getItem(`${aktifOgrenci}_${aktifDersString}_savedTime`)) || 0); 
+            let sessionElapsed = new Date().getTime() - parseInt(localStorage.getItem(`${aktifOgrenci}_startTime`));
+            let totalDiff = sessionElapsed + (parseInt(localStorage.getItem(`${aktifOgrenci}_${aktifDersString}_savedTime`)) || 0); 
             
-            if (gostergeyiGuncelle(diff) && mode === 'pomodoro') { 
+            let bittiMi = false;
+            if (mode === 'pomodoro') {
+                bittiMi = gostergeyiGuncelle(sessionElapsed);
+            } else {
+                bittiMi = gostergeyiGuncelle(totalDiff);
+            }
+            
+            if (bittiMi && mode === 'pomodoro') { 
                 sesCal(); 
                 window.pauseTimer(true); 
                 sistemBildirimi("🍅 Pomodoro Bitti!", "Harika odaklandın, şimdi mola vakti."); 
@@ -962,7 +1013,15 @@ document.addEventListener("DOMContentLoaded", () => {
         rastgeleYoklamaKur();
         
     } else { 
-        if (sTime > 0) startBtn.innerHTML = "▶ Devam Et"; 
+        if (sTime > 0 && mode === 'normal') startBtn.innerHTML = "▶ Devam Et"; 
         gostergeyiGuncelle(sTime); 
     }
+
+    // ÖĞRETMENE "BEN GELDİM" SİNYALİ!
+    socket.emit('ogrenci_derse_basladi', { 
+        ogrenciAd: aktifOgrenci, 
+        ders: aktifDersString, 
+        mesaj: 'Sisteme giriş yaptı 🟢', 
+        kocKodu: kocKodu 
+    });
 });
